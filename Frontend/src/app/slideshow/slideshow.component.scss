@@ -1,0 +1,358 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    animation: gradientShift 10s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    }
+
+    50% {
+        background: linear-gradient(135deg, #f093fb 0%, #667eea 50%, #764ba2 100%);
+    }
+
+    100% {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    }
+}
+
+.container {
+    max-width: 1024px;
+    width: 100%;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.menu-bar {
+    background: linear-gradient(to right, #f8fafc, #f1f5f9);
+    padding: 16px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(to right, #2563eb, #9333ea);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-text {
+    font-weight: bold;
+    color: #1f2937;
+    font-size: 18px;
+}
+
+.menu-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sign-in-btn {
+    padding: 8px 16px;
+    color: #374151;
+    font-weight: 500;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sign-in-btn:hover {
+    color: #2563eb;
+    background: #eff6ff;
+}
+
+.sign-up-btn {
+    padding: 8px 24px;
+    background: linear-gradient(to right, #2563eb, #9333ea);
+    color: white;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.sign-up-btn:hover {
+    background: linear-gradient(to right, #1d4ed8, #7c3aed);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.progress-container {
+    height: 8px;
+    background: #e5e7eb;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(to right, #3b82f6, #9333ea);
+    transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.slideshow-container {
+    position: relative;
+    height: 500px;
+    overflow: hidden;
+}
+
+.floating-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.floating-shape {
+    position: absolute;
+    opacity: 0.1;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(180deg);
+    }
+}
+
+.slide {
+    opacity: 0;
+    transform: translateX(100px) scale(0.95);
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+}
+
+.slide.active {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+
+.slide.prev {
+    transform: translateX(-100px) scale(0.95);
+}
+
+.slide-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    max-width: 1024px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: center;
+}
+
+.illustration {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 32px;
+    position: relative;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.slide-text {
+    text-align: left;
+}
+
+.slide-text h1,
+.slide-text h2 {
+    font-size: 36px;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 16px;
+    animation: slideEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.slide-text p {
+    font-size: 18px;
+    color: #6b7280;
+    line-height: 1.75;
+    margin-bottom: 32px;
+    animation: slideEnter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-delay: 0.2s;
+}
+
+@keyframes slideEnter {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.start-button {
+    padding: 16px 32px;
+    background: linear-gradient(to right, #2563eb, #9333ea);
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.start-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.start-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.start-button:hover::before {
+    left: 100%;
+}
+
+.navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    background: #f9fafb;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    color: #6b7280;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.nav-btn:hover {
+    color: #1f2937;
+}
+
+.nav-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.indicators {
+    display: flex;
+    gap: 8px;
+}
+
+.indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #d1d5db;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.indicator.active {
+    background: #2563eb;
+    transform: scale(1.2);
+}
+
+@media (max-width: 768px) {
+    .slide-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .slide-text {
+        text-align: center;
+    }
+
+    .slideshow-container {
+        height: 400px;
+    }
+
+    .slide-text h1,
+    .slide-text h2 {
+        font-size: 28px;
+    }
+
+    .menu-bar {
+        padding: 12px 16px;
+    }
+
+    .menu-buttons {
+        gap: 8px;
+    }
+}
