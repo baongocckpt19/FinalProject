@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-
+import { Router } from '@angular/router';
+import { routes } from '../app.routes';
 @Component({
   selector: 'app-slideshow',
   imports: [CommonModule],
@@ -11,6 +12,10 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 export class SlideshowComponent implements AfterViewInit {
   currentSlide = 1;
   totalSlides = 4;
+
+  constructor(private router: Router) {}
+
+
 
   ngAfterViewInit(): void {
     this.setupEvents();
@@ -82,5 +87,8 @@ export class SlideshowComponent implements AfterViewInit {
         this.updateSlide(slideNumber);
       });
     });
+  }
+   navigateToSignin() {
+    this.router.navigate(['/login']);
   }
 }

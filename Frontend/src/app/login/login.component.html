@@ -57,10 +57,10 @@
                     </form>
 
                     <div class="divider">
-                        <span>Hoặc đăng nhập với</span>
+                        <span>Bạn chưa có tài khoản?</span>
                     </div>
 
-                    <div class="social-buttons">
+                    <!--<div class="social-buttons">
                         <button class="social-btn" (click)="socialLogin('google')">
                             <svg width="20" height="20" viewBox="0 0 24 24">
                                 <path fill="#4285F4"
@@ -81,10 +81,10 @@
                             </svg>
                             Facebook
                         </button>
-                    </div>
+                    </div> -->
 
                     <div class="switch-form">
-                        Chưa có tài khoản?
+
                         <a class="switch-link" (click)="switchToSignup(); $event.preventDefault()">Đăng ký ngay</a>
                     </div>
                 </div>
@@ -175,23 +175,15 @@
                             </div>
                         </div>
 
-                        <div class="form-options">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="agreeTerms" class="checkbox" name="agreeTerms"
-                                    [(ngModel)]="agreeTerms" required>
-                                <label for="agreeTerms" class="checkbox-label">Tôi đồng ý với <a href="#"
-                                        class="forgot-link">Điều khoản sử dụng</a></label>
-                            </div>
-                        </div>
 
                         <button type="submit" class="submit-btn">Tạo tài khoản</button>
                     </form>
 
-                    <div class="divider">
-                        <span>Hoặc đăng ký với</span>
+                     <div class="divider">
+                        <span>Bạn đã có tài khoản?</span>
                     </div>
 
-                    <div class="social-buttons">
+                    <!--<div class="social-buttons">
                         <button class="social-btn" (click)="socialLogin('google')">
                             <svg width="20" height="20" viewBox="0 0 24 24">
                                 <path fill="#4285F4"
@@ -212,10 +204,9 @@
                             </svg>
                             Facebook
                         </button>
-                    </div>
+                    </div> -->
 
                     <div class="switch-form">
-                        Đã có tài khoản?
                         <a class="switch-link" (click)="switchToSignin(); $event.preventDefault()">Đăng nhập ngay</a>
                     </div>
                 </div>

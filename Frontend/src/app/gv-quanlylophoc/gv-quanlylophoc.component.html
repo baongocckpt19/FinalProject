@@ -1,0 +1,328 @@
+<body>
+    <div class="dashboard-container">
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Content -->
+            <main class="dashboard-content">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h2 class="page-title">Quản lý lớp học</h2>
+                        <p class="page-subtitle">Quản lý thông tin các lớp học và sinh viên</p>
+                    </div>
+
+                    <div class="page-actions">
+                        <button class="btn btn-primary" (click)="openAddClassModal()">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                            </svg>
+                            Thêm lớp học
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Class Management -->
+                <div class="class-management">
+                    <div class="class-header">
+                        <h3>Danh sách lớp học</h3>
+                        <div class="class-actions">
+                            <span style="color: #64748b; font-size: 14px;">Tổng: 8 lớp học</span>
+                        </div>
+                    </div>
+
+                    <div class="search-filter-bar">
+                        <div class="search-box">
+                            <svg class="search-icon" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                            </svg>
+                            <input class="search-input" type="text"  placeholder="Tìm kiếm lớp học..."  [(ngModel)]="searchText" (input)="searchClasses()">
+                        </div>
+
+                        <div class="filter-actions">
+                            <button class="btn btn-outline" (click)="sortByName()">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z" />
+                                </svg>
+                                Sắp xếp theo tên
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="class-table-container">
+                        <table class="class-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tên lớp học</th>
+                                    <th>Số học sinh</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="classTableBody">
+                                <tr *ngFor="let lop of  filteredClassList; let i = index">
+                                    <td>{{i+1}}</td>
+                                    <td>
+                                        <div class="class-info">
+                                            <div class="class-details">
+                                                <h4>{{lop.tenLop}}</h4>
+                                                <div class="class-code">{{lop.classCode}}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="student-count">
+                                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-4h3v4h2v-7.5c0-.83.67-1.5 1.5-1.5S12 9.67 12 10.5V11h2.5c.83 0 1.5.67 1.5 1.5V18h2v4H4v-4z" />
+                                            </svg>
+                                            {{lop.soHocSinh}} sinh viên
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="date-created">{{lop.ngayTao}}</div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge" [ngClass]="{ 
+                                                                                'active': lop.trangThai === 'Hoạt động', 
+                                                                                'inactive': lop.trangThai === 'Tạm dừng' 
+                                                                             }">{{lop.trangThai}}</span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-icon btn-detail" (click)="openClassDeatilModal(lop)"
+                                                title="Chi tiết">
+                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                                </svg>
+                                            </button>
+                                            <button class="btn-icon btn-delete" (click)="openDeleteModal()" >
+                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add Class Modal -->
+    <div *ngIf="showAddClassModal" class="modal-overlay active">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-icon info">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                    </svg>
+                </div>
+                <h3 class="modal-title">Thêm lớp học mới</h3>
+            </div>
+
+            <form id="addClassForm">
+                <div class="form-group">
+                    <label class="form-label">Tên lớp học *</label>
+                    <input type="text" class="form-input" id="className" placeholder="Nhập tên lớp học" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mã lớp *</label>
+                    <input type="text" class="form-input" id="classCode" placeholder="Ví dụ: IT306" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mô tả</label>
+                    <textarea class="form-input form-textarea" id="classDescription"
+                        placeholder="Mô tả về lớp học (tùy chọn)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Số lượng sinh viên tối đa</label>
+                    <input type="number" class="form-input" id="maxStudents" placeholder="50" min="1" max="200">
+                </div>
+            </form>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" (click)="closeAddClassModal()">Hủy</button>
+                <button class="modal-btn modal-btn-primary" (click)="openNotificationModal()">Thêm lớp học</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Class Detail Modal -->
+    <div class="modal-overlay active" *ngIf="showClassDetailModal">
+        <div class="modal" style="max-width: 900px;">
+            <div class="modal-header">
+                <div class="modal-icon info">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
+                </div>
+                <h3 class="modal-title" id="detailModalTitle">Chi tiết lớp học</h3>
+            </div>
+
+            <div class="class-detail-form">
+                <div class="class-detail-grid">
+                    <div class="form-group">
+                        <label class="form-label">Tên lớp học</label>
+                        <input type="text" class="form-input"  [(ngModel)]="selectedClass.tenLop">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mã lớp</label>
+                        <input type="text" class="form-input"  [(ngModel)]="selectedClass.classCode">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Giảng viên</label>
+                        <input type="text" class="form-input"  value="Nguyễn Văn An">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Ngày tạo</label>
+                        <input type="date" class="form-input"  [(ngModel)]="selectedClass.ngayTao">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Trạng thái lớp học</label>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+                            <div class="toggle-switch" [class.active]="selectedClass.trangThai === 'Hoạt động'"  (click)="toggleClassStatusInModal()"></div>
+                            <span>{{selectedClass.trangThai}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mô tả</label>
+                    <textarea class="form-input form-textarea"
+                        id="editDescription">Lớp học về lập trình web với HTML, CSS, JavaScript và các framework hiện đại. Sinh viên sẽ học cách xây dựng website responsive và tương tác.</textarea>
+                </div>
+            </div>
+
+            <!-- Student Management Section -->
+            <div class="student-management">
+                <div class="student-section">
+                    <h4 class="section-title">Danh sách sinh viên trong lớp {{selectedClass.soHocSinh}}</h4>
+                    <div class="student-list" id="currentStudents">
+                        <div class="student-item">
+                            <div class="student-info">
+                              
+                                <div class="student-details">
+                                    <h5>Nguyễn Văn A</h5>
+                                    <p>MSSV: 2021001</p>
+                                </div>
+                            </div>
+                            <button class="btn-remove" onclick="removeStudent(1)">Xóa</button>
+                        </div>
+
+                        <div class="student-item">
+                            <div class="student-info">
+                                <div class="student-details">
+                                    <h5>Lê Thị B</h5>
+                                    <p>MSSV: 2021002</p>
+                                </div>
+                            </div>
+                            <button class="btn-remove" onclick="removeStudent(2)">Xóa</button>
+                        </div>
+
+                        <div class="student-item">
+                            <div class="student-info">
+                                <div class="student-details">
+                                    <h5>Trần Văn C</h5>
+                                    <p>MSSV: 2021003</p>
+                                </div>
+                            </div>
+                            <button class="btn-remove" onclick="removeStudent(3)">Xóa</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="student-section">
+                    <h4 class="section-title">Yêu cầu tham gia lớp (2 yêu cầu)</h4>
+                    <div class="student-list" id="pendingStudents">
+                        <div class="student-item">
+                            <div class="student-info">
+                                <div class="student-details">
+                                    <h5>Phạm Hoàng D</h5>
+                                    <p>MSSV: 2021004</p>
+                                </div>
+                            </div>
+                            <div class="student-actions">
+                                <button class="btn-accept" onclick="acceptStudent(4)">Chấp nhận</button>
+                                <button class="btn-reject" onclick="rejectStudent(4)">Từ chối</button>
+                            </div>
+                        </div>
+
+                        <div class="student-item">
+                            <div class="student-info">
+                                 <div class="student-details">
+                                    <h5>Vũ Thị E</h5>
+                                    <p>MSSV: 2021005</p>
+                                </div>
+                            </div>
+                            <div class="student-actions">
+                                <button class="btn-accept" onclick="acceptStudent(5)">Chấp nhận</button>
+                                <button class="btn-reject" onclick="rejectStudent(5)">Từ chối</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" (click)="closeClassDetailModal()">Đóng</button>
+                <button class="modal-btn modal-btn-primary" (click)="openNotificationModal()">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div class="modal-overlay active" *ngIf="showNotificationModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
+                </div>
+                <h3 class="modal-title" >Thành công!</h3>
+            </div>
+            <p class="modal-message" >Thao tác đã được thực hiện thành công.</p>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-primary" (click)="closeNotificationModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay active" *ngIf="showDeleteModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-icon error">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z" />
+                    </svg>
+                </div>
+                <h3 class="modal-title">Xác nhận xóa lớp học</h3>
+            </div>
+            <p class="modal-message" id="deleteMessage">Bạn có chắc chắn muốn xóa lớp học này? Hành động này không thể
+                hoàn tác.</p>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" (click)="closeDeleteModal()">Hủy</button>
+                <button class="modal-btn modal-btn-danger" (click)="closeDeleteModal()">Xóa lớp học</button>
+            </div>
+        </div>
+    </div>
+</body>

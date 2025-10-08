@@ -11,8 +11,8 @@
                 <span class="logo-text">EduSmart</span>
             </div>
             <div class="menu-buttons">
-                <button id="signInBtn" class="sign-in-btn">Sign In</button>
-                <button id="signUpBtn" class="sign-up-btn">Sign Up</button>
+                <button id="signInBtn" class="sign-in-btn">Admin</button>
+                <button id="signUpBtn" class="sign-up-btn" href="#" (click)="navigateToSignin(); $event.preventDefault()">Đăng nhập | Đăng ký</button>
             </div>
         </div>
         
@@ -202,7 +202,7 @@
                     <div class="slide-text">
                         <h2>AI đồng hành cùng học tập</h2>
                         <p>Tích hợp ChatGPT hỗ trợ sinh viên và giảng viên tra cứu, giải đáp nhanh chóng.</p>
-                        <button id="startBtn" class="start-button">🚀 Bắt đầu ngay</button>
+                        <button id="startBtn" class="start-button" href="#" (click)="navigateToSignin(); $event.preventDefault()">🚀 Bắt đầu ngay</button>
                     </div>
                 </div>
             </div>
