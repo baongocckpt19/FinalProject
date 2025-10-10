@@ -22,6 +22,33 @@ export class GvQuanlylophocComponent {
   closeAddClassModal() {
     this.showAddClassModal = false;
   }
+  newClass = {
+    className: '',
+    classCode: '',
+    description: '',
+    maxStudents: null
+  };
+
+  addClass() {
+    const { className, classCode, maxStudents } = this.newClass;
+
+    if (!className || !classCode || !maxStudents) {
+      alert('Vui lòng nhập đủ thông tin bắt buộc!');
+      return;
+    }
+
+    // Nếu hợp lệ, xử lý thêm lớp học
+    this.openNotificationModal();
+    this.closeAddClassModal();
+
+    // Reset form nếu cần
+    this.newClass = {
+      className: '',
+      classCode: '',
+      description: '',
+      maxStudents: null
+    };
+  }
 
   /*modal chi tiết lớp học*/
   showClassDetailModal = false;
@@ -41,6 +68,8 @@ export class GvQuanlylophocComponent {
   }
   openNotificationModal() {
     this.showNotificationModal = true;
+    this.closeAddClassModal();
+    this.closeClassDetailModal();
   }
 
   /*modal xóa lớp học*/
@@ -93,27 +122,40 @@ export class GvQuanlylophocComponent {
 
   /*sắp xếp tên lớp học*/
   sortAscending: boolean = true; // Biến để lưu trạng thái sắp xếp
+  sortByNameActive: boolean = false;
   sortByName() {
-    this.lophoc.sort((a, b) => {
-      const nameA = a.tenLop.toLowerCase();
-      const nameB = b.tenLop.toLowerCase();
+    this.sortByNameActive = true;
 
-      if (nameA < nameB) return this.sortAscending ? -1 : 1;
-      if (nameA > nameB) return this.sortAscending ? 1 : -1;
-      return 0;
-    });
-    // Đổi hướng sắp xếp (tăng ↔ giảm)
-    this.sortAscending = !this.sortAscending;
+    this.filteredClassList.sort((a, b) => a.tenLop.localeCompare(b.tenLop, 'vi', { sensitivity: 'base' }));
   }
 
+
+  // sortByName() {
+  //   this.filteredClassList.sort((a, b) => {
+  //     const nameA = a.tenLop.toLowerCase();
+  //     const nameB = b.tenLop.toLowerCase();
+
+  //     if (nameA < nameB) return this.sortAscending ? -1 : 1;
+  //     if (nameA > nameB) return this.sortAscending ? 1 : -1;
+  //     return 0;
+  //   });
+  //   // Đổi hướng sắp xếp (tăng ↔ giảm)
+  //   this.sortAscending = !this.sortAscending;
+  // }
+
+
+  
   /*chức năng tìm kiếm*/
   filteredClassList = [...this.lophoc];
   searchText: string = '';
+  
   searchClasses() {
     const search = this.searchText.trim().toLowerCase();
-
+    this.sortByNameActive = false; // reset sort theo tên khi tìm kiếm
+    
     if (!search) {
       this.filteredClassList = [...this.lophoc]; // nếu rỗng → hiển thị toàn bộ
+      this.sortBystatus();
       return;
     }
 
@@ -121,6 +163,20 @@ export class GvQuanlylophocComponent {
       lop.tenLop.toLowerCase().includes(search) ||
       lop.classCode.toLowerCase().includes(search)
     );
+    this.sortBystatus(); // sắp xếp theo trạng thái sau khi tìm kiếm
   }
 
+  /*mặc định sắp xếp theo trang thái*/
+  sortBystatus() {
+    this.filteredClassList.sort((a, b) => {
+      // "Hoạt động" luôn lên trên
+      if (a.trangThai === 'Hoạt động' && b.trangThai !== 'Hoạt động') return -1;
+      if (a.trangThai !== 'Hoạt động' && b.trangThai === 'Hoạt động') return 1;
+      return 0;
+    });
+  }
+  ngOnInit() {
+    this.filteredClassList = [...this.lophoc];
+    this.sortBystatus();
+  }
 }

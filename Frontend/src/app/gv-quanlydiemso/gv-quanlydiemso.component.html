@@ -1,387 +1,255 @@
 <body>
     <div class="dashboard-container">
-        
         <!-- Main Content -->
         <div class="main-content">
-            
             <!-- Dashboard Content -->
             <main class="dashboard-content">
                 <!-- Page Header -->
                 <div class="page-header">
                     <div class="page-title-section">
                         <h2 class="page-title">Quản lý điểm số</h2>
-                        <p class="page-subtitle">Nhập và quản lý điểm số cho các lớp học</p>
+                        <p class="page-subtitle">Nhập và quản lý điểm số cho sinh viên</p>
                     </div>
-                    
+
                     <div class="page-actions">
-                        <button class="btn btn-success" onclick="exportGrades()">
+                        <button class="btn btn-outline" (click)="openFileImportModal()">
                             <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                <path
+                                    d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                            </svg>
+                            Nhập từ file
+                        </button>
+                        <button class="btn btn-outline" (click)="openBulkGradeInputModal()">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M19,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.9 20.1,3 19,3M19,19H5V5H19V19Z" />
+                            </svg>
+                            Nhập hàng loạt
+                        </button>
+                        <button class="btn btn-outline" onclick="exportGrades()">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
                             </svg>
                             Xuất báo cáo
                         </button>
-                        <button class="btn btn-primary" onclick="importGrades()">
-                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-                            </svg>
-                            Nhập từ Excel
-                        </button>
                     </div>
                 </div>
-                
-                <!-- Class Selection -->
-                <div class="class-selection">
-                    <h3>Chọn lớp học để quản lý điểm</h3>
-                    <div class="class-grid">
-                        <div class="class-card" onclick="selectClass(1)">
-                            <div class="class-card-header">
-                                <div>
-                                    <div class="class-name">Lập trình Web</div>
-                                    <div class="class-code">IT301</div>
-                                </div>
-                            </div>
-                            <div class="class-stats">
-                                <div class="stat-item">
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-4h3v4h2v-7.5c0-.83.67-1.5 1.5-1.5S12 9.67 12 10.5V11h2.5c.83 0 1.5.67 1.5 1.5V18h2v4H4v-4z"/>
-                                    </svg>
-                                    45 SV
-                                </div>
-                                <div class="stat-item">
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                    </svg>
-                                    Đã nhập điểm
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="class-card" onclick="selectClass(2)">
-                            <div class="class-card-header">
-                                <div>
-                                    <div class="class-name">Cơ sở dữ liệu</div>
-                                    <div class="class-code">IT302</div>
-                                </div>
-                            </div>
-                            <div class="class-stats">
-                                <div class="stat-item">
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-4h3v4h2v-7.5c0-.83.67-1.5 1.5-1.5S12 9.67 12 10.5V11h2.5c.83 0 1.5.67 1.5 1.5V18h2v4H4v-4z"/>
-                                    </svg>
-                                    38 SV
-                                </div>
-                                <div class="stat-item">
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 21H5V3H14V9H19V21Z"/>
-                                    </svg>
-                                    Chưa nhập
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="class-card" onclick="selectClass(3)">
-                            <div class="class-card-header">
-                                <div>
-                                    <div class="class-name">Thuật toán</div>
-                                    <div class="class-code">IT303</div>
-                                </div>
-                            </div>
-                            <div class="class-stats">
-                                <div class="stat-item">
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-4h3v4h2v-7.5c0-.83.67-1.5 1.5-1.5S12 9.67 12 10.5V11h2.5c.83 0 1.5.67 1.5 1.5V18h2v4H4v-4z"/>
-                                    </svg>
-                                    42 SV
-                                </div>
-                                <div class="stat-item">
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                    </svg>
-                                    Đã nhập điểm
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Statistics -->
-                <div class="stats-grid" id="statsGrid" style="display: none;">
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-header">
-                            <span class="stat-title">Xuất sắc (8.5-10)</span>
-                            <div class="stat-icon excellent">
+                            <span class="stat-title">Tổng sinh viên</span>
+                            <div class="stat-icon blue">
                                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    <path
+                                        d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-4h3v4h2v-7.5c0-.83.67-1.5 1.5-1.5S12 9.67 12 10.5V11h2.5c.83 0 1.5.67 1.5 1.5V18h2v4H4v-4z" />
                                 </svg>
                             </div>
                         </div>
-                        <div class="stat-value">12</div>
+                        <div class="stat-value">288</div>
                         <div class="stat-change positive">
-                            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M7 14l5-5 5 5z"/>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M7 14l5-5 5 5z" />
                             </svg>
-                            26.7%
+                            +12 từ tuần trước
                         </div>
                     </div>
-                    
+
                     <div class="stat-card">
                         <div class="stat-header">
-                            <span class="stat-title">Giỏi (7.0-8.4)</span>
-                            <div class="stat-icon good">
+                            <span class="stat-title">Điểm trung bình</span>
+                            <div class="stat-icon green">
                                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    <path
+                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                 </svg>
                             </div>
                         </div>
-                        <div class="stat-value">18</div>
+                        <div class="stat-value">7.8</div>
                         <div class="stat-change positive">
-                            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M7 14l5-5 5 5z"/>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M7 14l5-5 5 5z" />
                             </svg>
-                            40.0%
+                            +0.3 điểm
                         </div>
                     </div>
-                    
+
                     <div class="stat-card">
                         <div class="stat-header">
-                            <span class="stat-title">Khá (5.5-6.9)</span>
-                            <div class="stat-icon average">
+                            <span class="stat-title">Tỷ lệ đậu</span>
+                            <div class="stat-icon orange">
                                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    <path
+                                        d="M16,6L18.29,8.29L13.41,13.17L9.41,9.17L2,16.59L3.41,18L9.41,12L13.41,16L20.29,9.12L22.59,11.41L24,10L16,6Z" />
                                 </svg>
                             </div>
                         </div>
-                        <div class="stat-value">10</div>
+                        <div class="stat-value">92%</div>
                         <div class="stat-change positive">
-                            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M7 14l5-5 5 5z"/>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M7 14l5-5 5 5z" />
                             </svg>
-                            22.2%
+                            +5% từ kỳ trước
                         </div>
                     </div>
-                    
+
                     <div class="stat-card">
                         <div class="stat-header">
-                            <span class="stat-title">Yếu (<5.5) </span>
-                            <div class="stat-icon poor">
+                            <span class="stat-title">Cần cải thiện</span>
+                            <div class="stat-icon red">
                                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>
+                                    <path
+                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                                 </svg>
                             </div>
                         </div>
-                        <div class="stat-value">5</div>
+                        <div class="stat-value">23</div>
                         <div class="stat-change negative">
-                            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M7 10l5 5 5-5z"/>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M7 10l5 5 5-5z" />
                             </svg>
-                            11.1%
+                            -8 sinh viên
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Grade Management -->
-                <div class="grade-management" id="gradeManagement">
+                <div class="grade-management">
                     <div class="grade-header">
-                        <h3 id="selectedClassName">Lập trình Web - IT301</h3>
+                        <h3>Bảng điểm sinh viên</h3>
                         <div class="grade-actions">
-                            <button class="btn btn-outline" onclick="saveAllGrades()">
-                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
+                            <span style="color: #64748b; font-size: 14px;">Lớp: Lập trình Web (IT301)</span>
+                        </div>
+                    </div>
+
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <select class="filter-select" id="classFilter">
+                                <option value="IT301">Lập trình Web (IT301)</option>
+                                <option value="IT302">Cơ sở dữ liệu (IT302)</option>
+                                <option value="IT303">Thuật toán (IT303)</option>
+                                <option value="IT304">Hệ thống thông tin (IT304)</option>
+                            </select>
+                        </div>
+
+                        <div class="search-actions">
+                            <!-- button ẩn hiện điểm -->
+                            <button class="btn-compact btn-outline" (click)="toggleGradeVisibility()"
+                                id="toggleGradeBtn">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path *ngIf="!isGradeVisible"
+                                        d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                                    <path *ngIf="isGradeVisible" d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74
+                                         7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 
+                                         4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 
+                                         0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z" />
+                                </svg>
+                                {{ isGradeVisible ? 'Ẩn điểm' : 'Hiện điểm' }}
+                            </button>
+                            <!-- button lưu tất cả -->
+                            <button class="btn-compact btn-success" (click)="saveAllGrades()">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3M19,19H5V5H16.17L19,7.83V19M12,12C10.34,12 9,13.34 9,15C9,16.66 10.34,18 12,18C13.66,18 15,16.66 15,15C15,13.34 13.66,12 12,12Z" />
                                 </svg>
                                 Lưu tất cả
                             </button>
-                            <button class="btn btn-primary" onclick="calculateFinalGrades()">
-                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M19,3H5C3.9,3 3,3.9 3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3M13,13H11V10H13M13,17H11V15H13M17,13H15V10H17M17,17H15V15H17M9,13H7V10H9M9,17H7V15H9V17Z"/>
+                            <!-- search box -->
+                            <div class="search-box">
+                                <svg class="search-icon" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                                 </svg>
-                                Tính điểm tổng kết
-                            </button>
+                                <input type="text" id="studentSearchInput" placeholder="Tìm kiếm sinh viên..."
+                                    class="search-input" [(ngModel)]="searchText" (input)="searchStudent()">
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="search-filter-bar">
-                        <div class="search-box">
-                            <svg class="search-icon" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-                            </svg>
-                            <input type="text" id="studentSearchInput" placeholder="Tìm kiếm sinh viên..." class="search-input">
-                        </div>
-                        
-                        <div class="filter-actions">
-                            <button class="btn btn-outline" onclick="sortByGrade()">
-                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 18h6v-2H3v2zM3 6v2h18V6H3zm0 7h12v-2H3v2z"/>
-                                </svg>
-                                Sắp xếp theo điểm
-                            </button>
-                        </div>
-                    </div>
-                    
+                    <!-- bảng điểm -->
                     <div class="grade-table-container">
                         <table class="grade-table">
                             <thead>
                                 <tr>
                                     <th>STT</th>
-                                    <th>Sinh viên</th>
-                                    <th>Điểm chuyên cần (10%)</th>
-                                    <th>Điểm giữa kỳ (30%)</th>
-                                    <th>Điểm cuối kỳ (60%)</th>
-                                    <th>Điểm tổng kết</th>
-                                    <th>Xếp hạng</th>
-                                    <th>Thao tác</th>
+                                    <th (click)="sortBy('ten')" class="sortable">
+                                        Sinh viên
+                                        <span *ngIf="currentSortColumn === 'ten'">
+                                            {{ isAscending ? '↑' : '↓' }}
+                                        </span>
+                                    </th>
+
+                                    <th (click)="sortBy('diemChuyenCan')" class="sortable">
+                                        Điểm chuyên cần
+                                        <span *ngIf="currentSortColumn === 'diemChuyenCan'">
+                                            {{ isAscending ? '↑' : '↓' }}
+                                        </span>
+                                    </th>
+
+                                    <th (click)="sortBy('diemGiuaKy')" class="sortable">
+                                        Điểm giữa kỳ
+                                        <span *ngIf="currentSortColumn === 'diemGiuaKy'">
+                                            {{ isAscending ? '↑' : '↓' }}
+                                        </span>
+                                    </th>
+
+                                    <th (click)="sortBy('diemCuoiKy')" class="sortable">
+                                        Điểm cuối kỳ
+                                        <span *ngIf="currentSortColumn === 'diemCuoiKy'">
+                                            {{ isAscending ? '↑' : '↓' }}
+                                        </span>
+                                    </th>
+                                    <th (click)="sortBy('diemTrungbinh')" class="sortable">
+                                        Điểm trung bình
+                                        <span *ngIf="currentSortColumn === 'diemTrungbinh'">
+                                            {{ isAscending ? '↑' : '↓' }}
+                                        </span>
+                                    </th>
+                                    <th>Xếp loại</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody id="gradeTableBody">
-                                <tr>
-                                    <td>1</td>
+                                <tr *ngFor="let sinhVien of sv; let i = index">
+                                    <td>{{i+1}}</td>
                                     <td>
                                         <div class="student-info">
-                                            <div class="student-avatar">AN</div>
                                             <div class="student-details">
-                                                <h4>Nguyễn Văn An</h4>
-                                                <div class="student-id">SV001</div>
+                                                <h5>{{sinhVien.ho}} {{sinhVien.ten}}</h5>
+                                                <p>MSSV: {{sinhVien.mssv}}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td><input type="number" class="grade-input good" value="8.5" min="0" max="10" step="0.1"></td>
-                                    <td><input type="number" class="grade-input excellent" value="9.0" min="0" max="10" step="0.1"></td>
-                                    <td><input type="number" class="grade-input excellent" value="8.8" min="0" max="10" step="0.1"></td>
-                                    <td><div class="final-grade excellent">8.83</div></td>
-                                    <td><div class="grade-rank">1</div></td>
+                                    <td><input type="number" class="grade-input" min="0" max="10" step="0.1"
+                                            [(ngModel)]="sinhVien.diemChuyenCan" (ngModelChange)="diemTB()"></td>
+                                    <td><input type="number" class="grade-input" min="0" max="10" step="0.1"
+                                            [(ngModel)]="sinhVien.diemGiuaKy" (ngModelChange)="diemTB()"></td>
+                                    <td><input type="number" class="grade-input" min="0" max="10" step="0.1"
+                                            [(ngModel)]="sinhVien.diemCuoiKy" (ngModelChange)="diemTB()"></td>
+                                    <td><span class="total-grade" id="total-1">{{sinhVien.diemTrungbinh | number
+                                            :'1.1-1' }}</span></td>
+                                    <td><span class="grade-badge" [ngClass]="{ 
+                                                                                'excellent': sinhVien.xepLoai === 'Xuất sắc', 
+                                                                                'good': sinhVien.xepLoai === 'Giỏi', 
+                                                                                'fair': sinhVien.xepLoai === 'Khá',
+                                                                                'average': sinhVien.xepLoai === 'Trung bình',
+                                                                                'poor': sinhVien.xepLoai === 'Yếu'
+                                                                             }">{{sinhVien.xepLoai}}</span></td>
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn-icon btn-edit" onclick="editStudentGrade(1)" title="Chỉnh sửa">
+                                            <button class="btn-icon btn-save" (click)="saveStudentGrade(sinhVien)"
+                                                title="Lưu điểm">
                                                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                                    <path
+                                                        d="M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3M19,19H5V5H16.17L19,7.83V19M12,12C10.34,12 9,13.34 9,15C9,16.66 10.34,18 12,18C13.66,18 15,16.66 15,15C15,13.34 13.66,12 12,12Z" />
                                                 </svg>
                                             </button>
-                                            <button class="btn-icon btn-history" onclick="viewGradeHistory(1)" title="Lịch sử">
+                                            <button class="btn-icon btn-detail"
+                                                (click)="openStudentDetailModal(sinhVien)" title="Chi tiết">
                                                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3Z"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>2</td>
-                                    <td>
-                                        <div class="student-info">
-                                            <div class="student-avatar">BH</div>
-                                            <div class="student-details">
-                                                <h4>Trần Thị Bình</h4>
-                                                <div class="student-id">SV002</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><input type="number" class="grade-input excellent" value="9.0" min="0" max="10" step="0.1"></td>
-                                    <td><input type="number" class="grade-input good" value="8.2" min="0" max="10" step="0.1"></td>
-                                    <td><input type="number" class="grade-input good" value="8.5" min="0" max="10" step="0.1"></td>
-                                    <td><div class="final-grade good">8.41</div></td>
-                                    <td><div class="grade-rank">2</div></td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-icon btn-edit" onclick="editStudentGrade(2)" title="Chỉnh sửa">
-                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                                                </svg>
-                                            </button>
-                                            <button class="btn-icon btn-history" onclick="viewGradeHistory(2)" title="Lịch sử">
-                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3Z"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>3</td>
-                                    <td>
-                                        <div class="student-info">
-                                            <div class="student-avatar">CD</div>
-                                            <div class="student-details">
-                                                <h4>Lê Văn Cường</h4>
-                                                <div class="student-id">SV003</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><input type="number" class="grade-input good" value="7.5" min="0" max="10" step="0.1"></td>
-                                    <td><input type="number" class="grade-input good" value="7.8" min="0" max="10" step="0.1"></td>
-                                    <td><input type="number" class="grade-input good" value="8.0" min="0" max="10" step="0.1"></td>
-                                    <td><div class="final-grade good">7.89</div></td>
-                                    <td><div class="grade-rank">3</div></td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-icon btn-edit" onclick="editStudentGrade(3)" title="Chỉnh sửa">
-                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                                                </svg>
-                                            </button>
-                                            <button class="btn-icon btn-history" onclick="viewGradeHistory(3)" title="Lịch sử">
-                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3Z"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>4</td>
-                                    <td>
-                                        <div class="student-info">
-                                            <div class="student-avatar">DH</div>
-                                            <div class="student-details">
-                                                <h4>Phạm Thị Dung</h4>
-                                                <div class="student-id">SV004</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><input type="number" class="grade-input average" value="6.0" min="0" max="10" step="0.1"></td>
-                                    <td><input type="number" class="grade-input average" value="6.5" min="0" max="10" step="0.1"></td>
-                                    <td><input type="number" class="grade-input good" value="7.2" min="0" max="10" step="0.1"></td>
-                                    <td><div class="final-grade average">6.89</div></td>
-                                    <td><div class="grade-rank">4</div></td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-icon btn-edit" onclick="editStudentGrade(4)" title="Chỉnh sửa">
-                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                                                </svg>
-                                            </button>
-                                            <button class="btn-icon btn-history" onclick="viewGradeHistory(4)" title="Lịch sử">
-                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3Z"/>
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>5</td>
-                                    <td>
-                                        <div class="student-info">
-                                            <div class="student-avatar">EK</div>
-                                            <div class="student-details">
-                                                <h4>Hoàng Văn Em</h4>
-                                                <div class="student-id">SV005</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td><input type="number" class="grade-input poor" value="4.5" min="0" max="10" step="0.1"></td>
-                                    <td><input type="number" class="grade-input poor" value="5.0" min="0" max="10" step="0.1"></td>
-                                    <td><input type="number" class="grade-input average" value="5.8" min="0" max="10" step="0.1"></td>
-                                    <td><div class="final-grade poor">5.39</div></td>
-                                    <td><div class="grade-rank">5</div></td>
-                                    <td>
-                                        <div class="action-buttons">
-                                            <button class="btn-icon btn-edit" onclick="editStudentGrade(5)" title="Chỉnh sửa">
-                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                                                </svg>
-                                            </button>
-                                            <button class="btn-icon btn-history" onclick="viewGradeHistory(5)" title="Lịch sử">
-                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3Z"/>
+                                                    <path
+                                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                                                 </svg>
                                             </button>
                                         </div>
@@ -391,7 +259,305 @@
                         </table>
                     </div>
                 </div>
-            </main>
+
+                <!-- Charts and Attention List Grid -->
+                <div style="display: grid; grid-template-columns: 0.6fr 1fr; gap: 24px;">
+                    <!-- Grade Chart -->
+                    <div class="grade-chart-container">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Phân bố điểm - Lớp Lập trình Web (IT301)</h3>
+                            <div class="chart-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: #667eea;"></div>
+                                    <span>Số sinh viên</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-content" style="height: 300px;">
+                            <div class="chart-bar" *ngFor="let bar of gradeDistribution">
+                                <div class="bar" [style.height]="(bar.count * 10) + 'px'" style="background: #667eea;">
+                                    <div class="bar-value">{{ bar.count }}</div>
+                                </div>
+                                <div class="bar-label">{{ bar.range }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Students Need Attention -->
+                    <div class="grade-chart-container">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Sinh viên cần chú ý</h3>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <select class="filter-select" id="attentionGradeType" [(ngModel)]="attentionGradeType"
+                                    (change)="onGradeTypeChange($event)"
+                                    style=" min-width: 140px; font-size: 13px; padding: 8px 12px;">
+                                    <option value="average">Điểm trung bình</option>
+                                    <option value="attendance">Điểm chuyên cần</option>
+                                    <option value="midterm">Điểm giữa kỳ</option>
+                                    <option value="final">Điểm cuối kỳ</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="height: 200px; overflow-y: auto; padding: 16px 0;">
+                            <!-- Nếu không có sinh viên cần chú ý -->
+                            <div *ngIf="attentionStudents.length === 0" class="no-attention-students">
+                                <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                </svg>
+                                <h4>Tuyệt vời!</h4>
+                                <p>Không có sinh viên nào cần chú ý về {{ getGradeTypeName(attentionGradeType) }}</p>
+                            </div>
+
+                            <!-- Nếu có sinh viên cần chú ý -->
+                            <div *ngIf="attentionStudents.length > 0">
+                                <div class="attention-student-item" *ngFor="let student of attentionStudents"
+                                    (click)="viewStudentDetail(student.id)" style="cursor: pointer;">
+                                    <div class="attention-student-info">
+                                        <div class="attention-student-name">{{ student.name }}</div>
+                                        <div class="attention-student-id">{{ student.mssv }}</div>
+                                    </div>
+                                    <div class="attention-grade">
+                                        <div class="attention-grade-type">{{ student.gradeLabel }}</div>
+                                        <div class="attention-grade-value">{{ student.grade | number: '1.1-1' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+        </div>
+        </main>
+    </div>
+    </div>
+
+    <!-- Student Detail Modal -->
+    <div class="modal-overlay active" id="studentDetailModal" *ngIf="showStudentDetailModal">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <div class="modal-icon info">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
+                </div>
+                <h3 class="modal-title" id="studentDetailTitle">Chi tiết điểm sinh viên</h3>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Họ và tên</label>
+                    <input type="text" class="form-input" id="studentName" [value]="selectedStudent.ho + ' ' + selectedStudent.ten" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mã số sinh viên</label>
+                    <input type="text" class="form-input" id="studentId" [(ngModel)]="selectedStudent.mssv" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Lớp học</label>
+                    <input type="text" class="form-input" id="studentClass" [(ngModel)]="selectedStudent.tenLop"
+                        readonly>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="studentEmail" value="nguyenvana@student.edu.vn" readonly>
+                </div>
+            </div>
+
+            <div class="student-grades">
+                <h4 style="margin-bottom: 16px; color: #1e293b; font-weight: 600;">Chi tiết điểm số</h4>
+
+                <div class="grades-grid">
+                    <div class="grade-item">
+                        <div class="grade-item-label">Điểm chuyên cần</div>
+                        <div class="grade-item-value" id="detailAttendance">{{selectedStudent.diemChuyenCan}}</div>
+                    </div>
+
+                    <div class="grade-item">
+                        <div class="grade-item-label">Điểm giữa kỳ</div>
+                        <div class="grade-item-value" id="detailMidterm">{{selectedStudent.diemGiuaKy}}</div>
+                    </div>
+
+                    <div class="grade-item">
+                        <div class="grade-item-label">Điểm cuối kỳ</div>
+                        <div class="grade-item-value" id="detailFinal">{{selectedStudent.diemCuoiKy}}</div>
+                    </div>
+
+                    <div class="grade-item">
+                        <div class="grade-item-label">Số buổi vắng</div>
+                        <div class="grade-item-value" id="detailAbsent">2</div>
+                    </div>
+                </div>
+
+                <div class="grade-summary">
+                    <h4>Điểm tổng kết</h4>
+                    <div class="final-grade" id="detailFinalGrade">{{selectedStudent.diemTrungbinh}}</div>
+                    <div class="grade-status" id="detailGradeStatus">Xếp loại: {{selectedStudent.xepLoai}}</div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" (click)="closeStudentDetailModal()">Đóng</button>
+                <button class="modal-btn modal-btn-primary" onclick="printStudentReport()">In báo cáo</button>
+            </div>
         </div>
     </div>
-</body>
+
+    <!-- File Import Modal -->
+    <div class="modal-overlay active " id="fileImportModal" *ngIf="showFileImportModal">
+        <div class="modal" style="max-width: 700px;">
+            <div class="modal-header">
+                <div class="modal-icon info">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                    </svg>
+                </div>
+                <h3 class="modal-title">Nhập điểm từ file Excel/CSV</h3>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <label class="form-label">Chọn lớp học</label>
+                    <select class="form-input" id="fileImportClassSelect">
+                        <option value="IT301">Lập trình Web (IT301)</option>
+                        <option value="IT302">Cơ sở dữ liệu (IT302)</option>
+                        <option value="IT303">Thuật toán (IT303)</option>
+                        <option value="IT304">Hệ thống thông tin (IT304)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Chọn loại điểm</label>
+                    <select class="form-input" id="fileImportGradeType">
+                        <option value="attendance">Điểm chuyên cần</option>
+                        <option value="midterm">Điểm giữa kỳ</option>
+                        <option value="final">Điểm cuối kỳ</option>
+                        <option value="all">Cả 3 điểm (chuyên cần, giữa kỳ, cuối kỳ)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label class="form-label">Chọn file Excel hoặc CSV</label>
+                <input type="file" class="form-input" id="gradeFileInput" accept=".xlsx,.xls,.csv"
+                    style="padding: 12px;" [(ngModel)]="newFile.gradeFile" required>
+            </div>
+            <div
+                style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                <h4 style="color: #0369a1; margin-bottom: 8px; font-size: 14px;">📋 Định dạng file yêu cầu:</h4>
+                <ul style="color: #0369a1; font-size: 13px; margin-left: 20px;">
+                    <li>File Excel (.xlsx, .xls) hoặc CSV (.csv)</li>
+                    <li><strong>Cột A:</strong> Tên sinh viên</li>
+                    <li><strong>Cột B:</strong> MSSV (Mã số sinh viên)</li>
+                    <li><strong>Cột C:</strong> Điểm (nếu chọn 1 loại điểm)</li>
+                    <li><strong>Cột C, D, E:</strong> Điểm chuyên cần, giữa kỳ, cuối kỳ (nếu chọn "Cả 3 điểm")</li>
+                    <li>Dòng đầu tiên có thể là tiêu đề (sẽ được bỏ qua)</li>
+                    <li><strong>Ví dụ 1 điểm:</strong> Nguyễn Văn A | 2021001 | 8.5</li>
+                    <li><strong>Ví dụ 3 điểm:</strong> Nguyễn Văn A | 2021001 | 8.5 | 7.8 | 8.2</li>
+                </ul>
+            </div>
+
+            <div
+                style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                <h4 style="color: #92400e; margin-bottom: 8px; font-size: 14px;">⚠️ Lưu ý:</h4>
+                <ul style="color: #92400e; font-size: 13px; margin-left: 20px;">
+                    <li>Chỉ cập nhật điểm cho sinh viên có trong lớp đã chọn</li>
+                    <li>MSSV không tồn tại sẽ được bỏ qua</li>
+                    <li>Điểm không hợp lệ (< 0 hoặc> 10) sẽ được bỏ qua</li>
+                </ul>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" (click)="closeFileImportModal()">Hủy</button>
+                <button class="modal-btn modal-btn-primary" (click)="addFile()">Nhập điểm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Grade Input Modal -->
+    <div class="modal-overlay active" id="bulkGradeModal" *ngIf="showBulkGradeInputModal">
+        <div class="modal" style="max-width: 800px;">
+            <div class="modal-header">
+                <div class="modal-icon info">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M19,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.9 20.1,3 19,3M19,19H5V5H19V19Z" />
+                    </svg>
+                </div>
+                <h3 class="modal-title">Nhập điểm hàng loạt</h3>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <label class="form-label">Chọn lớp học</label>
+                    <select class="form-input" id="bulkClassSelect">
+                        <option value="IT301">Lập trình Web (IT301)</option>
+                        <option value="IT302">Cơ sở dữ liệu (IT302)</option>
+                        <option value="IT303">Thuật toán (IT303)</option>
+                        <option value="IT304">Hệ thống thông tin (IT304)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Chọn loại điểm</label>
+                    <select class="form-input" id="bulkGradeType">
+                        <option value="attendance">Điểm chuyên cần</option>
+                        <option value="midterm">Điểm giữa kỳ</option>
+                        <option value="final">Điểm cuối kỳ</option>
+                        <option value="all">Cả 3 điểm (chuyên cần, giữa kỳ, cuối kỳ)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label class="form-label">Nhập điểm (mỗi dòng một sinh viên)</label>
+                <textarea class="form-input" id="bulkGradeData" rows="8" placeholder="2021001,8.5
+2021002,9.2
+2021003,6.5
+
+Hoặc cả 3 điểm:
+2021001,8.5,7.8,8.2
+2021002,9.2,8.8,9.1" style="font-family: monospace; resize: vertical;" [(ngModel)]="newBulkGrades.grades"></textarea>
+            </div>
+
+            <div
+                style="background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                <h4 style="color: #0369a1; margin-bottom: 8px; font-size: 14px;">💡 Hướng dẫn:</h4>
+                <ul style="color: #0369a1; font-size: 13px; margin-left: 20px;">
+                    <li>Chọn lớp học và loại điểm trước khi nhập</li>
+                    <li><strong>Định dạng 1 điểm:</strong> MSSV,Điểm</li>
+                    <li><strong>Định dạng 3 điểm:</strong> MSSV,Điểm_CC,Điểm_GK,Điểm_CK</li>
+                    <li>Điểm từ 0 đến 10, có thể có 1 chữ số thập phân</li>
+                    <li><strong>Ví dụ 1 điểm:</strong> 2021001,8.5</li>
+                    <li><strong>Ví dụ 3 điểm:</strong> 2021001,8.5,7.8,8.2</li>
+                    <li>Hệ thống sẽ tự động tìm sinh viên theo MSSV trong lớp đã chọn</li>
+                </ul>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-secondary" (click)="closeBulkGradeInputModal()">Hủy</button>
+                <button class="modal-btn modal-btn-primary" (click)="processBulkGrades()">Áp dụng điểm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div class="modal-overlay active" id="notificationModal" *ngIf="showNotificationModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-icon" id="notificationIcon">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24" id="notificationIconSvg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
+                </div>
+                <h3 class="modal-title" id="notificationTitle">Thành công!</h3>
+            </div>
+            <p class="modal-message" id="notificationMessage">Thao tác đã được thực hiện thành công.</p>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-primary" (click)="closeNotificationModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
