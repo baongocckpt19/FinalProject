@@ -1,0 +1,130 @@
+<body>
+    <div class="dashboard-container">
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Profile Content -->
+            <main class="profile-content">
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-header-content">
+                        <div class="profile-avatar-section">
+                            <div class="profile-avatar-large">
+                                GV
+                            </div>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <h1 class="profile-name">Nguyễn Văn An</h1>
+                            <p class="profile-role">Giảng viên</p>
+                            
+
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile Content -->
+                <div class="profile-sections">
+                    <!-- Personal Information -->
+                    <div class="profile-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Thông tin cá nhân</h3>
+                            <button class="edit-btn" onclick="toggleEdit('personal-info')">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                                </svg>
+                                Chỉnh sửa
+                            </button>
+                        </div>
+                        
+                        <form id="personal-info">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="fullName" class="form-label">Họ và tên</label>
+                                    <input type="text" id="fullName" class="form-input" value="Nguyễn Văn An" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="employeeId" class="form-label">Mã Số</label>
+                                    <input type="text" id="employeeId" class="form-input" value="GV001" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="email" class="form-label">Email</label>
+                                    <input type="email" id="email" class="form-input" value="nguyenvanan@university.edu.vn" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone" class="form-label">Số điện thoại</label>
+                                    <input type="tel" id="phone" class="form-input" value="0123456789" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="department" class="form-label">Khoa</label>
+                                    <input type="text" id="department" class="form-input" value="Công nghệ Thông tin" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="position" class="form-label">Chức vụ</label>
+                                    <input type="text" id="position" class="form-input" value="Giảng viên" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="address" class="form-label">Địa chỉ</label>
+                                <input type="text" id="address" class="form-input" value="123 Đường ABC, Quận XYZ, TP.HCM" disabled>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="bio" class="form-label">Giới thiệu</label>
+                                <textarea id="bio" class="form-input form-textarea" disabled>Giảng viên với 5 năm kinh nghiệm trong lĩnh vực Công nghệ Thông tin, chuyên môn về Lập trình Web và Cơ sở dữ liệu. Tôi luôn tận tâm trong việc giảng dạy và hướng dẫn sinh viên.</textarea>
+                            </div>
+                            
+                            <div id="personal-info-actions" style="display: none; margin-top: 20px;">
+                                <button type="button" class="btn btn-primary" onclick="savePersonalInfo()">
+                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                    </svg>
+                                    Lưu thay đổi
+                                </button>
+                                <button type="button" class="btn btn-outline" onclick="cancelEdit('personal-info')">Hủy</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Change Password -->
+                    <div class="profile-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Đổi mật khẩu</h3>
+                        </div>
+                        
+                        <form id="password-form">
+                            <div class="form-group">
+                                <label for="currentPassword" class="form-label">Mật khẩu hiện tại</label>
+                                <input type="password" id="currentPassword" class="form-input" placeholder="Nhập mật khẩu hiện tại">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="newPassword" class="form-label">Mật khẩu mới</label>
+                                    <input type="password" id="newPassword" class="form-input" placeholder="Nhập mật khẩu mới">
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmPassword" class="form-label">Xác nhận mật khẩu</label>
+                                    <input type="password" id="confirmPassword" class="form-input" placeholder="Xác nhận mật khẩu mới">
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="btn btn-primary" onclick="changePassword()">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"/>
+                                </svg>
+                                Đổi mật khẩu
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>

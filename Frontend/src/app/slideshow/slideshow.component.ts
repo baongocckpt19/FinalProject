@@ -91,4 +91,5 @@ export class SlideshowComponent implements AfterViewInit {
    navigateToSignin() {
     this.router.navigate(['/login']);
   }
+  
 }

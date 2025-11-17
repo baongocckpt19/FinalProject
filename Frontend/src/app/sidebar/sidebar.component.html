@@ -58,6 +58,17 @@
             </div>
 
             <div class="nav-item">
+                <a class="nav-link" [ngClass]="{'active' : isActive('/diemdanh') }"
+                    (click)="navigateToAttendanceMode(); $event.preventDefault()">
+                    <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />
+                    </svg>
+                    Bắt đầu điểm danh
+                </a>
+            </div>
+
+            <div class="nav-item">
                 <a class="nav-link" [ngClass]="{'active' : isActive('/chatbot') }"
                     (click)="navigateToChatBot(); $event.preventDefault()">
                     <svg class="nav-icon" fill="currentColor" viewBox="0 0 24 24">
@@ -67,6 +78,7 @@
                     Chat Bot
                 </a>
             </div>
+
         </nav>
     </div>
 
@@ -83,7 +95,7 @@
                     <span class="notification-badge">3</span>
                 </button>
 
-                <div class="user-profile">
+                <div class="user-profile" (click)="navigatetoPersonalPage(); $event.preventDefault()">
                     <div class="user-avatar">GV</div>
                     <div class="user-info">
                         <h4>Nguyễn Văn An</h4>

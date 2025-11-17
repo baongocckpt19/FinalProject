@@ -27,7 +27,10 @@ export class SidebarComponent {
           this.titleService = "Quản lý điểm danh";
         } else if (event.url === '/chatbot') {
           this.titleService = "Chat Bot";
-        } else {
+        } else if (event.url === '/diemdanh') {
+          this.titleService = "Chế độ điểm danh";
+        }
+         else {
           this.titleService = "";    
         }
       }
@@ -54,7 +57,14 @@ export class SidebarComponent {
   logout() {
     this.router.navigate(['/login']);
   }
+  navigateToAttendanceMode() {
+    this.router.navigate(['/diemdanh']);
+  }
   isActive(route: string): boolean {
     return this.activeRoute === route;
   }
+  navigatetoPersonalPage() {
+    this.router.navigate(['/trangcanhan']);
+  }
+  
 }

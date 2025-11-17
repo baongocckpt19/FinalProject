@@ -1,27 +1,26 @@
 import { Component, Renderer2, ElementRef, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Cần cho các directive cơ bản như ngIf, ngFor
-import { FormsModule } from '@angular/forms'; // Cần cho ngModel
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule, HttpErrorResponse } from '@angular/common/http';
+import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  // Thêm CommonModule và FormsModule vào imports
-  imports: [CommonModule, FormsModule],
+  standalone: true, // 👈 thêm để component tự hoạt động được
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './login.component.html',
-  // Giữ nguyên styleUrl
-  styleUrl: './login.component.scss',
-  // Đảm bảo standalones: true nếu bạn đang dùng standalone component
-  // standalone: true 
+  styleUrl: './login.component.scss'
 })
 export class LoginComponent implements OnInit {
+
   // === Thuộc tính cho Data Binding (Binding Models) ===
-
   // Đăng nhập
-  loginEmail = '';
-  loginPassword = '';
+  username = '';
+  password = '';
   rememberMe = false;
-
   // Đăng ký
-  userRole = 'student'; // Mặc định là 'student'
+  userRole = 'student';
   fullName = '';
   registerEmail = '';
   registerPassword = '';
@@ -34,13 +33,17 @@ export class LoginComponent implements OnInit {
   // Thông báo
   successMessage: string | null = null;
   errorMessage: string | null = null;
-  
-  // Tham chiếu DOM và Renderer vẫn cần cho việc chuyển đổi form và toggle password
-  constructor(private renderer: Renderer2, private el: ElementRef) {}
+
+
+  constructor(
+    private router: Router,
+    private renderer: Renderer2,
+    private el: ElementRef,
+    private authService: AuthService // 👈 inject AuthService
+  ) { }
 
   ngOnInit(): void {
-    // Không cần gắn sự kiện submit bằng renderer/listener nữa
-    // vì ta sẽ dùng (ngSubmit) trên tag <form> trong HTML
+    // Không cần listener — sử dụng (ngSubmit) trong template
   }
 
   // 🔹 Ẩn/hiện mật khẩu
@@ -53,44 +56,57 @@ export class LoginComponent implements OnInit {
 
   // 🔹 Chuyển giữa đăng nhập và đăng ký
   switchToSignup(): void {
-    this.isSignupMode = true; // Cập nhật biến trạng thái
+    this.isSignupMode = true;
     const container = this.el.nativeElement.querySelector('#formContainer');
-    // Vẫn cần Renderer để thêm/xóa class cho hiệu ứng CSS
     this.renderer.addClass(container, 'show-signup');
     this.clearMessages();
   }
 
   switchToSignin(): void {
-    this.isSignupMode = false; // Cập nhật biến trạng thái
+    this.isSignupMode = false;
     const container = this.el.nativeElement.querySelector('#formContainer');
     this.renderer.removeClass(container, 'show-signup');
     this.clearMessages();
   }
 
-  // 🔹 Xử lý đăng nhập
+  // 🔹 Xử lý đăng nhập (gọi API thật)
   handleLogin(): void {
     this.clearMessages();
 
-    // Dữ liệu được lấy trực tiếp từ thuộc tính class: this.loginEmail, this.loginPassword
-    if (!this.loginEmail || !this.loginPassword) {
+    if (!this.username || !this.password) {
       this.showError('Vui lòng nhập đầy đủ thông tin!');
       return;
     }
 
-    // Mô phỏng login (sau này bạn có thể gọi API thật ở đây)
-    if (this.loginEmail === 'test@gmail.com' && this.loginPassword === '123456') {
-      this.showSuccess('Đăng nhập thành công!');
-      // console.log('Ghi nhớ đăng nhập:', this.rememberMe);
-    } else {
-      this.showError('Email hoặc mật khẩu không đúng!');
-    }
+    // 👇 gọi API qua AuthService
+    this.authService.login(this.username, this.password).subscribe({
+      next: (res) => {
+        if (res) {
+          this.showSuccess('Đăng nhập thành công!');
+          this.authService.currentUser$.subscribe((account) => {
+            this.showSuccess('Đăng nhập thành công!');
+            if (account?.roleName == "Admin") {
+              this.router.navigate(['/admin']);
+            } else if (account?.roleName == "Giảng viên") {
+              this.router.navigate(['/gv_trangchu']);
+            } else {
+              this.router.navigate(['/trangcanhan']);
+            }
+          })
+        } else {
+          this.showError('Phản hồi không hợp lệ từ máy chủ!');
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        this.showError(err.error?.message || 'Sai tài khoản hoặc mật khẩu!');
+      }
+    });
   }
 
-  // 🔹 Xử lý đăng ký
+  // 🔹 Xử lý đăng ký (có thể gọi API thật)
   handleRegister(): void {
     this.clearMessages();
 
-    // Dữ liệu được lấy trực tiếp từ thuộc tính class
     if (!this.fullName || !this.registerEmail || !this.registerPassword || !this.confirmPassword) {
       this.showError('Vui lòng điền đầy đủ thông tin!');
       return;
@@ -106,16 +122,23 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    // console.log('Đăng ký với vai trò:', this.userRole);
-    this.showSuccess('Đăng ký thành công! Hãy đăng nhập để tiếp tục.');
-    setTimeout(() => this.switchToSignin(), 1500);
+    // 👇 Gọi API đăng ký thật (nếu backend có)
+    this.authService.register({
+      fullName: this.fullName,
+      username: this.registerEmail,
+      password: this.registerPassword,
+      role: this.userRole
+    }).subscribe({
+      next: (res) => {
+        this.showSuccess('Đăng ký thành công! Hãy đăng nhập để tiếp tục.');
+        setTimeout(() => this.switchToSignin(), 1500);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.showError(err.error?.message || 'Đăng ký thất bại!');
+      }
+    });
   }
 
-  // 🔹 Đăng nhập bằng mạng xã hội
-  socialLogin(platform: string): void {
-    this.clearMessages();
-    this.showSuccess(`Đăng nhập bằng ${platform} thành công (demo)!`);
-  }
 
   // 🔹 Hiển thị thông báo
   showSuccess(message: string): void {
@@ -134,6 +157,5 @@ export class LoginComponent implements OnInit {
     this.successMessage = null;
     this.errorMessage = null;
   }
-
 
 }

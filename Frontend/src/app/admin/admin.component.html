@@ -1,0 +1,1125 @@
+<body>
+    <div class="admin-container">
+        <!-- Admin Sidebar -->
+        <div class="admin-sidebar">
+            <div class="admin-header">
+                <div class="admin-logo">
+                    <div class="admin-logo-icon">
+                        <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="admin-logo-text">
+                            EduSmart
+                        </div>
+                        <div class="admin-badge">
+                            ADMIN
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <nav class="admin-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        Tổng quan
+                    </div>
+                    <div class="admin-nav-item">
+                        <a class="admin-nav-link active" onclick="showSection('dashboard')">
+                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+                            </svg> Dashboard </a>
+                    </div>
+                    <div class="admin-nav-item">
+                        <a class="admin-nav-link" onclick="showSection('analytics')">
+                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M16 4v4h4V4h-4zm-2-2h8v8h-8V2zm2 10v4h4v-4h-4zm-2-2h8v8h-8v-8zM4 4v4h4V4H4zM2 2h8v8H2V2zm2 10v4h4v-4H4zm-2-2h8v8H2v-8z" />
+                            </svg> Phân tích dữ liệu </a>
+                    </div>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        Quản lý
+                    </div>
+                    <div class="admin-nav-item">
+                        <a class="admin-nav-link" (click)="openUserManagement()">
+                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                            </svg> Quản lý người dùng </a>
+                    </div>
+                    <div class="admin-nav-item">
+                        <a class="admin-nav-link" (click)="openClassManagement()">
+                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                            </svg> Quản lý lớp học </a>
+                    </div>
+                </div>
+                <!-- phát triển nâng cao -->
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        Hệ thống
+                    </div>
+                    <div class="admin-nav-item"><a href="#" class="admin-nav-link">
+                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
+                            </svg> Bảo mật </a>
+                    </div>
+                    <div class="admin-nav-item"><a href="#" class="admin-nav-link">
+                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" />
+                            </svg> Cài đặt </a>
+                    </div>
+                    <div class="admin-nav-item"><a href="#" class="admin-nav-link">
+                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" />
+                            </svg> Hỗ trợ </a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <!-- Main Content -->
+        <div class="admin-main"><!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <div>
+                        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+                        <div class="breadcrumb"><span>Admin</span>
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                            </svg><span id="breadcrumbText">Tổng quan</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <svg class="search-icon" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                        </svg><input type="text" class="search-input" placeholder="Tìm kiếm...">
+                    </div><button class="notification-btn">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
+                        </svg><span class="notification-badge">5</span> </button>
+                    <div class="admin-profile">
+                        <div class="admin-avatar">
+                            AD
+                        </div>
+                        <div class="admin-info">
+                            <h4>Admin System</h4>
+                            <p>Quản trị viên</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active" *ngIf="isShowDashboard"><!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card users">
+                        <div class="stat-header">
+                            <div class="stat-icon users">
+                                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-4h3v4h2v-7.5c0-.83.67-1.5 1.5-1.5S12 9.67 12 10.5V18h2v-4h3v4h2V8.5c0-1.1-.9-2-2-2h-3c-.55 0-1.05.22-1.41.59L9.59 10.5c-.36.36-.59.86-.59 1.41V18H4z" />
+                                </svg>
+                            </div>
+                            <div class="stat-trend up">
+                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M7 14l5-5 5 5z" />
+                                </svg> +12.5%
+                            </div>
+                        </div>
+                        <div class="stat-number">
+                            1,234
+                        </div>
+                        <div class="stat-label">
+                            Tổng người dùng
+                        </div>
+                        <div class="stat-description">
+                            +89 người dùng mới trong tuần
+                        </div>
+                    </div>
+                    <div class="stat-card classes">
+                        <div class="stat-header">
+                            <div class="stat-icon classes">
+                                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                                </svg>
+                            </div>
+                            <div class="stat-trend up">
+                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M7 14l5-5 5 5z" />
+                                </svg> +15.3%
+                            </div>
+                        </div>
+                        <div class="stat-number">
+                            2,847
+                        </div>
+                        <div class="stat-label">
+                            Lớp học hoạt động
+                        </div>
+                        <div class="stat-description">
+                            +234 lớp mới trong tháng
+                        </div>
+                    </div>
+                    <div class="stat-card attendance">
+                        <div class="stat-header">
+                            <div class="stat-icon attendance">
+                                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="stat-trend up">
+                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M7 14l5-5 5 5z" />
+                                </svg> +8.2%
+                            </div>
+                        </div>
+                        <div class="stat-number">
+                            94.2%
+                        </div>
+                        <div class="stat-label">
+                            Tỷ lệ điểm danh
+                        </div>
+                        <div class="stat-description">
+                            Tăng 2.1% so với tháng trước
+                        </div>
+                    </div>
+                    <div class="stat-card revenue">
+                        <div class="stat-header">
+                            <div class="stat-icon revenue">
+                                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </div>
+                            <div class="stat-trend up">
+                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M7 14l5-5 5 5z" />
+                                </svg> +22.1%
+                            </div>
+                        </div>
+                        <div class="stat-number">
+                            8.7
+                        </div>
+                        <div class="stat-label">
+                            Điểm trung bình
+                        </div>
+                        <div class="stat-description">
+                            Tăng 0.3 điểm so với kỳ trước
+                        </div>
+                    </div>
+                </div><!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Thống kê người dùng</h3>
+                            <div class="chart-filter"><button class="filter-btn active">7 ngày</button> <button
+                                    class="filter-btn">30 ngày</button> <button class="filter-btn">3 tháng</button>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder">
+                            📊 Biểu đồ thống kê người dùng theo thời gian
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Phân bố vai trò</h3>
+                        </div>
+                        <div class="chart-placeholder">
+                            🥧 Biểu đồ tròn phân bố vai trò người dùng
+                        </div>
+                    </div>
+                </div><!-- Recent Activity -->
+                <div class="activity-section">
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <h3 class="activity-title">Hoạt động gần đây</h3><a href="#" class="view-all-btn">Xem tất
+                                cả</a>
+                        </div>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    GV
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        Giảng viên Nguyễn Văn A tạo lớp học mới
+                                    </div>
+                                    <div class="activity-time">
+                                        2 phút trước
+                                    </div>
+                                </div>
+                                <div class="activity-status status-success">
+                                    Thành công
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    SV
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        156 sinh viên mới đăng ký tài khoản
+                                    </div>
+                                    <div class="activity-time">
+                                        15 phút trước
+                                    </div>
+                                </div>
+                                <div class="activity-status status-success">
+                                    Hoàn thành
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    HT
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        Lỗi đồng bộ dữ liệu điểm danh
+                                    </div>
+                                    <div class="activity-time">
+                                        1 giờ trước
+                                    </div>
+                                </div>
+                                <div class="activity-status status-error">
+                                    Cần xử lý
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    BT
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        Cập nhật hệ thống phiên bản 2.1.0
+                                    </div>
+                                    <div class="activity-time">
+                                        3 giờ trước
+                                    </div>
+                                </div>
+                                <div class="activity-status status-warning">
+                                    Đang xử lý
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <h3 class="activity-title">Thông báo hệ thống</h3><a href="#" class="view-all-btn">Xem tất
+                                cả</a>
+                        </div>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    🔧
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        Bảo trì hệ thống định kỳ vào 2:00 AM
+                                    </div>
+                                    <div class="activity-time">
+                                        Hôm nay
+                                    </div>
+                                </div>
+                                <div class="activity-status status-warning">
+                                    Sắp tới
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    🚀
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        Ra mắt tính năng AI Chat Bot mới
+                                    </div>
+                                    <div class="activity-time">
+                                        Hôm qua
+                                    </div>
+                                </div>
+                                <div class="activity-status status-success">
+                                    Hoàn thành
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    📊
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        Báo cáo tháng 12 đã sẵn sàng
+                                    </div>
+                                    <div class="activity-time">
+                                        2 ngày trước
+                                    </div>
+                                </div>
+                                <div class="activity-status status-success">
+                                    Sẵn sàng
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    🔒
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">
+                                        Cập nhật chính sách bảo mật
+                                    </div>
+                                    <div class="activity-time">
+                                        1 tuần trước
+                                    </div>
+                                </div>
+                                <div class="activity-status status-success">
+                                    Áp dụng
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Analytics Section -->
+            <div id="analytics" class="content-section active" *ngIf="showAnalytics">
+                <div class="analytics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h3 class="metric-title">Tổng số buổi học</h3>
+                        </div>
+                        <div class="metric-value">
+                            15,847
+                        </div>
+                        <div class="metric-change positive">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M7 14l5-5 5 5z" />
+                            </svg> +18.2% so với tháng trước
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h3 class="metric-title">Tỷ lệ tham gia trung bình</h3>
+                        </div>
+                        <div class="metric-value">
+                            87.3%
+                        </div>
+                        <div class="metric-change positive">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M7 14l5-5 5 5z" />
+                            </svg> +3.1% so với tháng trước
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h3 class="metric-title">Điểm trung bình toàn trường</h3>
+                        </div>
+                        <div class="metric-value">
+                            7.8
+                        </div>
+                        <div class="metric-change positive">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M7 14l5-5 5 5z" />
+                            </svg> +0.4 điểm so với kỳ trước
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <h3 class="metric-title">Số lượng bài tập đã nộp</h3>
+                        </div>
+                        <div class="metric-value">
+                            23,456
+                        </div>
+                        <div class="metric-change positive">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M7 14l5-5 5 5z" />
+                            </svg> +25.7% so với tháng trước
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-section">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Xu hướng điểm danh theo thời gian</h3>
+                            <div class="chart-filter"><button class="filter-btn active">Tuần</button> <button
+                                    class="filter-btn">Tháng</button> <button class="filter-btn">Quý</button>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder">
+                            📈 Biểu đồ xu hướng tỷ lệ điểm danh theo thời gian
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Top 5 lớp có tỷ lệ tham gia cao nhất</h3>
+                        </div>
+                        <div class="chart-placeholder">
+                            🏆 Bảng xếp hạng lớp học
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Phân tích chi tiết theo khoa</h3>
+                        <div class="chart-filter"><button class="filter-btn active">Tất cả</button> <button
+                                class="filter-btn">CNTT</button> <button class="filter-btn">Kinh tế</button> <button
+                                class="filter-btn">Ngoại ngữ</button>
+                        </div>
+                    </div>
+                    <div class="chart-placeholder">
+                        📊 Biểu đồ so sánh hiệu suất giữa các khoa
+                    </div>
+                </div>
+            </div>
+            <!-- Users Management Section -->
+            <div id="users" class="content-section active" *ngIf="showUserManagement">
+                <div class="data-table">
+                    <div class="table-header">
+                        <h2 class="table-title">Quản lý người dùng</h2>
+                        <div class="table-actions">
+                            <!-- thanh tìm kiếm -->
+                            <div class="search-box">
+                                <input type="text" placeholder="Tìm kiếm người dùng..." [(ngModel)]="searchText"
+                                    (input)="searchUser()" />
+                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" class="search-icon">
+                                    <path
+                                        d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.471 6.471 0 0 0 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+                                </svg>
+                            </div>
+
+                            <!-- nút xuất excel -->
+                            <button class="btn btn-secondary" (click)="onExportExcel()">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                </svg> Xuất Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Người dùng</th>
+                                    <th>UserName</th>
+                                    <th>Vai trò</th>
+                                    <th>Email</th>
+                                    <th>Số vân tay</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let u of filteredUsers; let i = index" (click)="openUserDetail(u)"
+                                    class="row-clickable">
+
+                                    <td>{{i+1}}</td>
+
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="user-details">
+                                                <h4>{{ u.fullName }}</h4>
+
+                                                <p *ngIf="u.teacherId">TeacherID: {{ u.teacherId }}</p>
+                                                <p *ngIf="!u.teacherId && u.studentId">StudentID: {{ u.studentId }}</p>
+                                                <p *ngIf="!u.teacherId && !u.studentId">AccountID: {{ u.accountId }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ u.username }}</td>
+                                    <td>{{ u.roleName }}</td>
+                                    <td>{{ u.email }}</td>
+
+                                    <td>
+                                        <ng-container *ngIf="u.roleName === 'Học sinh'; else noFingerprint">
+                                            {{ u.fingerCount != null ? u.fingerCount : 0 }}
+                                        </ng-container>
+                                        <ng-template #noFingerprint>
+                                            --
+                                        </ng-template>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+
+                                            <button class="action-btn delete"
+                                                (click)="deleteUser(u.accountId); $event.stopPropagation()">
+                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                                                </svg>
+                                            </button>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <!-- Classes Management Section -->
+            <div id="classes" class="content-section active" *ngIf="showClassManagement">
+                <div class="data-table">
+                    <div class="table-header">
+                        <h2 class="table-title">Quản lý lớp học</h2>
+                        <div class="table-actions">
+                            <!-- thanh tìm kiếm -->
+                            <div class="search-box">
+                                <input type="text" placeholder="Tìm kiếm lớp..." [(ngModel)]="searchText"
+                                    (input)="searchClasses()" />
+                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" class="search-icon">
+                                    <path
+                                        d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.471 6.471 0 0 0 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+                                </svg>
+                            </div>
+                            <button class="btn btn-secondary" (click)="onExportClassExcel()">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                </svg> Xuất báo cáo
+                            </button>
+                            <button class="btn btn-primary" (click)="openCreateClassModal()">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                </svg> Tạo lớp học
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Lớp</th>
+                                    <th>Giảng viên</th>
+                                    <th>Số sinh viên</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Trạng thái</th>
+                                    <th>Sinh viên đã có vân tay</th>
+                                    <th>Thêm SV</th>
+                                    <th>Xuất danh sách SV</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <!-- danh sách -->
+                            <tbody>
+                                <tr *ngFor="let c of classes; let i = index" (click)="openStudentofClassModal(c)">
+                                    <td>{{ i + 1 }}</td>
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="user-details">
+                                                <h4>{{ c.className }}</h4>
+                                                <p>Mã lớp: {{ c.classCode }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ c.teacherName || '—' }}</td>
+                                    <td>{{ c.studentCount }}</td>
+                                    <td>{{ c.createdDate | date:'dd/MM/yyyy' }}</td>
+                                    <td>
+                                        <span class="status-badge"
+                                            [ngClass]="c.status ? 'status-inactive' : 'status-active'"
+                                            (click)="toggleStatus(c); $event.stopPropagation()"
+                                            style="cursor: pointer;">
+                                            {{ c.status ? 'Đã hoàn thành' : 'Hoạt động' }}
+                                        </span>
+                                    </td>
+
+                                    <td>{{ c.fingerprintedCount }}</td>
+                                    <td> <!--đay là button thêm sinh viên vào lớp -->
+                                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;"
+                                            (click)="openAddStudentModal(c); $event.stopPropagation()">
+                                            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                            </svg> Thêm SV
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-xuatbaocao" style="padding: 6px 12px; font-size: 12px;"
+                                            (click)="onExportStudentsOfClass(c.classId); $event.stopPropagation()">
+                                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                            </svg> Xuất DS SV
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="action-btn edit"
+                                                (click)="openClassEditModal(c); $event.stopPropagation()">
+                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                                </svg>
+                                            </button>
+                                            <button class="action-btn delete"
+                                                (click)="deleteClass(c.classId); $event.stopPropagation()">
+                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal tạo lớp học -->
+        <div id="createClassModal" class="modal show" *ngIf="showCreateClassModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Tạo lớp học mới</h3>
+                    <button class="modal-close" (click)="closeCreateClassModal()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg></button>
+                </div>
+                <form class="modal-form">
+                    <div class="form-group"><label for="className">Tên lớp học</label>
+                        <input type="text" id="className" [(ngModel)]="createClassName" name="className"
+                            placeholder="Nhập tên lớp học" required>
+                    </div>
+                    <div class="form-group"><label for="classCode">Mã lớp</label>
+                        <input type="text" id="classCode" [(ngModel)]="createClassCode" name="classCode"
+                            placeholder="Nhập mã lớp (VD: IT101)" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label for="teacherCode">Mã giảng viên</label>
+                            <input type="text" [ngModel]="createClassTeacherId"
+                                (ngModelChange)="lookupTeacherForCreate($event)" id="teacherCode" name="teacherCode"
+                                placeholder="Nhập mã giảng viên" required>
+                        </div>
+                        <div class="form-group"><label for="teacherName">Tên giảng viên</label>
+                            <input type="text" [value]="createClassTeacherName" id="teacherName" name="teacherName"
+                                placeholder="Tên giảng viên sẽ hiển thị tự động" readonly>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" (click)="closeCreateClassModal()">Hủy
+                        </button>
+                        <button type="button" class="btn btn-primary" (click)="submitCreateClass()">
+                            Tạo lớp học
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- Modal chỉnh sửa lớp học -->
+        <div id="editClassModal" class="modal show" *ngIf="showEditClassModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Chỉnh sửa thông tin lớp học</h3>
+                    <button class="modal-close" (click)="closeClassEditModal()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg></button>
+                </div>
+                <form class="modal-form">
+                    <div class="form-group">
+                        <label for="editClassName">Tên lớp học hiện tại
+                        </label>
+                        <input type="text" id="editClassName" name="editClassName" placeholder="Tên lớp học hiện tại"
+                            [value]="editClassCurrentName" readonly style="background: #f8fafc; color: #64748b;">
+                    </div>
+                    <div class="form-group">
+                        <label for="editClassName">Tên lớp học mới
+                        </label>
+                        <input type="text" id="editClassName" name="editClassName" placeholder="Nhập tên lớp học"
+                            [(ngModel)]="editClassNewName" required>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="editClassCode">Mã lớp hiện tại
+                        </label>
+                        <input type="text" id="editClassCode" name="editClassCode" [value]="editClassCurrentCode"
+                            readonly style="background: #f8fafc; color: #64748b;">
+                    </div>
+                    <div class="form-group">
+                        <label for="editClassName">Mã lớp học mới
+                        </label>
+                        <input type="text" id="editClassName" name="editClassName" placeholder="Nhập mã lớp học"
+                            [(ngModel)]="editClassNewCode" required>
+                    </div>
+
+
+
+                    <div class="form-group">
+                        <label for="editTeacherName">Tên giảng viên hiên tại
+                        </label>
+                        <input type="text" id="editTeacherName" name="editTeacherName" [value]="editClassCurrentTeacher"
+                            placeholder="Tên giảng viên hiện tại" readonly>
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="editTeacherCode">Mã giảng viên mới
+
+                        </label>
+                        <input type="text" id="editTeacherCode" name="editTeacherCode" placeholder="Nhập mã giảng viên"
+                            [ngModel]="editClassNewTeacherId" (ngModelChange)="handleClassTeacherLookup($event)"
+                            required>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editTeacherName">Tên giảng viên mới
+                        </label>
+                        <input type="text" id="editTeacherName" name="editTeacherName"
+                            placeholder="Tên giảng viên sẽ hiển thị tự động" [value]="editClassNewTeacherName" readonly>
+                    </div>
+
+                    <div class="modal-actions"><button type="button" class="btn btn-secondary"
+                            (click)="closeClassEditModal()">Hủy
+
+                        </button>
+                        <button type="button" class="btn btn-primary" (click)="saveClassChanges()">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                            </svg> Cập nhật lớp học
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal thêm sinh viên vào lớp-->
+        <div id="addStudentModal" class="modal show" *ngIf="showAddStudentModal">
+            <div class="modal-content" style="max-width: 800px;">
+                <div class="modal-header">
+                    <h3>Thêm sinh viên vào lớp {{ classNameForAddingStudent }}</h3>
+                    <button class="modal-close" (click)="closeAddStudentModal()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="modal-form">
+                    <!-- Tab Navigation -->
+                    <div class="tab-navigation">
+                        <button type="button" class="tab-btn" [class.active]="activeAddStudentTab === 'manual'"
+                            (click)="switchAddStudentTab('manual')">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                            </svg>
+                            Thêm thủ công
+                        </button>
+                        <button type="button" class="tab-btn" [class.active]="activeAddStudentTab === 'excel'"
+                            (click)="switchAddStudentTab('excel')">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                            </svg>
+                            Import từ Excel
+                        </button>
+                    </div>
+
+                    <!-- Manual Tab -->
+                    <div id="manualTab" class="tab-content" [class.active]="activeAddStudentTab === 'manual'">
+                        <div class="form-group">
+                            <label>Thêm sinh viên</label>
+                            <div class="student-input-row">
+                                <input type="text" id="studentCode" placeholder="Nhập mã số sinh viên"
+                                    [ngModel]="manualStudentCode" (ngModelChange)="onManualStudentCodeChange($event)">
+
+                                <input type="text" id="studentName" [value]="manualStudentName"
+                                    placeholder="Tên sinh viên sẽ hiển thị tự động" readonly>
+
+                                <button type="button" class="add-student-btn" (click)="addStudentToPendingList()"
+                                    [disabled]="!canAddManualStudent">
+                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Student List -->
+                        <div class="student-list-section">
+                            <h4>Danh sách sinh viên sẽ thêm</h4>
+                            <div class="student-list-container">
+                                <table class="student-list-table" *ngIf="pendingStudentsToAdd.length > 0">
+                                    <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Mã SV</th>
+                                            <th>Tên sinh viên</th>
+                                            <th>Username</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let s of pendingStudentsToAdd; let i = index">
+                                            <td>{{ i + 1 }}</td>
+                                            <td>{{ s.studentId }}</td>
+                                            <td>{{ s.fullName }}</td>
+                                            <td>{{ s.username }}</td>
+                                            <td>
+                                                <button type="button" class="action-btn delete"
+                                                    (click)="removePendingStudent(i)">
+                                                    Xóa
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div *ngIf="pendingStudentsToAdd.length === 0" class="empty-list">
+                                    Chưa có sinh viên nào được thêm
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Excel Tab -->
+                    <div id="excelTab" class="tab-content" [class.active]="activeAddStudentTab === 'excel'">
+                        <!-- phần này bạn sẽ hook upload sau -->
+                        <div class="form-group">
+                            <label for="excelFile">Chọn file Excel</label>
+                            <div class="file-upload-area">
+                                <input type="file" accept=".csv" (change)="onExcelFileSelected($event)">
+
+                                <div class="file-upload-text">
+                                    <svg width="48" height="48" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                    </svg>
+                                    <p>Kéo thả file Excel vào đây hoặc nhấn để chọn</p>
+                                    <small>Hỗ trợ định dạng .xlsx, .xls</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Mẫu file Excel</label>
+                            <div class="excel-template">
+                                <p>File Excel cần có cấu trúc như sau:</p>
+                                <table class="template-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã SV</th>
+                                            <th>Tên sinh viên</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>SV001</td>
+                                            <td>Nguyễn Văn A</td>
+                                        </tr>
+                                        <tr>
+                                            <td>SV002</td>
+                                            <td>Lê Thị B</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" (click)="closeAddStudentModal()">Hủy</button>
+                        <button type="button" class="btn btn-primary" (click)="confirmAddStudentsToClass()"
+                            [disabled]="activeAddStudentTab === 'manual' && pendingStudentsToAdd.length === 0">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                            </svg> Thêm sinh viên
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal chi tiết người dùng -->
+        <div id="userDetailModal" class="modal show" *ngIf="showUserDetailModal">
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header">
+                    <h3>Chi tiết thông tin người dùng</h3>
+                    <button class="modal-close" (click)="closeUserDetail()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg></button>
+                </div>
+                <div class="modal-form" *ngIf="selectedUser"><!-- User Avatar Section -->
+                    <div style="text-align: center; margin-bottom: 32px;">
+                        <h3 id="userDetailName" style="font-size: 24px; font-weight: bold; color: #1e293b; margin: 0;">
+                            {{selectedUser.fullName}}</h3>
+                        <p id="userDetailRole" style="color: #64748b; margin: 8px 0 0 0; font-size: 16px;">
+                            {{selectedUser.roleName}}
+                        </p>
+                        <!-- hiển thị số vân tay nếu là sinh viên -->
+                        <p *ngIf="selectedUser.studentId"
+                            style="color: #0f766e; margin: 4px 0 0 0; font-size: 14px; font-weight: 600;">
+                            Số vân tay: {{ selectedUser.fingerCount != null ? selectedUser.fingerCount : 0 }}
+                        </p>
+                    </div><!-- User Information Grid -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+                        <div class="form-group"><label
+                                style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                </svg> {{ selectedUser.teacherId ? 'Mã giảng viên' : (selectedUser.studentId ? 'Mã sinh viên' : 'Mã tài khoản} }') }}
+                            </label>
+                            <div
+                                style="padding: 12px 16px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; font-weight: 600; color: #1e293b;">
+                                <span id="userDetailId"> {{ selectedUser.teacherId ? selectedUser.teacherId :
+                                    (selectedUser.studentId ? selectedUser.studentId : selectedUser.accountId) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                </svg> Tên đăng nhập </label>
+                            <div
+                                style="padding: 12px 16px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; font-weight: 600; color: #1e293b;">
+                                <span id="userDetailUsername">{{selectedUser.username}}</span>
+                            </div>
+                        </div>
+                        <div class="form-group"><label
+                                style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                                </svg> Email </label>
+                            <div
+                                style="padding: 12px 16px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; color: #1e293b;">
+                                <span id="userDetailEmail">{{selectedUser.email}}</span>
+                            </div>
+                        </div>
+                        <div class="form-group"><label
+                                style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                                </svg> Số điện thoại </label>
+                            <div
+                                style="padding: 12px 16px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; color: #1e293b;">
+                                <span id="userDetailPhone">{{selectedUser.phone || '---'}}</span>
+                            </div>
+                        </div>
+                        <div class="form-group"><label
+                                style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                                </svg> Ngày sinh </label>
+                            <div
+                                style="padding: 12px 16px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; color: #1e293b;">
+                                <span id="userDetailPhone">{{selectedUser.dateOfBirth || '---'}}</span>
+                            </div>
+                        </div>
+                        <div class="form-group"><label
+                                style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                                </svg> Giới tính </label>
+                            <div
+                                style="padding: 12px 16px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; color: #1e293b;">
+                                <span id="userDetailPhone">{{selectedUser.gender || '---'}}</span>
+                            </div>
+                        </div>
+                    </div><!-- Address Section -->
+                    <div class="form-group" style="margin-bottom: 32px;"><label
+                            style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                            </svg> Địa chỉ </label>
+                        <div
+                            style="padding: 16px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; color: #1e293b; line-height: 1.6;">
+                            <span id="userDetailAddress"> {{selectedUser.address}}</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" (click)="closeUserDetail()">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal danh sách sinh viên thuộc lớp  -->
+        <div class="modal show" *ngIf="showStudentofClassModal">
+            <div class="modal-content" style="max-width: 900px;">
+                <div class="modal-header">
+                    <h3>Danh sách sinh viên lớp {{ selectedClassForStudentModal?.className }}</h3>
+                    <button class="modal-close" (click)="closeStudentofClassModal()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="modal-form">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã SV</th>
+                                    <th>Tên sinh viên</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Số lượng vân tay</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let student of studentsOfSelectedClass; let i = index">
+                                    <td>{{ i + 1 }}</td>
+                                    <td>{{ student.studentId }}</td>
+                                    <td>{{ student.fullName }}</td>
+                                    <td>{{ student.username }}</td>
+                                    <td>{{ student.email }}</td>
+                                    <!-- cột số lượng vân tay -->
+                                    <td>{{ student.fingerCount }}</td>
+                                    <!-- cột thao tác -->
+                                    <td>
+                                        <button class="action-btn delete"
+                                            (click)="removeStudentFromClass(student.studentId)">
+                                            Xóa khỏi lớp
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr *ngIf="!studentsOfSelectedClass || studentsOfSelectedClass.length === 0">
+                                    <td colspan="7" style="text-align: center; padding: 12px;">
+                                        Không có sinh viên nào trong lớp này.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary"
+                            (click)="closeStudentofClassModal()">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

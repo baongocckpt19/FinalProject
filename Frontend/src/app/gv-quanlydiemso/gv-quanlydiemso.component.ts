@@ -138,6 +138,8 @@ export class GvQuanlydiemsoComponent {
     this.openNotificationModal();
     this.diemTB(); // Cập nhật lại điểm trung bình và xếp loại sau khi lưu
   }
+
+  
   //tìm kiếm sinh viên
   searchText: string = '';
   sinhvienFiltered=[...this.sv];  // clone mảng gốc để lọc vì nếu không sẽ mất dữ liệu ở mang gốc khi tìm kiếm
@@ -154,6 +156,7 @@ export class GvQuanlydiemsoComponent {
     } 
     this.sortByName(); // Sắp xếp lại danh sách sau khi tìm kiếm
   }
+
   //sắp xếp theo tên
   sortByName() {
     this.sv.sort((a, b) =>  a.ten.localeCompare(b.ten, 'vi', { sensitivity: 'base' }) );

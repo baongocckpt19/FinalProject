@@ -15,6 +15,7 @@ export class AppComponent {
 
   isLogInPage = false;
   isSlideshow = false;
+  isAdmin = false;
 
   constructor(private router: Router) {
     this.router.events.subscribe(event => {
@@ -22,6 +23,7 @@ export class AppComponent {
 
         this.isLogInPage = event.url === '/login';
         this.isSlideshow = event.url === '/slideshow';
+        this.isAdmin = event.url === '/admin';
 
       }
     });
