@@ -84,7 +84,7 @@ public class ClassTableService {
         sb.append("Số học sinh đã có vân tay,").append(fingerprintedCount).append("\n");
 
         sb.append("Ngày tạo,").append(csv(createdDate)).append("\n");
-        sb.append("Trạng thái,").append(status != null && status ? "Đã hoàn thành" : "Hoạt động").append("\n");
+        sb.append("Trạng thái,").append(status != null && status ? "Đã hoàn thành" : "Đang hoạt động" ).append("\n");
 
         sb.append("\n"); // 1 dòng trống
 

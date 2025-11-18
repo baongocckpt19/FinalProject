@@ -18,13 +18,16 @@ public class AccountService {
         }
         Object[] user = (Object[]) result;
         AccountDto accountDto = new AccountDto();
-        accountDto.setAccountId((Integer) user[0]);
-        accountDto.setUsername((String) user[1]);
-        accountDto.setPassword((String) user[2]);
-        accountDto.setRoleId((Integer) user[3]);
-        accountDto.setRoleName((String) user[4]);
+        int i = 0;
+        accountDto.setAccountId((Integer) user[i++]);   // 0
+        accountDto.setUsername((String) user[i++]);     // 1
+        accountDto.setPassword((String) user[i++]);     // 2
+        accountDto.setRoleId((Integer) user[i++]);      // 3
+        accountDto.setRoleName((String) user[i++]);     // 4
+        accountDto.setFullName((String) user[i++]);     // 5
         return accountDto;
     }
+
 
     public AccountDto getUser(int id) {
         Object result = accountRepository.findById(id);
@@ -33,13 +36,16 @@ public class AccountService {
         }
         Object[] user = (Object[]) result;
         AccountDto accountDto = new AccountDto();
-        accountDto.setAccountId((Integer) user[0]);
-        accountDto.setUsername((String) user[1]);
-        accountDto.setPassword((String) user[2]);
-        accountDto.setRoleId((Integer) user[3]);
-        accountDto.setRoleName((String) user[4]);
+        int i = 0;
+        accountDto.setAccountId((Integer) user[i++]);   // 0
+        accountDto.setUsername((String) user[i++]);     // 1
+        accountDto.setPassword((String) user[i++]);     // 2
+        accountDto.setRoleId((Integer) user[i++]);      // 3
+        accountDto.setRoleName((String) user[i++]);     // 4
+        accountDto.setFullName((String) user[i++]);     // 5
         return accountDto;
     }
+
 
     @Transactional
     public void softDeleteAccount(int id) {

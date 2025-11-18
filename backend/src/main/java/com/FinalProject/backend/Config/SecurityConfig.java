@@ -30,17 +30,16 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // NHỚ: path gốc + nhánh con
-                        .requestMatchers(
-                                "/api/auth/**",
-                                "/api/users", "/api/users/**",
-                                "/api/classes", "/api/classes/**",
-                                "/api/teachers", "/api/teachers/**",
-                                "/api/students", "/api/students/**"
-                        ).permitAll()
-                        // các path còn lại phải authenticated
+                        .requestMatchers("/api/auth/**").permitAll()
+//                        .requestMatchers(
+//                                "/api/users/**",
+//                                "/api/classes/**",
+//                                "/api/students/**",
+//                                "/api/teachers/**"
+//                        ).authenticated()
                         .anyRequest().authenticated()
                 )
+
                 // thêm filter JWT đúng 1 lần sau phần authorize
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

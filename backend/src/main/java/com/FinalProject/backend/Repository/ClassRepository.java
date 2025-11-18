@@ -179,4 +179,56 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
     """, nativeQuery = true)
     void updateClassStatus(int classId, boolean newStatus);
 
+    // ====== 11) TỔNG SỐ SINH VIÊN CỦA GIẢNG VIÊN ======
+    @Query(value = """
+    SELECT COUNT(DISTINCT sc.StudentId)
+    FROM Class c
+    JOIN StudentClass sc ON sc.ClassId = c.ClassId
+    WHERE c.TeacherId = ?1
+      AND c.IsDeleted = 0
+      AND c.Status = 0
+      AND sc.IsDeleted = 0
+    """, nativeQuery = true)
+    Integer countStudentsForTeacher(int teacherId);
+
+
+    // ====== 12) SỐ LỚP ĐANG DẠY (ĐANG HOẠT ĐỘNG) ======
+    @Query(value = """
+    SELECT COUNT(*)
+    FROM Class c
+    WHERE c.TeacherId = ?1
+      AND c.IsDeleted = 0
+      AND c.Status = 0          
+    """, nativeQuery = true)
+    Integer countActiveClassesForTeacher(int teacherId);
+    // ====== 13) ĐIỂM TRUNG BÌNH TẤT CẢ SV CỦA GIẢNG VIÊN ======
+    @Query(value = """
+    SELECT AVG(0.25 * g.AttendanceGrade
+             + 0.25 * g.MidtermGrade
+             + 0.5  * g.FinalGrade)
+    FROM Grade g
+    JOIN Class c ON g.ClassId = c.ClassId
+    WHERE c.TeacherId = ?1
+      AND c.IsDeleted = 0
+      AND c.Status = 0         
+    """, nativeQuery = true)
+    Double averageScoreForTeacher(int teacherId);
+
+    // ====== 14) TỶ LỆ ĐIỂM DANH CỦA GIẢNG VIÊN ======
+    @Query(value = """
+    SELECT
+        CASE WHEN COUNT(*) = 0 THEN 0.0
+             ELSE 100.0 * SUM(CASE WHEN a.Status = N'Có mặt' THEN 1 ELSE 0 END) / COUNT(*)
+        END
+    FROM Attendance a
+    JOIN Class c ON a.ClassId = c.ClassId
+    WHERE c.TeacherId = ?1
+      AND c.IsDeleted = 0
+      AND c.Status = 0          -- 👈 LỚP ĐANG HOẠT ĐỘNG
+    """, nativeQuery = true)
+    Double attendanceRateForTeacher(int teacherId);
+
+
+
+
 }

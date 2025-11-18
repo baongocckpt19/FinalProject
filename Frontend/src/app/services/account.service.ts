@@ -1,4 +1,5 @@
-import { HttpClient } from '@angular/common/http';
+// account.service.ts
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -6,11 +7,20 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AccountService {
-   private apiUrl = 'http://localhost:8080/api/account'; 
+  private apiUrl = 'http://localhost:8080/api/account';
+
   constructor(private http: HttpClient) { }
 
   getCurrentAccount(): Observable<any>{
-    return this.http.get(this.apiUrl)
+    const token = localStorage.getItem('jwt_token');
+    let headers: HttpHeaders | undefined = undefined;
+
+    if (token) {
+      headers = new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+    }
+
+    return this.http.get(this.apiUrl, { headers });
   }
-  
 }

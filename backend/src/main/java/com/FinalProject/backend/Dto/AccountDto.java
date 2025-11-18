@@ -9,6 +9,7 @@ public class AccountDto {
     private String password;
     private int roleId;
     private String roleName;
+    private String fullName;
 }
 
 

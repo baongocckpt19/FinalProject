@@ -29,7 +29,7 @@ public class Clazz {
     private Date createdDate;
 
     @Column(name = "Status")
-    private Boolean status; // 0: đang hoạt động, 1: đã hoàn thành
+    private Boolean status;
 
     @Column(name = "IsDeleted")
     private Boolean isDeleted; // 0 hiển thị, 1 ẩn

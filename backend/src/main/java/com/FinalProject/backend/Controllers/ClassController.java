@@ -50,7 +50,7 @@ public class ClassController {
             String teacher = safe(c.getTeacherName());
             String count = c.getStudentCount() != null ? c.getStudentCount().toString() : "0";
             String created = safe(c.getCreatedDate());
-            String status = (c.getStatus() != null && c.getStatus()) ? "Tạm dừng" : "Đang hoạt động";
+            String status = (c.getStatus() != null && c.getStatus()) ? "Đã hoàn thành" : "Đang hoạt động";
             String fpCount = c.getFingerprintedCount() != null ? c.getFingerprintedCount().toString() : "0"; // NEW
 
             sb.append(stt++).append(",");

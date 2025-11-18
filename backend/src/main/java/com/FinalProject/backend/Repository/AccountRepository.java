@@ -13,20 +13,72 @@ import java.util.List;
 public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     @Query(value = """
-        SELECT a.AccountId, a.Username, a.PasswordHash, a.RoleId, r.RoleName
-        FROM Account a
-        JOIN Role r ON a.RoleId = r.RoleId
-        WHERE a.UserName = ?1 AND a.PasswordHash = ?2
-        """, nativeQuery = true)
+    WITH T AS (
+        SELECT
+            TeacherId,
+            AccountId,
+            FullName,
+            ROW_NUMBER() OVER (PARTITION BY AccountId ORDER BY TeacherId) AS rn
+        FROM Teacher
+    ),
+    S AS (
+        SELECT
+            StudentId,
+            AccountId,
+            FullName,
+            ROW_NUMBER() OVER (PARTITION BY AccountId ORDER BY StudentId) AS rn
+        FROM Student
+    )
+    SELECT
+        a.AccountId,                                  -- 0
+        a.Username,                                   -- 1
+        a.PasswordHash,                               -- 2
+        a.RoleId,                                     -- 3
+        r.RoleName,                                   -- 4
+        COALESCE(t.FullName, s.FullName) AS fullName  -- 5
+    FROM Account a
+    JOIN Role r ON a.RoleId = r.RoleId
+    LEFT JOIN T t ON t.AccountId = a.AccountId AND t.rn = 1
+    LEFT JOIN S s ON s.AccountId = a.AccountId AND s.rn = 1
+    WHERE a.Username = ?1
+      AND a.PasswordHash = ?2
+      AND a.isDeleted = 0
+    """, nativeQuery = true)
     Object login(String username, String passwordHash);
 
     @Query(value = """
-        SELECT a.AccountId, a.Username, a.PasswordHash, a.RoleId, r.RoleName
-        FROM Account a
-        JOIN Role r ON a.RoleId = r.RoleId
-        WHERE a.AccountId = ?1
-        """, nativeQuery = true)
+    WITH T AS (
+        SELECT
+            TeacherId,
+            AccountId,
+            FullName,
+            ROW_NUMBER() OVER (PARTITION BY AccountId ORDER BY TeacherId) AS rn
+        FROM Teacher
+    ),
+    S AS (
+        SELECT
+            StudentId,
+            AccountId,
+            FullName,
+            ROW_NUMBER() OVER (PARTITION BY AccountId ORDER BY StudentId) AS rn
+        FROM Student
+    )
+    SELECT
+        a.AccountId,                                  -- 0
+        a.Username,                                   -- 1
+        a.PasswordHash,                               -- 2
+        a.RoleId,                                     -- 3
+        r.RoleName,                                   -- 4
+        COALESCE(t.FullName, s.FullName) AS fullName  -- 5
+    FROM Account a
+    JOIN Role r ON a.RoleId = r.RoleId
+    LEFT JOIN T t ON t.AccountId = a.AccountId AND t.rn = 1
+    LEFT JOIN S s ON s.AccountId = a.AccountId AND s.rn = 1
+    WHERE a.AccountId = ?1
+      AND a.isDeleted = 0
+    """, nativeQuery = true)
     Object findById(int id);
+
 
     @Query(value = """
     WITH T AS (

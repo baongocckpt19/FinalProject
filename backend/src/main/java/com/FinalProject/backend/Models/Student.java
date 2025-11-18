@@ -1,9 +1,13 @@
 package com.FinalProject.backend.Models;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "Student")
+@Data
 public class Student {
 
     @Id
@@ -20,5 +24,15 @@ public class Student {
     @Column(name = "Email", length = 100)
     private String email;
 
-    // getters/setters ...
+    @Column(name = "Phone", length = 20)
+    private String phone;
+
+    @Column(name = "Address", length = 200)
+    private String address;
+
+    @Column(name = "DateOfBirth")
+    private LocalDate dateOfBirth;
+
+    @Column(name = "Gender", length = 10)
+    private String gender; // Nam / Nữ / Khác
 }

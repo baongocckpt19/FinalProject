@@ -1,11 +1,20 @@
+// auth.interceptor.ts
 import { HttpInterceptorFn } from '@angular/common/http';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('token');
+  // Không gắn token cho login
+  if (req.url.includes('/api/auth/login')) {
+    return next(req);
+  }
 
-  const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-    : req;
+  const token = localStorage.getItem('token');  // đúng với AuthService
+  if (token) {
+    req = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
 
-  return next(authReq);
+  return next(req);
 };
