@@ -3,6 +3,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TeacherClassService } from '../services/teacher-class.service';
+import { ClassService, StudentOfClass } from '../services/class.service';
+import { forkJoin } from 'rxjs';
+
 
 @Component({
   selector: 'app-gv-quanlylophoc',
@@ -15,7 +18,8 @@ export class GvQuanlylophocComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private teacherClassService: TeacherClassService
+    private teacherClassService: TeacherClassService,
+    private classService: ClassService
   ) { }
 
   /*modal thêm lớp học*/
@@ -53,16 +57,6 @@ export class GvQuanlylophocComponent implements OnInit {
     };
   }
 
-  /*modal chi tiết lớp học*/
-  showClassDetailModal = false;
-  selectedClass: any = null;
-  openClassDeatilModal(lop: any) {
-    this.selectedClass = { ...lop }; // clone nhỏ cho chắc
-    this.showClassDetailModal = true;
-  }
-  closeClassDetailModal() {
-    this.showClassDetailModal = false;
-  }
 
   /*modal thực hiện thành công*/
   showNotificationModal = false;
@@ -126,25 +120,26 @@ export class GvQuanlylophocComponent implements OnInit {
       soHocSinh: dto.studentCount,
       ngayTao: dto.createdDate, // có thể format lại nếu muốn
       trangThai: statusText,
-      soSvCoVanTay: dto.fingerprintedCount
+      soSvCoVanTay: dto.fingerprintedCount,
+      teacherName: dto.teacherName
     };
   }
 
   toggleClassStatus(lop: any) {
-  const newStatus = !lop.status; // đảo trạng thái boolean
+    const newStatus = !lop.status; // đảo trạng thái boolean
 
-  this.teacherClassService.updateClassStatus(lop.id, newStatus).subscribe({
-    next: () => {
-      // cập nhật UI
-      lop.status = newStatus;
-      lop.trangThai = newStatus ? 'Tạm dừng' : 'Hoạt động';
-    },
-    error: (err) => {
-      console.error('Update class status error', err);
-      alert('Không thể thay đổi trạng thái lớp');
-    }
-  });
-}
+    this.teacherClassService.updateClassStatus(lop.id, newStatus).subscribe({
+      next: () => {
+        // cập nhật UI
+        lop.status = newStatus;
+        lop.trangThai = newStatus ? 'Tạm dừng' : 'Hoạt động';
+      },
+      error: (err) => {
+        console.error('Update class status error', err);
+        alert('Không thể thay đổi trạng thái lớp');
+      }
+    });
+  }
 
 
   // sắp xếp tên lớp học
@@ -201,4 +196,239 @@ export class GvQuanlylophocComponent implements OnInit {
       }
     });
   }
+
+  // ====== QUẢN LÝ SINH VIÊN TRONG MODAL LỚP ======
+  studentsInClass: StudentOfClass[] = [];      // DS hiện có trong DB
+  pendingAddStudents: StudentOfClass[] = [];   // SV mới thêm (chưa lưu DB)
+  removedStudentIds: number[] = [];            // ID SV sẽ bị xóa khỏi lớp khi Save
+
+  // Form thêm SV
+  newStudentIdInput: string = '';
+  searchedStudent: any = null;      // dữ liệu trả về từ /api/students/{id}
+  searchStudentError: string = '';
+
+
+  // Thanh tìm kiếm sinh viên
+  studentSearchText: string = '';
+
+  // Danh sách sau khi filter (tự động cập nhật UI)
+  filteredStudents: StudentOfClass[] = [];
+
+
+  /*modal chi tiết lớp học*/
+  showClassDetailModal = false;
+  selectedClass: any = null;
+
+  openClassDeatilModal(lop: any) {
+    this.selectedClass = { ...lop }; // clone nhỏ
+
+    // reset state thêm/xóa
+    this.studentsInClass = [];
+    this.pendingAddStudents = [];
+    this.removedStudentIds = [];
+    this.newStudentIdInput = '';
+    this.searchedStudent = null;
+    this.searchStudentError = '';
+
+    this.showClassDetailModal = true;
+
+    // gọi API lấy DS SV của lớp
+    this.classService.getStudentsOfClass(lop.id).subscribe({
+      next: (data) => {
+        this.studentsInClass = data;
+        this.updateFilteredStudents();
+      },
+      error: (err) => {
+        console.error('Error getStudentsOfClass', err);
+        alert('Không tải được danh sách sinh viên của lớp');
+      }
+    });
+  }
+
+  closeClassDetailModal() {
+    this.showClassDetailModal = false;
+  }
+  // Cập nhật danh sách lọc khi có thay đổi thêm/xóa
+  private updateFilteredStudents() {
+    const all = this.getDisplayedStudents();
+
+    if (!this.studentSearchText.trim()) {
+      this.filteredStudents = [...all];
+      return;
+    }
+
+    const search = this.studentSearchText.trim().toLowerCase();
+
+    this.filteredStudents = all.filter(st =>
+      st.fullName.toLowerCase().includes(search) ||
+      st.username.toLowerCase().includes(search) ||
+      st.studentId.toString().includes(search)
+    );
+  }
+
+  // Trigger từ sự kiện nhập
+  filterDisplayedStudents() {
+    this.updateFilteredStudents();
+  }
+
+
+  // Tìm SV theo MSSV (StudentId)
+  searchStudent() {
+    this.searchStudentError = '';
+    this.searchedStudent = null;
+
+    const id = Number(this.newStudentIdInput);
+    if (!id || isNaN(id)) {
+      this.searchStudentError = 'Vui lòng nhập MSSV hợp lệ';
+      return;
+    }
+
+    this.classService.getStudentById(id).subscribe({
+      next: (data) => {
+        this.searchedStudent = data;
+        this.searchStudentError = '';
+      },
+      error: (err) => {
+        console.error('Error getStudentById', err);
+        this.searchStudentError = 'Không tìm thấy sinh viên với MSSV này';
+      }
+    });
+  }
+  // Thêm SV vừa tìm được vào danh sách tạm (chưa lưu DB)
+  addPendingStudent() {
+    if (!this.searchedStudent) return;
+    const sid = this.searchedStudent.studentId;
+
+    // 1) đã có trong lớp & chưa bị đánh dấu xóa
+    const existed = this.studentsInClass.some(s => s.studentId === sid)
+      && !this.removedStudentIds.includes(sid);
+    if (existed) {
+      alert('Sinh viên này đã nằm trong lớp');
+      return;
+    }
+
+    // 2) đã nằm trong pendingAdd
+    const existedInPending = this.pendingAddStudents.some(s => s.studentId === sid);
+    if (existedInPending) {
+      alert('Sinh viên này đã được thêm tạm');
+      return;
+    }
+
+    const newSt: StudentOfClass = {
+      studentId: this.searchedStudent.studentId,
+      fullName: this.searchedStudent.fullName,
+      username: this.searchedStudent.username,
+      email: this.searchedStudent.email,
+      fingerCount: 0   // chưa biết số vân tay => để 0
+    };
+
+    this.pendingAddStudents.push(newSt);
+
+    // reset input
+    this.newStudentIdInput = '';
+    this.searchedStudent = null;
+    this.updateFilteredStudents();
+
+  }
+  // Danh sách SV hiển thị (DS hiện có - đã bị đánh dấu xóa + DS pendingAdd)
+  getDisplayedStudents(): StudentOfClass[] {
+    const removed = new Set(this.removedStudentIds);
+
+    const existing = this.studentsInClass.filter(s => !removed.has(s.studentId));
+    const added = this.pendingAddStudents;
+
+    return [...existing, ...added];
+  }
+
+  // Kiểm tra SV có thuộc danh sách pendingAdd không
+  isPendingAdd(studentId: number): boolean {
+    return this.pendingAddStudents.some(s => s.studentId === studentId);
+  }
+
+  // Khi bấm nút "Xóa" trên từng dòng
+  markRemoveStudent(st: StudentOfClass) {
+    const sid = st.studentId;
+
+    if (this.isPendingAdd(sid)) {
+      // Nếu là SV mới thêm tạm -> chỉ cần bỏ khỏi pendingAdd
+      this.pendingAddStudents = this.pendingAddStudents.filter(s => s.studentId !== sid);
+    } else {
+      // SV đang tồn tại trong lớp -> đánh dấu xóa
+      if (!this.removedStudentIds.includes(sid)) {
+        this.removedStudentIds.push(sid);
+      }
+    }
+    this.updateFilteredStudents();
+
+  }
+  saveClassChanges() {
+    if (!this.selectedClass) return;
+
+    const classId = this.selectedClass.id;
+    const addIds = this.pendingAddStudents.map(s => s.studentId);
+    const removeIds = [...this.removedStudentIds];
+
+    if (addIds.length === 0 && removeIds.length === 0) {
+      // không có thay đổi
+      this.openNotificationModal();
+      return;
+    }
+
+    const requests = [];
+
+    if (addIds.length > 0) {
+      requests.push(this.classService.addStudentsToClass(classId, addIds));
+    }
+
+    if (removeIds.length > 0) {
+      for (const sid of removeIds) {
+        requests.push(this.classService.removeStudentFromClass(classId, sid));
+      }
+    }
+
+    forkJoin(requests).subscribe({
+      next: () => {
+        // Sau khi lưu thành công:
+        // - reload bảng lớp để cập nhật số SV
+        // - đóng modal + mở thông báo
+        this.loadMyClasses();
+        this.openNotificationModal();
+      },
+      error: (err) => {
+        console.error('Save class changes error', err);
+        alert('Không thể lưu thay đổi. Vui lòng thử lại.');
+      }
+    });
+  }
+
+  exportClassStudents(lop: any) {
+    const classId = lop.id;   // vì mapDtoToViewModel đã set id: dto.classId
+
+    if (!classId) {
+      alert('Không xác định được ID lớp để xuất dữ liệu');
+      return;
+    }
+
+    this.classService.exportStudents(classId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+
+        // tên file gợi ý: mã lớp + tên lớp
+        const safeCode = lop.classCode || 'class';
+        const safeName = (lop.tenLop || '').replace(/[/\\?%*:|"<>]/g, '_');
+        a.download = `${safeCode}_${safeName}_students.csv`;
+
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error exportClassStudents', err);
+        alert('Xuất dữ liệu lớp thất bại');
+      }
+    });
+  }
+
+
 }

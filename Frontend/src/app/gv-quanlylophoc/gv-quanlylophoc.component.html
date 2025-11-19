@@ -88,7 +88,6 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <!-- số sv đã có vân tay -->
                                         <div class="date-created"> {{ lop.soSvCoVanTay }} sinh viên</div>
                                     </td>
                                     <td>
@@ -98,20 +97,22 @@
                                         <span class="status-badge" [ngClass]="{ 
                                                                                     'active': lop.trangThai === 'Hoạt động', 
                                                                                     'inactive': lop.trangThai === 'Tạm dừng' 
-                                                                                    }" (click)="toggleClassStatus(lop); $event.stopPropagation()" 
-                                                                                    style="cursor: pointer;">
+                                                                                    }"
+                                            (click)="toggleClassStatus(lop); $event.stopPropagation()"
+                                            style="cursor: pointer;">
                                             {{ lop.trangThai }}
                                         </span>
                                     </td>
-                                    
+
 
                                     <td>
                                         <div class="action-buttons">
-                                            <button class="btn-icon btn-detail" (click)="openClassDeatilModal(lop)"
-                                                title="Chi tiết">
+                                            <!-- NÚT XUẤT DỮ LIỆU LỚP -->
+                                            <button class="btn-icon btn-export" title="Xuất CSV lớp này"
+                                                (click)="exportClassStudents(lop); $event.stopPropagation()">
+                                                <!-- icon download -->
                                                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path
-                                                        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                                    <path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.84v4h4.66V9h3.84L12 2z" />
                                                 </svg>
                                             </button>
                                             <button class="btn-icon btn-delete"
@@ -145,74 +146,118 @@
                     <h3 class="modal-title" id="detailModalTitle">Chi tiết lớp học</h3>
                 </div>
 
+                <!-- THÔNG TIN LỚP (READONLY) -->
                 <div class="class-detail-form">
                     <div class="class-detail-grid">
                         <div class="form-group">
                             <label class="form-label">Tên lớp học</label>
-                            <input type="text" class="form-input" [(ngModel)]="selectedClass.tenLop">
+                            <input type="text" class="form-input" [value]="selectedClass?.tenLop" readonly>
                         </div>
-
                         <div class="form-group">
                             <label class="form-label">Mã lớp</label>
-                            <input type="text" class="form-input" [(ngModel)]="selectedClass.classCode">
+                            <input type="text" class="form-input" [value]="selectedClass?.classCode" readonly>
                         </div>
-
                         <div class="form-group">
                             <label class="form-label">Giảng viên</label>
-                            <input type="text" class="form-input" value="Nguyễn Văn An">
+                            <input type="text" class="form-input"
+                                [value]="selectedClass?.teacherName || 'Giảng viên hiện tại'" readonly>
                         </div>
-
                         <div class="form-group">
                             <label class="form-label">Ngày tạo</label>
-                            <input type="date" class="form-input" [(ngModel)]="selectedClass.ngayTao">
+                            <input type="text" class="form-input" [value]="selectedClass?.ngayTao" readonly>
                         </div>
-
-
                     </div>
                 </div>
 
-                <!-- Student Management Section -->
+                <!-- KHU VỰC THÊM SINH VIÊN -->
                 <div class="student-management">
+                    <!-- Form thêm SV -->
                     <div class="student-section">
-                        <h4 class="section-title">Danh sách sinh viên trong lớp {{selectedClass.soHocSinh}}</h4>
+                        <h4 class="section-title">Thêm sinh viên vào lớp</h4>
+
+                        <div class="student-add-row">
+                            <div class="form-group" style="min-width: 140px;">
+                                <label class="form-label">MSSV</label>
+                                <input type="number" class="form-input" [(ngModel)]="newStudentIdInput"
+                                    (keyup.enter)="searchStudent()" placeholder="Nhập MSSV (StudentId)">
+                            </div>
+
+                            <div class="form-group" style="flex: 1;">
+                                <label class="form-label">Họ tên sinh viên</label>
+                                <input type="text" class="form-input" [value]="searchedStudent?.fullName || ''"
+                                    readonly>
+                            </div>
+
+                            <div class="form-group" style="display: flex; align-items: flex-end; gap: 8px;">
+                                <button class="modal-btn modal-btn-secondary" type="button" (click)="searchStudent()">
+                                    Tìm
+                                </button>
+
+                                <button class="btn-icon btn-confirm" type="button" [disabled]="!searchedStudent"
+                                    (click)="addPendingStudent()" title="Thêm sinh viên (tạm)">
+                                    <!-- tick xanh -->
+                                    <svg width="20" height="20" viewBox="0 0 24 24">
+                                        <path fill="#16a34a" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="error-text" *ngIf="searchStudentError">
+                            {{ searchStudentError }}
+                        </div>
+                    </div>
+
+                    <!-- Danh sách SV trong lớp -->
+                    <div class="student-section">
+                        <!-- THANH TÌM KIẾM SINH VIÊN TRONG LỚP -->
+                        <div style="margin: 10px 0;">
+                            <input type="text" class="form-input" placeholder="Tìm kiếm sinh viên theo tên hoặc MSSV..."
+                                [(ngModel)]="studentSearchText" (input)="filterDisplayedStudents()"
+                                style="width: 100%;">
+                        </div>
+
+                        <h4 class="section-title">
+                            Danh sách sinh viên trong lớp
+                            ({{ getDisplayedStudents().length }})
+                        </h4>
+
                         <div class="student-list" id="currentStudents">
-                            <div class="student-item">
+                            <div class="student-item" *ngFor="let st of filteredStudents">
                                 <div class="student-info">
-
                                     <div class="student-details">
-                                        <h5>Nguyễn Văn A</h5>
-                                        <p>MSSV: 2021001</p>
+                                        <h5>{{ st.fullName }}</h5>
+                                        <p>MSSV: {{ st.studentId }} &nbsp;|&nbsp; Username: {{ st.username }}</p>
+                                        <p>Email: {{ st.email }}</p>
                                     </div>
                                 </div>
-                                <button class="btn-remove" onclick="removeStudent(1)">Xóa</button>
+
+                                <div class="student-actions">
+                                    <span class="badge-new" *ngIf="isPendingAdd(st.studentId)">
+                                        Mới thêm
+                                    </span>
+
+                                    <button class="btn-remove" type="button" (click)="markRemoveStudent(st)">
+                                        Xóa
+                                    </button>
+                                </div>
                             </div>
 
-                            <div class="student-item">
-                                <div class="student-info">
-                                    <div class="student-details">
-                                        <h5>Lê Thị B</h5>
-                                        <p>MSSV: 2021002</p>
-                                    </div>
-                                </div>
-                                <button class="btn-remove" onclick="removeStudent(2)">Xóa</button>
-                            </div>
-
-                            <div class="student-item">
-                                <div class="student-info">
-                                    <div class="student-details">
-                                        <h5>Trần Văn C</h5>
-                                        <p>MSSV: 2021003</p>
-                                    </div>
-                                </div>
-                                <button class="btn-remove" onclick="removeStudent(3)">Xóa</button>
+                            <div *ngIf="getDisplayedStudents().length === 0" style="padding: 8px 0; color: #777;">
+                                Chưa có sinh viên nào trong lớp.
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- ACTIONS -->
                 <div class="modal-actions">
-                    <button class="modal-btn modal-btn-secondary" (click)="closeClassDetailModal()">Đóng</button>
-                    <button class="modal-btn modal-btn-primary" (click)="openNotificationModal()">Lưu thay đổi</button>
+                    <button class="modal-btn modal-btn-secondary" type="button" (click)="closeClassDetailModal()">
+                        Đóng
+                    </button>
+                    <button class="modal-btn modal-btn-primary" type="button" (click)="saveClassChanges()">
+                        Lưu thay đổi
+                    </button>
                 </div>
             </div>
         </div>

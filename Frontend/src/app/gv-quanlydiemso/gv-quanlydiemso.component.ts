@@ -76,19 +76,7 @@ export class GvQuanlydiemsoComponent {
  sv = [
   { id: 1, ho: "Nguyễn Văn", ten: "A", mssv: "2021001", diemChuyenCan: 8.2, diemGiuaKy: 8.5, diemCuoiKy: 7.8, diemTrungbinh: 0, xepLoai: "" },
   { id: 2, ho: "Trần Thị", ten: "B", mssv: "2021002", diemChuyenCan: 8.9, diemGiuaKy: 9.0, diemCuoiKy: 8.6, diemTrungbinh: 0, xepLoai: "" },
-  { id: 3, ho: "Lê Văn", ten: "C", mssv: "2021003", diemChuyenCan: 6.9, diemGiuaKy: 6.5, diemCuoiKy: 6.8, diemTrungbinh: 0, xepLoai: "" },
-  { id: 4, ho: "Phạm Thị", ten: "D", mssv: "2021004", diemChuyenCan: 7.7, diemGiuaKy: 7.2, diemCuoiKy: 7.5, diemTrungbinh: 0, xepLoai: "" },
-  { id: 5, ho: "Hoàng Văn", ten: "E", mssv: "2021005", diemChuyenCan: 5.8, diemGiuaKy: 5.5, diemCuoiKy: 6.0, diemTrungbinh: 0, xepLoai: "" },
-  { id: 6, ho: "Nguyễn Thị", ten: "F", mssv: "2021006", diemChuyenCan: 9.3, diemGiuaKy: 9.2, diemCuoiKy: 9.0, diemTrungbinh: 0, xepLoai: "" },
-  { id: 7, ho: "Trần Văn", ten: "G", mssv: "2021007", diemChuyenCan: 7.5, diemGiuaKy: 7.8, diemCuoiKy: 8.0, diemTrungbinh: 0, xepLoai: "" },
-  { id: 8, ho: "Phan Thị", ten: "H", mssv: "2021008", diemChuyenCan: 5.9, diemGiuaKy: 6.0, diemCuoiKy: 5.8, diemTrungbinh: 0, xepLoai: "" },
-  { id: 9, ho: "Lý Văn", ten: "I", mssv: "2021009", diemChuyenCan: 8.4, diemGiuaKy: 8.3, diemCuoiKy: 8.6, diemTrungbinh: 0, xepLoai: "" },
-  { id: 10, ho: "Võ Thị", ten: "K", mssv: "2021010", diemChuyenCan: 0 , diemGiuaKy: 0, diemCuoiKy: 6.2, diemTrungbinh: 0, xepLoai: "" },
-  { id: 11, ho: "Đỗ Văn", ten: "L", mssv: "2021011", diemChuyenCan: 7.3, diemGiuaKy: 7.0, diemCuoiKy: 7.2, diemTrungbinh: 0, xepLoai: "" },
-  { id: 12, ho: "Ngô Thị", ten: "M", mssv: "2021012", diemChuyenCan: 9.2, diemGiuaKy: 9.4, diemCuoiKy: 9.1, diemTrungbinh: 0, xepLoai: "" },
-  { id: 13, ho: "Bùi Văn", ten: "N", mssv: "2021013", diemChuyenCan: 6.7, diemGiuaKy: 6.8, diemCuoiKy: 7.0, diemTrungbinh: 0, xepLoai: "" },
-  { id: 14, ho: "Trương Thị", ten: "O", mssv: "2021014", diemChuyenCan: 8.0, diemGiuaKy: 8.1, diemCuoiKy: 8.4, diemTrungbinh: 0, xepLoai: "" },
-  { id: 15, ho: "Mai Văn", ten: "P", mssv: "2021015", diemChuyenCan: 7.5, diemGiuaKy: 7.4, diemCuoiKy: 7.6, diemTrungbinh: 0, xepLoai: "" }
+ 
 ];
 
   //tính điểm trung bình và xêp loại
