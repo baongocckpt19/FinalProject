@@ -214,5 +214,27 @@ public class ClassTableService {
         classRepository.updateClassStatus(classId, newStatus);
     }
 
+    //===========================================================//
+    //====================GIẢNG VIÊN=======================//
+    //===========================================================//
+
+    // ClassTableService.java
+
+    public List<ClassListDto> getClassesForTeacher(int teacherId) {
+        List<Object[]> rows = classRepository.findClassTableForTeacher(teacherId);
+        return rows.stream().map(r -> {
+            int i = 0;
+            ClassListDto dto = new ClassListDto();
+            dto.setClassId(asInt(r[i++]));             // 0
+            dto.setClassCode(asStr(r[i++]));           // 1
+            dto.setClassName(asStr(r[i++]));           // 2
+            dto.setTeacherName(asStr(r[i++]));         // 3
+            dto.setStudentCount(asInt(r[i++]));        // 4
+            dto.setCreatedDate(asStr(r[i++]));         // 5
+            dto.setStatus(asBool(r[i++]));             // 6
+            dto.setFingerprintedCount(((Number) r[i++]).intValue()); // 7
+            return dto;
+        }).toList();
+    }
 
 }

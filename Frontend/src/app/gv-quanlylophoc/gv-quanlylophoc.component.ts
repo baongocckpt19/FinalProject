@@ -1,18 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule, NgModel } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { TeacherClassService } from '../services/teacher-class.service';
 
 @Component({
   selector: 'app-gv-quanlylophoc',
   imports: [CommonModule, FormsModule],
+  standalone: true,
   templateUrl: './gv-quanlylophoc.component.html',
   styleUrl: './gv-quanlylophoc.component.scss'
 })
-export class GvQuanlylophocComponent {
+export class GvQuanlylophocComponent implements OnInit {
 
-  constructor(private router: Router) { }
+  constructor(
+    private router: Router,
+    private teacherClassService: TeacherClassService
+  ) { }
 
   /*modal thêm lớp học*/
   showAddClassModal = false;
@@ -26,7 +30,7 @@ export class GvQuanlylophocComponent {
     className: '',
     classCode: '',
     description: '',
-    maxStudents: null
+    maxStudents: null as number | null
   };
 
   addClass() {
@@ -37,11 +41,10 @@ export class GvQuanlylophocComponent {
       return;
     }
 
-    // Nếu hợp lệ, xử lý thêm lớp học
+    // TODO: gọi API tạo lớp (nếu bạn muốn)
     this.openNotificationModal();
     this.closeAddClassModal();
 
-    // Reset form nếu cần
     this.newClass = {
       className: '',
       classCode: '',
@@ -54,7 +57,7 @@ export class GvQuanlylophocComponent {
   showClassDetailModal = false;
   selectedClass: any = null;
   openClassDeatilModal(lop: any) {
-    this.selectedClass = lop;
+    this.selectedClass = { ...lop }; // clone nhỏ cho chắc
     this.showClassDetailModal = true;
   }
   closeClassDetailModal() {
@@ -81,80 +84,85 @@ export class GvQuanlylophocComponent {
     this.showDeleteModal = false;
   }
 
+  // ====== DỮ LIỆU LỚP HỌC ======
+  lophoc: any[] = [];
+  filteredClassList: any[] = [];
 
-  lophoc = [
-    { id: 1, tenLop: 'Lập trình Web', classCode: 'IT301', soHocSinh: 45, ngayTao: '15/08/2024', trangThai: 'Hoạt động' },
-    { id: 2, tenLop: 'Cơ sở dữ liệu', classCode: 'IT302', soHocSinh: 38, ngayTao: '20/08/2024', trangThai: 'Hoạt động' },
-    { id: 3, tenLop: 'Thuật toán', classCode: 'IT303', soHocSinh: 42, ngayTao: '25/08/2024', trangThai: 'Tạm dừng' },
-    { id: 4, tenLop: 'Hệ thống thông tin', classCode: 'IT304', soHocSinh: 35, ngayTao: '01/09/2024', trangThai: 'Hoạt động' },
-    { id: 5, tenLop: 'Trí tuệ nhân tạo', classCode: 'IT305', soHocSinh: 28, ngayTao: '05/09/2024', trangThai: 'Hoạt động' },
-    { id: 6, tenLop: 'Mạng máy tính', classCode: 'IT306', soHocSinh: 40, ngayTao: '10/09/2024', trangThai: 'Hoạt động' },
-    { id: 7, tenLop: 'Phân tích dữ liệu', classCode: 'IT307', soHocSinh: 33, ngayTao: '12/09/2024', trangThai: 'Tạm dừng' },
-    { id: 8, tenLop: 'Nguyên lý hệ điều hành', classCode: 'IT308', soHocSinh: 47, ngayTao: '15/09/2024', trangThai: 'Hoạt động' },
-    { id: 9, tenLop: 'Kỹ thuật lập trình', classCode: 'IT309', soHocSinh: 50, ngayTao: '18/09/2024', trangThai: 'Hoạt động' },
-    { id: 10, tenLop: 'Nhập môn Công nghệ thông tin', classCode: 'IT310', soHocSinh: 60, ngayTao: '20/09/2024', trangThai: 'Hoạt động' },
-    { id: 11, tenLop: 'An toàn thông tin', classCode: 'IT311', soHocSinh: 27, ngayTao: '25/09/2024', trangThai: 'Tạm dừng' },
-    { id: 12, tenLop: 'Thiết kế giao diện', classCode: 'IT312', soHocSinh: 32, ngayTao: '28/09/2024', trangThai: 'Hoạt động' },
-    { id: 13, tenLop: 'Cấu trúc dữ liệu', classCode: 'IT313', soHocSinh: 41, ngayTao: '01/10/2024', trangThai: 'Hoạt động' },
-    { id: 14, tenLop: 'Phát triển phần mềm', classCode: 'IT314', soHocSinh: 37, ngayTao: '03/10/2024', trangThai: 'Hoạt động' },
-    { id: 15, tenLop: 'Lập trình di động', classCode: 'IT315', soHocSinh: 36, ngayTao: '05/10/2024', trangThai: 'Tạm dừng' },
-    { id: 16, tenLop: 'Lập trình Java', classCode: 'IT316', soHocSinh: 44, ngayTao: '07/10/2024', trangThai: 'Hoạt động' },
-    { id: 17, tenLop: 'Công nghệ phần mềm', classCode: 'IT317', soHocSinh: 39, ngayTao: '10/10/2024', trangThai: 'Hoạt động' },
-    { id: 18, tenLop: 'Kiểm thử phần mềm', classCode: 'IT318', soHocSinh: 31, ngayTao: '12/10/2024', trangThai: 'Tạm dừng' },
-    { id: 19, tenLop: 'Phân tích yêu cầu hệ thống', classCode: 'IT319', soHocSinh: 30, ngayTao: '14/10/2024', trangThai: 'Hoạt động' },
-    { id: 20, tenLop: 'Học máy cơ bản', classCode: 'IT320', soHocSinh: 29, ngayTao: '16/10/2024', trangThai: 'Hoạt động' },
-    { id: 21, tenLop: 'Trí tuệ nhân tạo nâng cao', classCode: 'IT321', soHocSinh: 22, ngayTao: '18/10/2024', trangThai: 'Tạm dừng' },
-    { id: 22, tenLop: 'Quản trị dự án CNTT', classCode: 'IT322', soHocSinh: 26, ngayTao: '20/10/2024', trangThai: 'Hoạt động' },
-    { id: 23, tenLop: 'Khai phá dữ liệu', classCode: 'IT323', soHocSinh: 34, ngayTao: '22/10/2024', trangThai: 'Hoạt động' },
-    { id: 24, tenLop: 'Đồ án tốt nghiệp', classCode: 'IT324', soHocSinh: 18, ngayTao: '25/10/2024', trangThai: 'Hoạt động' },
-    { id: 25, tenLop: 'Nhập môn Python', classCode: 'IT325', soHocSinh: 55, ngayTao: '28/10/2024', trangThai: 'Hoạt động' }
-  ];
+  // tìm kiếm
+  searchText: string = '';
 
-  /*thay dổi trang thái lớp học trong modal chi tiết*/
-  toggleClassStatusInModal() {
-    if (this.selectedClass.trangThai === 'Hoạt động') {
-      this.selectedClass.trangThai = 'Tạm dừng';
-    } else {
-      this.selectedClass.trangThai = 'Hoạt động';
-    }
+  // sắp xếp
+  sortAscending: boolean = true;
+  sortByNameActive: boolean = false;
+
+  ngOnInit() {
+    this.loadMyClasses();
   }
 
+  // gọi API backend để lấy lớp của giảng viên đang đăng nhập
+  loadMyClasses() {
+    this.teacherClassService.getMyClasses().subscribe({
+      next: (data) => {
+        // data là List<ClassListDto> từ backend
+        this.lophoc = data.map(dto => this.mapDtoToViewModel(dto));
+        this.filteredClassList = [...this.lophoc];
+        this.sortBystatus();
+      },
+      error: (err) => {
+        console.error('Error loadMyClasses', err);
+        alert('Không tải được danh sách lớp học');
+      }
+    });
+  }
 
-  /*sắp xếp tên lớp học*/
-  sortAscending: boolean = true; // Biến để lưu trạng thái sắp xếp
-  sortByNameActive: boolean = false;
+  private mapDtoToViewModel(dto: any) {
+    // Status: ở backend bạn dùng 0 = hoạt động, 1 = hoàn thành/tạm dừng
+    const statusText = dto.status ? 'Tạm dừng' : 'Hoạt động';
+
+    return {
+      id: dto.classId,
+      tenLop: dto.className,
+      classCode: dto.classCode,
+      soHocSinh: dto.studentCount,
+      ngayTao: dto.createdDate, // có thể format lại nếu muốn
+      trangThai: statusText,
+      soSvCoVanTay: dto.fingerprintedCount
+    };
+  }
+
+  toggleClassStatus(lop: any) {
+  const newStatus = !lop.status; // đảo trạng thái boolean
+
+  this.teacherClassService.updateClassStatus(lop.id, newStatus).subscribe({
+    next: () => {
+      // cập nhật UI
+      lop.status = newStatus;
+      lop.trangThai = newStatus ? 'Tạm dừng' : 'Hoạt động';
+    },
+    error: (err) => {
+      console.error('Update class status error', err);
+      alert('Không thể thay đổi trạng thái lớp');
+    }
+  });
+}
+
+
+  // sắp xếp tên lớp học
   sortByName() {
     this.sortByNameActive = true;
 
-    this.filteredClassList.sort((a, b) => a.tenLop.localeCompare(b.tenLop, 'vi', { sensitivity: 'base' }));
+    this.filteredClassList.sort((a, b) =>
+      a.tenLop.localeCompare(b.tenLop, 'vi', { sensitivity: 'base' })
+    );
   }
 
-
-  // sortByName() {
-  //   this.filteredClassList.sort((a, b) => {
-  //     const nameA = a.tenLop.toLowerCase();
-  //     const nameB = b.tenLop.toLowerCase();
-
-  //     if (nameA < nameB) return this.sortAscending ? -1 : 1;
-  //     if (nameA > nameB) return this.sortAscending ? 1 : -1;
-  //     return 0;
-  //   });
-  //   // Đổi hướng sắp xếp (tăng ↔ giảm)
-  //   this.sortAscending = !this.sortAscending;
-  // }
-
-
-  
-  /*chức năng tìm kiếm*/
-  filteredClassList = [...this.lophoc];
-  searchText: string = '';
-  
+  // tìm kiếm
   searchClasses() {
     const search = this.searchText.trim().toLowerCase();
-    this.sortByNameActive = false; // reset sort theo tên khi tìm kiếm
-    
+    this.sortByNameActive = false;
+
     if (!search) {
-      this.filteredClassList = [...this.lophoc]; // nếu rỗng → hiển thị toàn bộ
+      this.filteredClassList = [...this.lophoc];
       this.sortBystatus();
       return;
     }
@@ -163,20 +171,34 @@ export class GvQuanlylophocComponent {
       lop.tenLop.toLowerCase().includes(search) ||
       lop.classCode.toLowerCase().includes(search)
     );
-    this.sortBystatus(); // sắp xếp theo trạng thái sau khi tìm kiếm
+    this.sortBystatus();
   }
 
-  /*mặc định sắp xếp theo trang thái*/
+  // mặc định sắp xếp theo trạng thái
   sortBystatus() {
     this.filteredClassList.sort((a, b) => {
-      // "Hoạt động" luôn lên trên
+      // "Hoạt động" lên trên
       if (a.trangThai === 'Hoạt động' && b.trangThai !== 'Hoạt động') return -1;
       if (a.trangThai !== 'Hoạt động' && b.trangThai === 'Hoạt động') return 1;
       return 0;
     });
   }
-  ngOnInit() {
-    this.filteredClassList = [...this.lophoc];
-    this.sortBystatus();
+
+  // ====== EXPORT CÁC LỚP CỦA GIẢNG VIÊN ======
+  exportMyClasses() {
+    this.teacherClassService.exportMyClasses().subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'my-classes.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error exportMyClasses', err);
+        alert('Xuất dữ liệu thất bại');
+      }
+    });
   }
 }

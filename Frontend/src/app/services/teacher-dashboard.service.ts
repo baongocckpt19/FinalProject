@@ -40,18 +40,4 @@ export class TeacherDashboardService {
     return this.http.get<TeacherDashboardStats>(`${this.baseUrl}/stats`);
   }
 
-  // Top 5 lớp có điểm trung bình cao nhất
-  getTopScoreClasses(): Observable<TopScoreClass[]> {
-    return this.http.get<TopScoreClass[]>(`${this.baseUrl}/top-score-classes`);
-  }
-
-  // Phân bố điểm
-  getScoreDistribution(): Observable<ScoreDistribution> {
-    return this.http.get<ScoreDistribution>(`${this.baseUrl}/score-distribution`);
-  }
-
-  // Top 5 lớp có tỉ lệ điểm danh cao nhất
-  getTopAttendanceClasses(): Observable<TopAttendanceClass[]> {
-    return this.http.get<TopAttendanceClass[]>(`${this.baseUrl}/top-attendance-classes`);
-  }
 }

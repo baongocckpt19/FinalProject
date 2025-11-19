@@ -179,6 +179,13 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
     """, nativeQuery = true)
     void updateClassStatus(int classId, boolean newStatus);
 
+
+
+    //========================================================//
+    //======================== THỐNG KÊ CHO GIẢNG VIÊN =======================//
+    //========================================================//
+
+
     // ====== 11) TỔNG SỐ SINH VIÊN CỦA GIẢNG VIÊN ======
     @Query(value = """
     SELECT COUNT(DISTINCT sc.StudentId)
@@ -227,6 +234,39 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
       AND c.Status = 0          -- 👈 LỚP ĐANG HOẠT ĐỘNG
     """, nativeQuery = true)
     Double attendanceRateForTeacher(int teacherId);
+
+
+    // ====== 1b) BẢNG LỚP CỦA 1 GIẢNG VIÊN + ĐẾM SỐ SV VÀ SỐ SV CÓ VÂN TAY (GIAO DIỆN QUẢN LÝ LỚP HỌC OF GV) ======
+    @Query(value = """
+    SELECT 
+        c.ClassId,                                          -- 0
+        c.ClassCode,                                        -- 1
+        c.ClassName,                                        -- 2
+        t.FullName AS TeacherName,                          -- 3
+        (
+            SELECT COUNT(*)
+            FROM StudentClass sc
+            WHERE sc.ClassId = c.ClassId
+              AND sc.IsDeleted = 0
+        ) AS StudentCount,                                  -- 4
+        CONVERT(varchar(19), c.CreatedDate, 120) AS CreatedDate, -- 5
+        c.Status,                                           -- 6
+        (
+            SELECT COUNT(DISTINCT s.StudentId)
+            FROM StudentClass sc
+            JOIN Student s ON sc.StudentId = s.StudentId
+            JOIN Fingerprint f ON f.StudentId = s.StudentId
+            WHERE sc.ClassId = c.ClassId
+              AND sc.IsDeleted = 0
+        ) AS FingerprintedCount                             -- 7
+    FROM Class c
+    LEFT JOIN Teacher t ON t.TeacherId = c.TeacherId
+    WHERE c.IsDeleted = 0
+      AND c.TeacherId = ?1
+    ORDER BY c.ClassId
+    """, nativeQuery = true)
+    List<Object[]> findClassTableForTeacher(int teacherId);
+
 
 
 
