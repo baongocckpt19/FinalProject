@@ -1,0 +1,168 @@
+/* src/app/components/toast/toast.component.scss */
+
+/* Container ở góc trên bên phải */
+.toast-container {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  align-items: flex-end; // đẩy toast sát mép phải
+  pointer-events: none;  // không chặn click element bên dưới
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Mỗi toast */
+.toast {
+  position: relative;
+  min-width: 280px;
+  max-width: 420px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #0f172a;
+  background: #e5f9ec; /* sẽ override theo type */
+  box-shadow:
+    0 10px 25px rgba(15, 23, 42, 0.18),
+    0 0 0 1px rgba(15, 23, 42, 0.03);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+  overflow: hidden;
+
+  /* animate trượt từ phải sang + hơi fade */
+  animation: slideInRight 0.28s ease-out;
+}
+
+/* Đuôi nhạt dần bên phải */
+.toast::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -40px;
+  width: 120px;
+  height: 100%;
+  background: radial-gradient(
+    circle at 0% 50%,
+    rgba(255, 255, 255, 0.7),
+    rgba(255, 255, 255, 0)
+  );
+  pointer-events: none;
+}
+
+/* Icon tròn phía trái */
+.toast-icon {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Nội dung */
+.toast-content {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toast-title {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.toast-message {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* Nút đóng */
+.toast-close {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0 0 4px;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+/* ====== MÀU THEO TYPE ====== */
+
+/* Thành công - xanh lá gradient nhẹ */
+.toast.success {
+  background: linear-gradient(
+    90deg,
+    #16a34a,
+    #16a34a,
+    rgba(22, 163, 74, 0.12)
+  );
+  color: #ecfdf3;
+}
+
+.toast.success .toast-icon {
+  color: #16a34a;
+  background: #ecfdf3;
+}
+
+.toast.success .toast-title {
+  color: #ecfdf3;
+}
+
+.toast.success .toast-message {
+  color: #f9fafb;
+}
+
+/* Thất bại - đỏ */
+.toast.error {
+  background: linear-gradient(
+    90deg,
+    #dc2626,
+    #dc2626,
+    rgba(220, 38, 38, 0.12)
+  );
+  color: #fef2f2;
+}
+
+.toast.error .toast-icon {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.toast.error .toast-title {
+  color: #fee2e2;
+}
+
+.toast.error .toast-message {
+  color: #fef9c3;
+}
+
+/* ====== ANIMATION ====== */
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}

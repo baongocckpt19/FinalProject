@@ -163,6 +163,21 @@ public class ClassController {
         return ResponseEntity.ok("Updated");
     }
 
+    // export bảng điểm của lớp ra CSV
+    @GetMapping("/{id}/export/grades")
+    public ResponseEntity<byte[]> exportGradesOfClass(@PathVariable int id) {
+        byte[] file = classTableService.exportGradesOfClass(id);
+
+        if (file.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=class_" + id + "_grades.csv")
+                .header(org.springframework.http.HttpHeaders.CONTENT_TYPE, "text/csv; charset=UTF-8")
+                .body(file);
+    }
 
 }
 

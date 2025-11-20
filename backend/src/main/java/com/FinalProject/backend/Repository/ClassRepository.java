@@ -236,7 +236,7 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
     Double attendanceRateForTeacher(int teacherId);
 
 
-    // ====== 1b) BẢNG LỚP CỦA 1 GIẢNG VIÊN + ĐẾM SỐ SV VÀ SỐ SV CÓ VÂN TAY (GIAO DIỆN QUẢN LÝ LỚP HỌC OF GV) ======
+    // ====== 15) BẢNG LỚP CỦA 1 GIẢNG VIÊN + ĐẾM SỐ SV VÀ SỐ SV CÓ VÂN TAY (GIAO DIỆN QUẢN LÝ LỚP HỌC OF GV) ======
     @Query(value = """
     SELECT 
         c.ClassId,                                          -- 0
@@ -266,6 +266,7 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
     ORDER BY c.ClassId
     """, nativeQuery = true)
     List<Object[]> findClassTableForTeacher(int teacherId);
+
 
 
 

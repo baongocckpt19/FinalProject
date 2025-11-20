@@ -6,6 +6,7 @@ import com.FinalProject.backend.Dto.ClassListDto;
 import com.FinalProject.backend.Dto.StudentOfClassDto;
 import com.FinalProject.backend.Models.Clazz;
 import com.FinalProject.backend.Repository.ClassRepository;
+import com.FinalProject.backend.Repository.GradeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,9 +18,12 @@ import java.util.List;
 public class ClassTableService {
 
     private final ClassRepository classRepository;
+    private final GradeRepository gradeRepository; // NEW
 
-    public ClassTableService(ClassRepository classRepository) {
+    public ClassTableService(ClassRepository classRepository,
+                             GradeRepository gradeRepository) {   // NEW
         this.classRepository = classRepository;
+        this.gradeRepository = gradeRepository;                   // NEW
     }
 
     public List<ClassListDto> getAllClasses() {
@@ -236,5 +240,86 @@ public class ClassTableService {
             return dto;
         }).toList();
     }
+
+
+    // ======================= EXPORT ĐIỂM CỦA LỚP =======================
+
+    public byte[] exportGradesOfClass(int classId) {
+        // 1) Lấy info lớp
+        Object cls = classRepository.findClassInfoById(classId);
+        if (cls == null) {
+            return new byte[0];
+        }
+        Object[] c = (Object[]) cls;
+        int i = 0;
+        Integer cId          = asInt(c[i++]);   // 0
+        String classCode     = asStr(c[i++]);   // 1
+        String className     = asStr(c[i++]);   // 2
+        String teacherName   = asStr(c[i++]);   // 3
+        Integer studentCount = asInt(c[i++]);   // 4
+        String createdDate   = asStr(c[i++]);   // 5
+        Boolean status       = asBool(c[i++]);  // 6
+
+        // 2) Lấy danh sách điểm GIỐNG UI (LEFT JOIN, đầy đủ SV trong lớp)
+        List<Object[]> grades = gradeRepository.findGradesByClassId(classId);
+
+        StringBuilder sb = new StringBuilder();
+
+        // ===== THÔNG TIN LỚP =====
+        sb.append("Tên lớp,").append(csv(className)).append("\n");
+        sb.append("Mã lớp,").append(csv(classCode)).append("\n");
+        sb.append("Giảng viên,").append(csv(teacherName)).append("\n");
+        sb.append("Số sinh viên,").append(studentCount != null ? studentCount : 0).append("\n");
+        sb.append("Ngày tạo,").append(csv(createdDate)).append("\n");
+        sb.append("Trạng thái,")
+                .append(status != null && status ? "Đã hoàn thành" : "Đang hoạt động")
+                .append("\n");
+
+        sb.append("\n"); // dòng trống
+
+        // ===== HEADER BẢNG ĐIỂM =====
+        sb.append("STT,Họ tên,MSSV,Điểm chuyên cần,Điểm giữa kỳ,Điểm cuối kỳ,Điểm trung bình,Xếp loại\n");
+
+        int stt = 1;
+        for (Object[] g : grades) {
+            int j = 0;
+            Integer studentId      = asInt(g[j++]);                      // 0
+            String fullName        = asStr(g[j++]);                      // 1
+            String username        = asStr(g[j++]);                      // 2
+            Double attendanceGrade = g[j] != null ? ((Number) g[j]).doubleValue() : null; j++; // 3
+            Double midtermGrade    = g[j] != null ? ((Number) g[j]).doubleValue() : null; j++; // 4
+            Double finalGrade      = g[j] != null ? ((Number) g[j]).doubleValue() : null; j++; // 5
+
+            double at  = attendanceGrade != null ? attendanceGrade : 0.0;
+            double mid = midtermGrade    != null ? midtermGrade    : 0.0;
+            double fin = finalGrade      != null ? finalGrade      : 0.0;
+
+            double avg = 0.25 * at + 0.25 * mid + 0.5 * fin;
+
+            String xepLoai;
+            if (avg >= 9)      xepLoai = "Xuất sắc";
+            else if (avg >= 8) xepLoai = "Giỏi";
+            else if (avg >= 7) xepLoai = "Khá";
+            else if (avg >= 5) xepLoai = "Trung bình";
+            else               xepLoai = "Yếu";
+
+            sb.append(stt++).append(",");
+            sb.append(csv(fullName)).append(",");  // Họ tên
+            sb.append(studentId != null ? studentId : "").append(","); // MSSV = StudentId            sb.append(at).append(",");
+            sb.append(mid).append(",");
+            sb.append(fin).append(",");
+            sb.append(String.format(java.util.Locale.US, "%.2f", avg)).append(",");
+            sb.append(csv(xepLoai)).append("\n");
+        }
+
+        // BOM UTF-8 cho Excel (để mở đúng tiếng Việt)
+        byte[] bom = new byte[] {(byte)0xEF, (byte)0xBB, (byte)0xBF};
+        byte[] data = sb.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] result = new byte[bom.length + data.length];
+        System.arraycopy(bom, 0, result, 0, bom.length);
+        System.arraycopy(data, 0, result, bom.length, data.length);
+        return result;
+    }
+
 
 }

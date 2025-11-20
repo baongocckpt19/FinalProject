@@ -1,9 +1,11 @@
 package com.FinalProject.backend.Repository;
 
+import com.FinalProject.backend.Models.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import com.FinalProject.backend.Models.Student;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface StudentRepository extends JpaRepository<Student, Integer> {
 
     // Lấy thông tin sinh viên + username để hiển thị trong modal
@@ -23,7 +25,7 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
         """, nativeQuery = true)
     Object findStudentInfoById(int studentId);
 
-    // Tìm StudentId dựa theo Username (phục vụ import CSV khi cột đầu là username)
+    // Tìm StudentId dựa theo Username (MSSV)
     @Query(value = """
         SELECT s.StudentId
         FROM Student s

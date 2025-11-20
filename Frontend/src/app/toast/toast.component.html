@@ -1,0 +1,20 @@
+<!-- src/app/components/toast/toast.component.html -->
+<div class="toast-container">
+    <div *ngFor="let t of toasts" class="toast" [ngClass]="t.type">
+        <div class="toast-icon">
+            <span *ngIf="t.type === 'success'">✔</span>
+            <span *ngIf="t.type === 'error'">✖</span>
+        </div>
+
+        <div class="toast-content">
+            <div class="toast-title">
+                {{ t.type === 'success' ? 'Thực hiện thành công' : 'Thực hiện thất bại' }}
+            </div>
+            <div class="toast-message" *ngIf="t.message">
+                {{ t.message }}
+            </div>
+        </div>
+
+        <button class="toast-close" (click)="close(t.id)">×</button>
+    </div>
+</div>
