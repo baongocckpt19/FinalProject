@@ -1,20 +1,32 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 
-interface AttendanceItem {
-  date: string; // dạng yyyy-mm-dd
-  className?: string; // ví dụ: "Lớp 10A1" (nếu bạn có)
-}
+import { AttendanceService, AttendanceCalendarDay, AttendanceClassSummary } from '../services/attendance.service';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-gv-quanlydiemdanh',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './gv-quanlydiemdanh.component.html',
   styleUrl: './gv-quanlydiemdanh.component.scss'
 })
 export class GvQuanlydiemdanhComponent implements OnInit {
-  attendanceData: AttendanceItem[] = [];
-  currentDate: Date = new Date(); // ngày giờ hiện tại
-  selectedDate: string = this.formatDate(this.currentDate.toISOString().slice(0, 10)) // YYYY-MM-DD của hôm nay
+
+  currentDate: Date = new Date();               // ngày hiện tại
+
+  /** ngày đang chọn (dạng yyyy-MM-dd – dùng để gọi API) */
+  selectedDate: string = '';
+
+  /** Chuỗi hiển thị ngày đang chọn (dd/MM/yyyy) */
+  selectedDateLabel: string = '';
+
+  /** Dữ liệu calendar lấy từ API */
+  attendanceCalendar: AttendanceCalendarDay[] = [];
+
+  /** Danh sách lớp điểm danh trong ngày được chọn */
+  attendanceClasses: AttendanceClassSummary[] = [];
+
   monthNames = [
     'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
     'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
@@ -29,21 +41,60 @@ export class GvQuanlydiemdanhComponent implements OnInit {
     isEmpty?: boolean;
     classCount?: number;
   }[] = [];
-status: string|string[]|Set<string>|{ [klass: string]: any; }|null|undefined;
+
+  // các phần modal cũ của bạn giữ nguyên
+  showAttendanceDetailModal = false;
+  selectClass: any = null;
+
+  showStudentDetailModal = false;
+
+  constructor(private attendanceService: AttendanceService) { }
 
   ngOnInit() {
-    // Dữ liệu điểm danh mẫu (bạn thay bằng dữ liệu thật từ API)
-    this.attendanceData = [
-      { date: '2025-10-10' },
-      { date: '2025-10-13' },
-      { date: '2025-10-13' },
-      { date: '2025-10-21' },
-    ];
+    // Khởi tạo ngày đang chọn = hôm nay
+    const todayIso = this.toIsoDate(this.currentDate); // yyyy-MM-dd
+    this.selectedDate = todayIso;
+    this.selectedDateLabel = this.formatDate(todayIso);
 
-    this.generateCalendar();
+    // Load calendar cho tháng hiện tại + dữ liệu lớp của ngày hôm nay
+    this.loadCalendarForCurrentMonth();
   }
 
-  /** Sinh lịch */
+  /** Đổi Date -> yyyy-MM-dd */
+  private toIsoDate(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  /** Lấy 1–>cuối tháng hiện tại từ currentDate, rồi gọi API calendar */
+  private loadCalendarForCurrentMonth(): void {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    const start = this.toIsoDate(firstDay);
+    const end = this.toIsoDate(lastDay);
+
+    this.attendanceService.getCalendar(start, end).subscribe({
+      next: (data) => {
+        this.attendanceCalendar = data;
+        this.generateCalendar();
+        // Sau khi sinh lịch, cũng load danh sách lớp của ngày đang chọn
+        this.loadClassesForDate(this.selectedDate);
+      },
+      error: (err) => {
+        console.error('Lỗi load calendar:', err);
+        this.attendanceCalendar = [];
+        this.generateCalendar();
+      }
+    });
+  }
+
+  /** Sinh lịch tháng dựa trên currentDate + attendanceCalendar */
   generateCalendar() {
     this.calendarDays = [];
 
@@ -53,29 +104,33 @@ status: string|string[]|Set<string>|{ [klass: string]: any; }|null|undefined;
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+    const startingDayOfWeek = firstDay.getDay(); // 0 = CN
 
-    // Thêm các ô trống đầu tháng
+    // map nhanh: yyyy-MM-dd -> classCount
+    const attendanceMap = new Map<string, number>();
+    this.attendanceCalendar.forEach(item => {
+      attendanceMap.set(item.date, item.classCount || 0);
+    });
+
+    // Ô trống đầu tháng
     for (let i = 0; i < startingDayOfWeek; i++) {
       this.calendarDays.push({ isEmpty: true });
     }
 
-    // Thêm các ô ngày thực tế
+    // Ô ngày thực tế
+    const today = new Date();
+    const todayIso = this.toIsoDate(today);
+
     for (let day = 1; day <= daysInMonth; day++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      const dayAttendance = this.attendanceData.filter(item => item.date === dateStr);
-      const today = new Date();
+      const classCount = attendanceMap.get(dateStr) || 0;
 
       this.calendarDays.push({
         dayNumber: day,
         dateStr,
-        classCount: dayAttendance.length,
-        hasAttendance: dayAttendance.length > 0,
-        isToday: (
-          year === today.getFullYear() &&
-          month === today.getMonth() &&
-          day === today.getDate()
-        ),
+        classCount,
+        hasAttendance: classCount > 0,
+        isToday: dateStr === todayIso,
         isSelected: dateStr === this.selectedDate,
         isEmpty: false
       });
@@ -84,55 +139,69 @@ status: string|string[]|Set<string>|{ [klass: string]: any; }|null|undefined;
 
   /** Chuyển tháng */
   previousMonth() {
-    this.currentDate.setMonth(this.currentDate.getMonth() - 1);
-    this.generateCalendar();
+    this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() - 1, 1);
+    this.loadCalendarForCurrentMonth();
   }
 
   nextMonth() {
-    this.currentDate.setMonth(this.currentDate.getMonth() + 1);
-    this.generateCalendar();
+    this.currentDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 1);
+    this.loadCalendarForCurrentMonth();
   }
 
-  /** Khi chọn ngày */
+  /** Khi click vào 1 ngày */
   selectDate(dateStr?: string) {
     if (!dateStr) return;
 
     this.selectedDate = dateStr;
-    this.generateCalendar();
-
-    const dayAttendance = this.attendanceData.filter(item => item.date === dateStr);
-
-    // if (dayAttendance.length === 0) {
-    //   alert(`Không có dữ liệu: Ngày ${this.formatDate(dateStr)} không có buổi học nào.`);
-    // } else {
-    //   alert(`Hiển thị ${dayAttendance.length} buổi học ngày ${this.formatDate(dateStr)}.`);
-    // }
+    this.selectedDateLabel = this.formatDate(dateStr);
+    this.generateCalendar();           // cập nhật lại isSelected trên calendar
+    this.loadClassesForDate(dateStr);  // gọi API lấy danh sách lớp
   }
 
-  /** Định dạng ngày dd/mm/yyyy */
+  /** Gọi API lấy danh sách lớp điểm danh trong 1 ngày */
+  private loadClassesForDate(dateStr: string): void {
+    this.attendanceService.getClassesByDate(dateStr).subscribe({
+      next: (classes) => {
+        this.attendanceClasses = classes;
+      },
+      error: (err) => {
+        console.error('Lỗi load lớp điểm danh:', err);
+        this.attendanceClasses = [];
+      }
+    });
+  }
+
+  // Số "thực sự có mặt" = Có mặt + Muộn
+  getEffectivePresent(c: AttendanceClassSummary): number {
+    const present = c.present ?? 0;
+    const late = c.late ?? 0;
+    return present + late;
+  }
+
+  // Tỉ lệ điểm danh = (Có mặt + Muộn) / Tổng * 100
+  getEffectiveRate(c: AttendanceClassSummary): number {
+    const total = c.total ?? 0;
+    if (!total) return 0;
+    return (this.getEffectivePresent(c) * 100) / total;
+  }
+
+
+  /** Định dạng ngày dd/MM/yyyy cho hiển thị */
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    return `${d}/${m}/${y}`;
   }
 
-  /** Lấy tên tháng hiển thị */
+  /** Tên tháng hiển thị */
   get currentMonthLabel(): string {
     return `${this.monthNames[this.currentDate.getMonth()]}, ${this.currentDate.getFullYear()}`;
   }
 
-
-  attendanceClass = [
-    { date: '2025-10-13', classCode: 'IT301', className: 'Lập trình Web', time: '07:30 - 09:30', status: 'Đang hoạt động', rate: 93, present: 14, total: 15, absent: 1 },
-    { date: '2025-10-10', classCode: 'IT302', className: 'Cơ sở dữ liệu', time: '10:00 - 12:00', status: 'Đã kết thúc', rate: 85, present: 12, total: 15, absent: 3 },
-    { date: '2025-10-21', classCode: 'IT303', className: 'Mạng máy tính', time: '13:00 - 15:00', status: 'Đang hoạt động', rate: 0, present: 0, total: 15, absent: 0 },
-    { date: '2025-10-21', classCode: 'IT304', className: 'Hệ điều hành', time: '15:30 - 17:30', status: 'Đang hoạt động', rate: 0, present: 0, total: 15, absent: 0 },
-    { date: '2025-10-21', classCode: 'IT305', className: 'Lập trình nâng cao', time: '18:00 - 20:00', status: 'Đã kết thúc', rate: 0, present: 0, total: 15, absent: 0 },
-  ]
-  
-  //xem chi tiết điểm danh
-  showAttendanceDetailModal = false;
-  selectClass: any = null;
-  openAttendanceDetailModal(attendanceClass: any) {
+  // ================== MODAL LỚP (giữ nguyên logic cũ) ==================
+  openAttendanceDetailModal(attendanceClass: AttendanceClassSummary) {
     this.selectClass = attendanceClass;
     this.showAttendanceDetailModal = true;
   }
@@ -141,43 +210,40 @@ status: string|string[]|Set<string>|{ [klass: string]: any; }|null|undefined;
   }
 
   // xem chi tiết sinh viên
-  showStudentDetailModal = false;
   openStudentDetailModal() {
-   // this.selectClass = attendanceClass;
     this.showStudentDetailModal = true;
   }
   closeStudentDetailModal() {
     this.showStudentDetailModal = false;
   }
-// chuẩn hóa trạng thái nội bộ là 'present' / 'absent'
-students = [
-  { id: 1, ho: "Nguyễn Văn", ten: "A", mssv: "2021001", status: 'present', rate :95, time:'07:32',absent: 2 },
-  { id: 2, ho: "Trần Thị", ten: "B", mssv: "2021002", status: 'absent', rate :80, time:'-',absent: 5 },
-  { id: 3, ho: "Lê Văn", ten: "C", mssv: "2021003", status: 'present', rate :90, time:'07:35',absent: 3 },
-  { id: 4, ho: "Phạm Thị", ten: "D", mssv: "2021004", status: 'present', rate :100, time:'07:30',absent: 0 },
-  { id: 5, ho: "Hoàng Văn", ten: "E", mssv: "2021005", status: 'absent', rate :70, time:'-',absent: 6 },
-  { id: 6, ho: "Vũ Thị", ten: "F", mssv: "2021006", status: 'present', rate :85, time:'07:40',absent: 4 },
-  { id: 7, ho: "Đặng Văn", ten: "G", mssv: "2021007", status: 'present', rate :95, time:'07:33',absent: 2 },  
-  { id: 8, ho: "Trần Thị", ten: "H", mssv: "2021008", status: 'absent', rate :60, time:'-',absent: 7 },
-  { id: 9, ho: "Lý Văn", ten: "I", mssv: "2021009", status: 'present', rate :88, time:'07:36',absent: 3 },
-  { id: 10, ho: "Võ Thị", ten: "K", mssv: "2021010", status: 'present', rate :92, time:'07:31',absent: 2 },
-  { id: 11, ho: "Đỗ Văn", ten: "L", mssv: "2021011", status: 'absent', rate :75, time:'-',absent: 5 },
-  { id: 12, ho: "Ngô Thị", ten: "M", mssv: "2021012", status: 'present', rate :89, time:'07:34',absent: 3 },
-  { id: 13, ho: "Bùi Văn", ten: "N", mssv: "2021013", status: 'present', rate :94, time:'07:32',absent: 2 },
-  { id: 14, ho: "Trương Thị", ten: "O", mssv: "2021014", status: 'absent', rate :65, time:'-',absent: 6 },
-  { id: 15, ho: "Mai Văn", ten: "P", mssv: "2021015", status: 'present', rate :91, time:'07:35',absent: 3 }
-  
-];
 
-toggleStudentStatus(id: number): void {
-  const student = this.students.find(s => s.id === id);
-  if (!student) return;
+  // phần students + toggleStudentStatus bạn có thể giữ nguyên hoặc sau này load thêm từ API attendance chi tiết
+  students = [
+    { id: 1, ho: 'Nguyễn Văn', ten: 'A', mssv: '2021001', status: 'present', rate: 95, time: '07:32', absent: 2 },
+    { id: 2, ho: 'Trần Thị', ten: 'B', mssv: '2021002', status: 'absent', rate: 80, time: '-', absent: 5 },
+  ];
 
-  // đổi trạng thái giữa 'present' và 'absent'
-  student.status = student.status === 'present' ? 'absent' : 'present';
+  toggleStudentStatus(id: number): void {
+    const student = this.students.find(s => s.id === id);
+    if (!student) return;
+    student.status = student.status === 'present' ? 'absent' : 'present';
+  }
 
-  // nếu component dùng ChangeDetectionStrategy.OnPush, thay array để kích hoạt detection:
-  // this.students = [...this.students];
+  // Chuỗi tìm kiếm
+searchTerm: string = '';
+
+// Danh sách lớp sau khi filter theo searchTerm
+get filteredAttendanceClasses(): AttendanceClassSummary[] {
+  const term = this.searchTerm.trim().toLowerCase();
+  if (!term) {
+    return this.attendanceClasses;
+  }
+
+  return this.attendanceClasses.filter(c => {
+    const code = c.classCode?.toLowerCase() || '';
+    const name = c.className?.toLowerCase() || '';
+    return code.includes(term) || name.includes(term);
+  });
 }
 
 }

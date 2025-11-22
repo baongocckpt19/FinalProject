@@ -765,7 +765,9 @@
  .stat-number.present {
      color: #16a34a;
  }
-
+.stat-number.late {
+     color: #d97706;
+ }
  .stat-number.absent {
      color: #dc2626;
  }
@@ -1195,4 +1197,108 @@
      .attendance-table {
          min-width: 800px;
      }
+
+     
  }
+
+ /* Thanh công cụ phía trên bảng */
+.attendance-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* Hộp tìm kiếm */
+.search-box {
+  position: relative;
+  width: 260px;
+  max-width: 100%;
+
+  input {
+    width: 100%;
+    padding: 8px 32px 8px 12px;
+    border-radius: 999px;
+    border: 1px solid #d0d7e2;
+    background-color: #f9fafb;
+    font-size: 14px;
+    color: #111827;
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background-color 0.2s ease;
+
+    &::placeholder {
+      color: #9ca3af;
+      font-size: 13px;
+    }
+
+    &:focus {
+      background-color: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+  }
+
+  .search-clear-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    color: #9ca3af;
+    padding: 0;
+
+    &:hover {
+      color: #4b5563;
+    }
+  }
+}
+
+/* Nếu cần nhấn mạnh màu sắc cột tỉ lệ/absent (tuỳ bạn đã có hay chưa) */
+.attendance-rate {
+  font-weight: 600;
+}
+
+.attendance-rate.high {
+  color: #16a34a; // xanh
+}
+
+.attendance-rate.medium {
+  color: #f59e0b; // vàng
+}
+
+.attendance-rate.low {
+  color: #dc2626; // đỏ
+}
+
+.absent-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.absent-count.low {
+  background-color: #ecfdf3;
+  color: #16a34a;
+}
+
+.absent-count.medium {
+  background-color: #fef9c3;
+  color: #f59e0b;
+}
+
+.absent-count.high {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
