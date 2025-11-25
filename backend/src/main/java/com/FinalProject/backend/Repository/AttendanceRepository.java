@@ -49,4 +49,84 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
         ORDER BY c.ClassName
         """, nativeQuery = true)
     List<Object[]> findClassesForTeacherAndDate(int teacherId, Date date);
+    // ... phần import, @Repository, interface, 2 query cũ ...
+
+    // 3) DS sinh viên và trạng thái điểm danh của 1 lớp trong 1 ngày + thống kê theo lớp
+    @Query(value = """
+        SELECT 
+            a.AttendanceId,       -- 0
+            s.StudentId,          -- 1
+            s.FullName,           -- 2
+            acc.Username,         -- 3
+            a.Status,             -- 4
+            a.AttendanceTime,     -- 5
+
+            -- Tổng số buổi của lớp
+            (SELECT COUNT(DISTINCT AttendanceDate)
+             FROM Attendance
+             WHERE ClassId = ?1) AS TotalSessions,             -- 6
+
+            -- Số buổi Có mặt của SV trong lớp
+            (SELECT COUNT(*)
+             FROM Attendance
+             WHERE ClassId = ?1
+               AND StudentId = s.StudentId
+               AND Status = N'Có mặt') AS PresentSessions,    -- 7
+
+            -- Số buổi Muộn của SV trong lớp
+            (SELECT COUNT(*)
+             FROM Attendance
+             WHERE ClassId = ?1
+               AND StudentId = s.StudentId
+               AND Status = N'Muộn') AS LateSessions,         -- 8
+
+            -- Số buổi Vắng của SV trong lớp
+            (SELECT COUNT(*)
+             FROM Attendance
+             WHERE ClassId = ?1
+               AND StudentId = s.StudentId
+               AND Status = N'Vắng') AS AbsentSessions        -- 9
+        FROM Attendance a
+        JOIN Student s ON a.StudentId = s.StudentId
+        JOIN Account acc ON s.AccountId = acc.AccountId
+        WHERE a.ClassId = ?1
+          AND a.AttendanceDate = ?2
+        ORDER BY s.FullName
+        """, nativeQuery = true)
+    List<Object[]> findStudentAttendanceForClassAndDate(int classId, Date date);
+
+    // 4) Lịch sử điểm danh của 1 sinh viên trong 1 lớp
+    @Query(value = """
+        SELECT 
+            a.AttendanceId,        -- 0
+            a.AttendanceDate,      -- 1
+            a.SessionStart,        -- 2
+            a.SessionEnd,          -- 3
+            a.Status,              -- 4
+            a.AttendanceTime       -- 5
+        FROM Attendance a
+        WHERE a.ClassId = ?1
+          AND a.StudentId = ?2
+        ORDER BY a.AttendanceDate DESC, a.SessionStart
+        """, nativeQuery = true)
+    List<Object[]> findAttendanceHistoryForStudentInClass(int classId, int studentId);
+
+    // 5) Tổng số buổi của lớp (distinct ngày)
+    @Query(value = """
+        SELECT COUNT(DISTINCT AttendanceDate)
+        FROM Attendance
+        WHERE ClassId = ?1
+        """, nativeQuery = true)
+    Integer countTotalSessionsForClass(int classId);
+
+    // 6) Cập nhật trạng thái 1 bản ghi điểm danh
+    @org.springframework.data.jpa.repository.Modifying
+    @Query(value = """
+        UPDATE Attendance
+        SET Status = ?2
+        WHERE AttendanceId = ?1
+        """, nativeQuery = true)
+    void updateAttendanceStatus(int attendanceId, String newStatus);
 }
+
+

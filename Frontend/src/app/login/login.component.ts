@@ -88,10 +88,10 @@ export class LoginComponent implements OnInit {
             if (account?.roleName == "Admin") {
               this.router.navigate(['/admin']);
             } else if (account?.roleName == "Giảng viên") {
-              this.router.navigate(['/gv_trangchu']);
-            } else {
-              this.router.navigate(['/trangcanhan']);
-            }
+              this.router.navigate(['/gv_trangchu']);}
+            // } else {
+            //   this.router.navigate(['/trangcanhan']);
+            // }
           })
         } else {
           this.showError('Phản hồi không hợp lệ từ máy chủ!');

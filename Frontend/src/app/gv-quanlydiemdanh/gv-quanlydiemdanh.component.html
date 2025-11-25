@@ -64,10 +64,10 @@
                 <div class="attendance-list">
                     <div class="attendance-list-header">
                         <h3 class="attendance-list-title">Các lớp điểm danh ngày {{ selectedDateLabel }}</h3>
-                        
+
                         <span class="attendance-list-info">{{ attendanceClasses.length }} lớp học</span>
                     </div>
-                    
+
 
                     <div class="attendance-table-container">
                         <table class="attendance-table">
@@ -86,7 +86,7 @@
                             <tbody>
                                 <tr style="cursor: pointer;"
                                     *ngFor="let attendanceClass of filteredAttendanceClasses; let i = index"
-                                    (click)="openAttendanceDetailModal(attendanceClass); $event.stopPropagation()">
+                                    (click)="openAttendanceDetailModal(attendanceClass, $event)">
                                     <td>{{ i + 1 }}</td>
                                     <td>
                                         <div class="class-info">
@@ -151,61 +151,67 @@
 
 
                 <!-- Attendance Detail Section -->
+                <!-- Attendance Detail Section -->
                 <div id="attendanceDetailSection" class="attendance-detail-section show"
-                    *ngIf="showAttendanceDetailModal">
+                    *ngIf="showAttendanceDetailModal && selectClass">
                     <div class="attendance-list-header">
-                        <h3 class="attendance-list-title">Chi tiết điểm danh - <span id="detailClassName"> Lớp {{selectClass.className}}</span>
+                        <h3 class="attendance-list-title">
+                            Chi tiết điểm danh - <span>Lớp {{ selectClass.className }}</span>
                         </h3>
-                        <button class="btn btn-outline" onclick="hideAttendanceDetail()">
+                        <button class="btn btn-primary" (click)="exportAttendanceReport($event)">
                             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                                 <path
-                                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                                    d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,5.89 21.1,4 20,4Z" />
                             </svg>
-                            Ẩn chi tiết
+                            Xuất báo cáo
                         </button>
                     </div>
 
-
                     <div class="attendance-table-container">
                         <div style="padding: 32px;">
+                            <!-- Info grid -->
                             <div class="modal-info-grid">
                                 <div class="modal-info-card">
                                     <div class="info-label">Mã lớp</div>
-                                    <div class="info-value" id="detailClassCode">IT301</div>
+                                    <div class="info-value">{{ selectClass.classCode }}</div>
                                 </div>
                                 <div class="modal-info-card">
                                     <div class="info-label">Thời gian</div>
-                                    <div class="info-value" id="detailClassTime">07:30 - 09:30</div>
+                                    <div class="info-value">{{ selectClass.time }}</div>
                                 </div>
                                 <div class="modal-info-card">
                                     <div class="info-label">Ngày học</div>
-                                    <div class="info-value" id="detailClassDate">16/12/2024</div>
+                                    <div class="info-value">{{ selectedDateLabel }}</div>
                                 </div>
                             </div>
 
+                            <!-- Stats -->
                             <div class="modal-stats">
                                 <div class="stat-item">
-                                    <div class="stat-number" id="detailTotalStudents">15</div>
+                                    <div class="stat-number">{{ selectClass.total }}</div>
                                     <div class="stat-label">Tổng sinh viên</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-number present" id="detailPresentStudents">14</div>
+                                    <div class="stat-number present">{{ selectClass.present }}</div>
                                     <div class="stat-label">Có mặt</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-number late" id="detailPresentStudents">14</div>
+                                    <div class="stat-number late">{{ selectClass.late }}</div>
                                     <div class="stat-label">Muộn</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-number absent" id="detailAbsentStudents">1</div>
+                                    <div class="stat-number absent">{{ selectClass.absent }}</div>
                                     <div class="stat-label">Vắng mặt</div>
                                 </div>
                                 <div class="stat-item">
-                                    <div class="stat-number rate" id="detailAttendanceRate">93%</div>
+                                    <div class="stat-number rate">
+                                        {{ getEffectiveRate(selectClass) | number:'1.0-0' }}%
+                                    </div>
                                     <div class="stat-label">Tỷ lệ điểm danh</div>
                                 </div>
                             </div>
 
+                            <!-- Student list -->
                             <div class="student-list-section">
                                 <h4 class="section-title">Danh sách sinh viên</h4>
 
@@ -223,45 +229,56 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr *ngFor="let student of students; let i = index;">
-                                                 <td>{{ i + 1 }}</td>
+                                            <tr *ngFor="let student of attendanceStudents; let i = index"
+                                                (click)="openStudentDetailModal(student, $event)"
+                                                style="cursor: pointer;">
+                                                <td>{{ i + 1 }}</td>
                                                 <td>
-                                                    
                                                     <div class="student-info">
                                                         <div class="student-details">
-                                                            <div class="student-name">{{ student.ho }} {{ student.ten }}
-                                                            </div>
-                                                            <div class="student-id">{{ student.mssv }}</div>
+                                                            <div class="student-name">{{ student.fullName }}</div>
+                                                            <div class="student-id">{{ student.studentId }}</div>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <span class="attendance-status" [ngClass]="student.status"
-                                                        (click)="toggleStudentStatus(student.id)"
-                                                        style="cursor: pointer;" title="Click để đổi trạng thái">
-                                                        {{ student.status === 'present' ? 'Có mặt' : 'Vắng mặt' }}
-                                                        <!-- hiển thị tiếng Việt -->
+                                                    <span class="attendance-status" [ngClass]="{
+                          'present': student.status === 'present',
+                          'absent': student.status === 'absent',
+                          'late': student.status === 'late'
+                        }" (click)="onToggleStudentStatus(student, $event)" style="cursor: pointer;"
+                                                        title="Click để đổi trạng thái (Có mặt → Muộn → Vắng)">
+                                                        {{ student.status === 'present'
+                                                        ? 'Có mặt'
+                                                        : (student.status === 'late' ? 'Muộn' : 'Vắng mặt') }}
                                                     </span>
                                                 </td>
-                                                <td>{{ student.time || '-' }}</td>
+                                                <td>{{ student.attendanceTime || '-' }}</td>
 
-                                                <td><span class="student-rate" [ngClass]="{
-                                                    'excellent' : student.rate >90,
-                                                    'good' : student.rate <=90 && student.rate >=75,
-                                                    'average' : student.rate <75 && student.rate >=50,
-                                                    'poor' : student.rate <50 
-                                                }">{{student.rate}}%</span></td>
-
-                                                <td><span class="absent-count "
-                                                        [ngClass]="{
-                                                                                'low' : student.absent <=2,
-                                                                                'medium' : student.absent >2 && student.absent <=5,
-                                                                                'high' :student.absent >5}">{{student.absent}}</span></td>
                                                 <td>
+                                                    <span class="student-rate" [ngClass]="{
+                          'excellent' : student.attendanceRate > 90,
+                          'good'      : student.attendanceRate <= 90 && student.attendanceRate >= 75,
+                          'average'   : student.attendanceRate < 75 && student.attendanceRate >= 50,
+                          'poor'      : student.attendanceRate < 50
+                        }">
+                                                        {{ student.attendanceRate | number:'1.0-0' }}%
+                                                    </span>
+                                                </td>
 
+                                                <td>
+                                                    <span class="absent-count" [ngClass]="{
+                          'low'    : student.absentSessions <= 2,
+                          'medium' : student.absentSessions > 2 && student.absentSessions <= 5,
+                          'high'   : student.absentSessions > 5
+                        }">
+                                                        {{ student.absentSessions }}
+                                                    </span>
+                                                </td>
+                                                <td>
                                                     <div class="action-buttons">
                                                         <button class="btn-icon btn-view"
-                                                            (click)="openStudentDetailModal(); $event.stopPropagation()"
+                                                            (click)="openStudentDetailModal(student, $event)"
                                                             title="Chi tiết sinh viên">
                                                             <svg width="16" height="16" fill="currentColor"
                                                                 viewBox="0 0 24 24">
@@ -269,21 +286,18 @@
                                                                     d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V21C3 22.11 3.89 23 5 23H19C20.11 23 21 22.11 21 21V9M19 21H5V3H13V9H19V21Z" />
                                                             </svg>
                                                         </button>
-                                                        
                                                     </div>
                                                 </td>
                                             </tr>
-
-
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
 
-                            
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -291,8 +305,7 @@
 
 
         <!-- Student Detail Modal -->
-        <div class="modal active " *ngIf="showStudentDetailModal"> >
-            <!-- <div class="modal-overlay" onclick="closeStudentModal()"></div>  -->
+        <div class="modal active" *ngIf="showStudentDetailModal && studentDetail">
             <div class="modal-content" style="max-width: 1000px;">
                 <div class="modal-header">
                     <h3 class="modal-title">Chi tiết sinh viên</h3>
@@ -308,24 +321,31 @@
                     <!-- Student Basic Info -->
                     <div class="student-profile-section">
                         <div class="student-profile-header">
-                            <div class="student-avatar-large" id="modalStudentAvatar">NV</div>
+                            <div class="student-avatar-large" id="modalStudentAvatar">
+                                {{ (studentDetail.fullName || 'SV') | slice:0:1 }}
+                            </div>
                             <div class="student-profile-info">
-                                <h3 class="student-profile-name" id="modalStudentName">Nguyễn Văn An</h3>
-                                <p class="student-profile-id" id="modalStudentId">SV001</p>
+                                <h3 class="student-profile-name">
+                                    {{ studentDetail.fullName }}
+                                </h3>
+                                <p class="student-profile-id">
+                                    {{ studentDetail.username }}
+                                </p>
                                 <div class="student-profile-stats">
                                     <div class="profile-stat">
                                         <span class="profile-stat-label">Email:</span>
-                                        <span class="profile-stat-value">baongock52gmail.com</span>
+                                        <span class="profile-stat-value">{{ studentDetail.email }}</span>
                                     </div>
                                     <div class="profile-stat">
                                         <span class="profile-stat-label">SĐT:</span>
-                                        <span class="profile-stat-value">0369756152</span>
+                                        <span class="profile-stat-value">{{ studentDetail.phone }}</span>
                                     </div>
                                     <div class="profile-stat">
                                         <span class="profile-stat-label">Lớp:</span>
-                                        <span class="profile-stat-value">IT301</span>
+                                        <span class="profile-stat-value">
+                                            {{ studentDetail.classCode }} - {{ studentDetail.className }}
+                                        </span>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -334,23 +354,25 @@
                     <!-- Attendance Statistics -->
                     <div class="modal-stats">
                         <div class="stat-item">
-                            <div class="stat-number" id="modalTotalSessions">30</div>
+                            <div class="stat-number">{{ studentDetail.totalSessions || 0 }}</div>
                             <div class="stat-label">Tổng buổi học</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number present" id="modalPresentSessions">28</div>
+                            <div class="stat-number present">{{ studentDetail.presentSessions || 0 }}</div>
                             <div class="stat-label">Có mặt</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number present" id="detailPresentStudents">14</div>
-                            <div class="stat-label">Có mặt</div>
+                            <div class="stat-number late">{{ studentDetail.lateSessions || 0 }}</div>
+                            <div class="stat-label">Muộn</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number absent" id="modalAbsentSessions">2</div>
+                            <div class="stat-number absent">{{ studentDetail.absentSessions || 0 }}</div>
                             <div class="stat-label">Vắng mặt</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number rate" id="modalAttendancePercentage">93%</div>
+                            <div class="stat-number rate">
+                                {{ studentDetail.attendanceRate || 0 | number:'1.0-0' }}%
+                            </div>
                             <div class="stat-label">Tỷ lệ tham gia</div>
                         </div>
                     </div>
@@ -359,105 +381,44 @@
                     <div class="attendance-history-section">
                         <h4 class="section-title">Lịch sử điểm danh gần đây</h4>
 
-                        <div class="history-filter">
-                            <button class="filter-btn active" onclick="filterHistory('all')">Tất cả</button>
-                            <button class="filter-btn" onclick="filterHistory('present')">Có mặt</button>
-                            <button class="filter-btn" onclick="filterHistory('absent')">Vắng mặt</button>
-                            <button class="filter-btn" onclick="filterHistory('late')">Đi muộn</button>
-                        </div>
-
                         <div class="history-table-container">
                             <table class="history-table">
                                 <thead>
                                     <tr>
+                                        <th>STT</th>
                                         <th>Ngày</th>
-                                        <th>Môn học</th>
-                                        <th>Tiết học</th>
+                                        <th>Thời gian</th>
                                         <th>Trạng thái</th>
                                         <th>Giờ điểm danh</th>
                                     </tr>
                                 </thead>
-                                <tbody id="historyTableBody">
-                                    <tr>
-                                        <td>16/12/2024</td>
-                                        <td>Lập trình Web</td>
-                                        <td>1-2</td>
-                                        <td><span class="attendance-status present">Có mặt</span></td>
-                                        <td>07:32</td>
-
-                                    </tr>
-                                    <tr>
-                                        <td>13/12/2024</td>
-                                        <td>Lập trình Web</td>
-                                        <td>1-2</td>
-                                        <td><span class="attendance-status present">Có mặt</span></td>
-                                        <td>07:28</td>
-
-                                    </tr>
-                                    <tr>
-                                        <td>09/12/2024</td>
-                                        <td>Lập trình Web</td>
-                                        <td>1-2</td>
-                                        <td><span class="attendance-status absent">Vắng mặt</span></td>
-                                        <td>-</td>
-
-                                    </tr>
-                                    <tr>
-                                        <td>06/12/2024</td>
-                                        <td>Lập trình Web</td>
-                                        <td>1-2</td>
-                                        <td><span class="attendance-status present">Có mặt</span></td>
-                                        <td>07:45</td>
-
-                                    </tr>
-                                    <tr>
-                                        <td>02/12/2024</td>
-                                        <td>Lập trình Web</td>
-                                        <td>1-2</td>
-                                        <td><span class="attendance-status present">Có mặt</span></td>
-                                        <td>07:30</td>
-
-                                    </tr>
-                                    <tr>
-                                        <td>29/11/2024</td>
-                                        <td>Lập trình Web</td>
-                                        <td>1-2</td>
-                                        <td><span class="attendance-status present">Có mặt</span></td>
-                                        <td>07:25</td>
-
-                                    </tr>
-                                    <tr>
-                                        <td>25/11/2024</td>
-                                        <td>Lập trình Web</td>
-                                        <td>1-2</td>
-                                        <td><span class="attendance-status absent">Vắng mặt</span></td>
-                                        <td>-</td>
-
-                                    </tr>
-                                    <tr>
-                                        <td>22/11/2024</td>
-                                        <td>Lập trình Web</td>
-                                        <td>1-2</td>
-                                        <td><span class="attendance-status present">Có mặt</span></td>
-                                        <td>07:33</td>
-                                        g
+                                <tbody>
+                                    <tr *ngFor="let h of studentDetail.history; let i = index">
+                                        <td>{{ i + 1 }}</td>
+                                        <td>{{ formatDate(h.date) }}</td>
+                                        <td>{{ h.sessionTime }}</td>
+                                        <td>
+                                            <span class="attendance-status" [ngClass]="{
+                          'present': h.status === 'present',
+                          'late'   : h.status === 'late',
+                          'absent' : h.status === 'absent'
+                        }" (click)="onToggleHistoryStatus(h, $event)" style="cursor: pointer;"
+                                                title="Click để đổi trạng thái">
+                                                {{ h.status === 'present'
+                                                ? 'Có mặt'
+                                                : (h.status === 'late' ? 'Muộn' : 'Vắng mặt') }}
+                                            </span>
+                                        </td>
+                                        <td>{{ h.attendanceTime || '-' }}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-primary">
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,5.89 21.1,4 20,4Z" />
-                        </svg>
-                        Xuất báo cáo
-                    </button>
                 </div>
             </div>
         </div>
+
     </div>
 </body>

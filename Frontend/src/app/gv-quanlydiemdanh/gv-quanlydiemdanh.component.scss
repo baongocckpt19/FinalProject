@@ -465,7 +465,12 @@
      color: #dc2626;
      border: 1px solid #fecaca;
  }
-
+.attendance-status.late {
+        background: #fef3c7;
+        color: #d97706;
+        border: 1px solid #fed7aa;
+  
+ }
  .class-status {
      display: inline-flex;
      align-items: center;

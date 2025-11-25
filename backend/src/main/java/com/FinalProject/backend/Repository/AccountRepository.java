@@ -196,4 +196,5 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     """, nativeQuery = true)
     Object findUserDetailByAccountId(int accountId);
 
+
 }

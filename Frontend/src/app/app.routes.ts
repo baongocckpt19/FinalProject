@@ -11,6 +11,9 @@ import { AdminComponent } from './admin/admin.component';
 import { roleGuard } from './guards/role.guard';
 import { authGuard } from './guards/auth.guard';
 import { DiemdanhComponent } from './diemdanh/diemdanh.component';
+import { SvTrangchuComponent } from './sv-trangchu/sv-trangchu.component';
+import { SvDiemsoComponent } from './sv-diemso/sv-diemso.component';
+import { SvDiemdanhComponent } from './sv-diemdanh/sv-diemdanh.component';
 
 export const routes: Routes = [
 
@@ -53,6 +56,18 @@ export const routes: Routes = [
     {
         path: 'diemdanh',
         component: DiemdanhComponent,
+    },
+    {
+        path: 'sv-trangchu',
+        component: SvTrangchuComponent,
+    },
+    {
+        path: 'sv-diemso',
+        component:SvDiemsoComponent,
+    },
+     {
+        path: 'sv-diemdanh',
+        component:SvDiemdanhComponent,
     },
     {
         path: '',
