@@ -1,0 +1,286 @@
+<body>
+    <div class="dashboard-container">
+        <div class="main-content">
+            <main class="dashboard-content">
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h2 class="page-title">Quản lý vân tay</h2>
+                        <p class="page-subtitle">
+                            Thêm và quản lý vân tay cho sinh viên trên các thiết bị điểm danh
+                        </p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="btn btn-outline" type="button">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 13H5v-2h14v2zm0-6H5V5h14v2zm0 10H5v-2h14v2z" />
+                            </svg>
+                            Hướng dẫn sử dụng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Fingerprint Management Card -->
+                <div class="fingerprint-management">
+
+                    <div class="fingerprint-header">
+                        <h3>Đăng ký vân tay cho sinh viên</h3>
+                        <span class="fingerprint-subtitle">
+                            Nhập MSSV để tìm sinh viên, sau đó tạo phiên đăng ký vân tay và thực hiện quét trên thiết bị
+                            ESP32.
+                        </span>
+                    </div>
+
+                    <div class="fingerprint-layout">
+                        <!-- LEFT: Student Search & Info -->
+                        <div class="fingerprint-column">
+
+                            <div class="student-search-card">
+                                <h4 class="section-title">Thông tin sinh viên</h4>
+
+                                <!-- Search row -->
+                                <div class="student-search-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Mã sinh viên (MSSV / StudentId)</label>
+                                        <input type="number" class="form-input" [(ngModel)]="studentIdInput"
+                                            (keyup.enter)="searchStudent()" placeholder="Nhập mã sinh viên...">
+                                    </div>
+
+                                    <div class="form-group search-button-group">
+                                        <button class="btn btn-primary" type="button" (click)="searchStudent()"
+                                            [disabled]="!studentIdInput || searching">
+                                            <span *ngIf="!searching">Tìm sinh viên</span>
+                                            <span *ngIf="searching">Đang tìm...</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="error-text" *ngIf="searchStudentError">
+                                    {{ searchStudentError }}
+                                </div>
+
+                                <!-- Student info -->
+                                <div class="student-info-card" *ngIf="selectedStudent">
+                                    <div class="student-info-header">
+                                        <div class="student-avatar">
+                                            {{ selectedStudent.fullName ? selectedStudent.fullName.charAt(0) : 'S' }}
+                                        </div>
+                                        <div>
+                                            <h5 class="student-name">{{ selectedStudent.fullName }}</h5>
+                                            <p class="student-meta">
+                                                MSSV: {{ selectedStudent.studentId }} · Username: {{
+                                                selectedStudent.username }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="student-info-body">
+                                        <!-- ... phần Email, trạng thái vân tay, số thiết bị ... -->
+                                        <div class="student-info-item">
+                                            <span class="detail-label">Email</span>
+                                            <span class="detail-value">
+                                                {{ selectedStudent.email || 'Chưa có email' }}
+                                            </span>
+                                        </div>
+
+                                        <div class="student-info-item">
+                                            <span class="detail-label">Trạng thái vân tay</span>
+                                            <span class="status-chip" [ngClass]="{
+                          'status-chip-success': selectedStudent.hasFingerprint,
+                          'status-chip-muted': !selectedStudent.hasFingerprint
+                        }">
+                                                <!-- icon -->
+                                                <svg *ngIf="selectedStudent.hasFingerprint" width="16" height="16"
+                                                    viewBox="0 0 24 24">
+                                                    <path fill="currentColor"
+                                                        d="M9 16.17 4.83 12 3.41 13.41 9 19l12-12-1.41-1.41z" />
+                                                </svg>
+                                                <svg *ngIf="!selectedStudent.hasFingerprint" width="16" height="16"
+                                                    viewBox="0 0 24 24">
+                                                    <path fill="currentColor"
+                                                        d="M12 2a9.99 9.99 0 0 0-10 10 9.99 9.99 0 0 0 10 10 9.99 9.99 0 0 0 10-10A9.99 9.99 0 0 0 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                                </svg>
+                                                <span>
+                                                    {{ selectedStudent.hasFingerprint ? 'Đã có vân tay'
+                                                    : 'Chưa đăng ký vân tay' }}
+                                                </span>
+                                            </span>
+                                        </div>
+
+                                        <div class="student-info-item">
+                                            <span class="detail-label">Thiết bị đã đăng ký</span>
+                                            <span class="detail-value">
+                                                {{ selectedStudent.fingerprintDevicesCount }} thiết bị
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!-- Danh sách thiết bị -->
+                                    <div class="device-list"
+                                        *ngIf="selectedStudent.devices && selectedStudent.devices.length > 0">
+                                        <div class="device-list-header">
+                                            <span class="device-list-title">Thiết bị có vân tay của sinh viên</span>
+                                            <span class="device-list-count">
+                                                {{ selectedStudent.devices.length }} thiết bị
+                                            </span>
+                                        </div>
+
+                                        <div class="device-item" *ngFor="let d of selectedStudent.devices">
+                                            <div class="device-main">
+                                                <div class="device-code">{{ d.deviceCode }}</div>
+                                                <div class="device-name">
+                                                    {{ d.deviceName || 'Thiết bị không tên' }}
+                                                </div>
+                                            </div>
+                                            <div class="device-meta">
+                                                <span class="device-room" *ngIf="d.room">
+                                                    Phòng: {{ d.room }}
+                                                </span>
+                                                <span class="device-slot">
+                                                    Slot: {{ d.sensorSlot }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="device-empty"
+                                        *ngIf="selectedStudent.devices && selectedStudent.devices.length === 0">
+                                        Sinh viên chưa đăng ký vân tay trên thiết bị nào.
+                                    </div>
+                                </div>
+
+                                <!-- No student yet -->
+                                <div class="student-empty" *ngIf="!selectedStudent && !searching">
+                                    <p>Chưa có sinh viên nào được chọn. Vui lòng nhập MSSV và nhấn <b>Tìm sinh viên</b>.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT: Fingerprint Enroll -->
+                        <div class="fingerprint-column">
+
+                            <div class="enroll-status-card">
+                                <h4 class="section-title">Phiên đăng ký vân tay</h4>
+
+                                <div *ngIf="!selectedStudent" class="empty-state">
+                                    <p>Vui lòng chọn sinh viên trước khi tạo phiên đăng ký vân tay.</p>
+                                </div>
+
+                                <ng-container *ngIf="selectedStudent">
+
+                                    <!-- Current state -->
+                                    <div class="enroll-state-row">
+                                        <span class="detail-label">Trạng thái hiện tại</span>
+                                        <span class="status-chip" [ngClass]="{
+                          'status-chip-muted': enrollState === 'idle',
+                          'status-chip-warning': enrollState === 'waitingDevice',
+                          'status-chip-info': enrollState === 'receivedFromDevice',
+                          'status-chip-success': enrollState === 'done',
+                          'status-chip-danger': enrollState === 'error'
+                        }">
+                                            <span *ngIf="enrollState === 'idle'">Chưa tạo phiên</span>
+                                            <span *ngIf="enrollState === 'waitingDevice'">Đang chờ thiết bị gửi
+                                                template</span>
+                                            <span *ngIf="enrollState === 'receivedFromDevice'">Đã nhận từ thiết bị, chờ
+                                                lưu</span>
+                                            <span *ngIf="enrollState === 'saving'">Đang lưu vân tay...</span>
+                                            <span *ngIf="enrollState === 'done'">Hoàn tất đăng ký vân tay</span>
+                                            <span *ngIf="enrollState === 'error'">Có lỗi xảy ra</span>
+                                        </span>
+                                    </div>
+
+                                    <!-- Session info -->
+                                    <div class="enroll-session-grid"
+                                        *ngIf="currentSessionCode || currentSensorSlot !== null">
+                                        <div class="detail-item">
+                                            <div class="detail-label">Session code</div>
+                                            <div class="detail-value code-value">
+                                                {{ currentSessionCode || '—' }}
+                                            </div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Sensor slot</div>
+                                            <div class="detail-value">
+                                                {{ currentSensorSlot !== null ? currentSensorSlot : '—' }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Actions -->
+                                    <div class="enroll-actions">
+                                        <button type="button" class="btn btn-primary" (click)="createEnrollSession()"
+                                            [disabled]="creatingSession || enrollState === 'waitingDevice'">
+                                            <span *ngIf="!creatingSession">Tạo phiên đăng ký</span>
+                                            <span *ngIf="creatingSession">Đang tạo phiên...</span>
+                                        </button>
+
+                                        <button type="button" class="btn btn-outline" (click)="cancelEnrollSession()"
+                                            [disabled]="!currentSessionCode || enrollState === 'saving'">
+                                            Hủy phiên
+                                        </button>
+
+                                        <button type="button" class="btn btn-outline btn-confirm-save"
+                                            (click)="confirmEnroll()" [disabled]="enrollState !== 'receivedFromDevice'">
+                                            Lưu vân tay cho sinh viên
+                                        </button>
+                                    </div>
+
+                                    <!-- Last message -->
+                                    <div class="enroll-message" *ngIf="lastEnrollMessage">
+                                        {{ lastEnrollMessage }}
+                                    </div>
+
+                                    <!-- Stepper help -->
+                                    <div class="enroll-steps">
+                                        <h5>Hướng dẫn thao tác</h5>
+                                        <ol class="stepper">
+                                            <li>
+                                                <span class="step-index">1</span>
+                                                <div class="step-content">
+                                                    <div class="step-title">Tạo phiên đăng ký vân tay</div>
+                                                    <div class="step-desc">
+                                                        Nhấn <b>Tạo phiên đăng ký</b>. Hệ thống sẽ tạo sessionCode và
+                                                        hiển
+                                                        thị tại đây.
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <span class="step-index">2</span>
+                                                <div class="step-content">
+                                                    <div class="step-title">Nhập sessionCode vào ESP32</div>
+                                                    <div class="step-desc">
+                                                        Mở Serial Monitor (hoặc giao diện web cho ESP), nhập sessionCode
+                                                        và
+                                                        bắt đầu quét vân tay
+                                                        theo hướng dẫn trên LCD.
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <span class="step-index">3</span>
+                                                <div class="step-content">
+                                                    <div class="step-title">Nhận template và lưu cho sinh viên</div>
+                                                    <div class="step-desc">
+                                                        Sau khi ESP gửi template lên server, trạng thái sẽ chuyển sang
+                                                        <i>Đã nhận từ thiết bị</i>. Nhấn <b>Lưu vân tay cho sinh
+                                                            viên</b> để
+                                                        hoàn tất.
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ol>
+                                    </div>
+
+                                </ng-container>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+</body>

@@ -31,6 +31,11 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/esp/**").permitAll()
+
+                                .requestMatchers("/api/fingerprint/**").permitAll()
+                                .requestMatchers("/api/students/**").permitAll()
+
 //                        .requestMatchers(
 //                                "/api/users/**",
 //                                "/api/classes/**",

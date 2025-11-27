@@ -23,12 +23,16 @@ export class SidebarComponent {
           this.titleService = "Quản lý lớp học";
         } else if (event.url === '/gv_quanlydiemso') {
           this.titleService = "Quản lý điểm số";
-        } else if (event.url === '/gv_quanlydiemdanh') {
-          this.titleService = "Quản lý điểm danh";
+        } else if (event.url === '/gv_lichday') {
+          this.titleService = "Lịch giảng dạy";
         } else if (event.url === '/chatbot') {
           this.titleService = "Chat Bot";
-        } else if (event.url === '/diemdanh') {
+        }  
+        else if (event.url === '/diemdanh') {
           this.titleService = "Chế độ điểm danh";
+        }
+        else if (event.url === '/gv-quanlyvantay') {
+          this.titleService = "Thêm vân tay";
         }
          else {
           this.titleService = "";    
@@ -48,8 +52,8 @@ export class SidebarComponent {
   navigateToScoreManagement() {
     this.router.navigate(['/gv_quanlydiemso']);
   }
-  navigateToAttendance() {
-    this.router.navigate(['/gv_quanlydiemdanh']);
+  navigateToSchedule() {
+    this.router.navigate(['/gv_lichday']);
   }
   navigateToChatBot() {
     this.router.navigate(['/chatbot']);
@@ -59,6 +63,9 @@ export class SidebarComponent {
   }
   navigateToAttendanceMode() {
     this.router.navigate(['/diemdanh']);
+  }
+  navigateToFingerprint() {
+    this.router.navigate(['/gv-quanlyvantay']);
   }
   isActive(route: string): boolean {
     return this.activeRoute === route;

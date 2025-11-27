@@ -4,7 +4,7 @@ import { LoginComponent } from './login/login.component';
 import { GvTrangchuComponent } from './gv-trangchu/gv-trangchu.component';
 import { GvQuanlylophocComponent } from './gv-quanlylophoc/gv-quanlylophoc.component';
 import { GvQuanlydiemsoComponent } from './gv-quanlydiemso/gv-quanlydiemso.component';
-import { GvQuanlydiemdanhComponent } from './gv-quanlydiemdanh/gv-quanlydiemdanh.component';
+//import { GvQuanlydiemdanhComponent } from './gv-quanlydiemdanh/gv-quanlydiemdanh.component';
 import { ChatbotComponent } from './chatbot/chatbot.component';
 import { TrangcanhanComponent } from './trangcanhan/trangcanhan.component';
 import { AdminComponent } from './admin/admin.component';
@@ -14,6 +14,9 @@ import { DiemdanhComponent } from './diemdanh/diemdanh.component';
 import { SvTrangchuComponent } from './sv-trangchu/sv-trangchu.component';
 import { SvDiemsoComponent } from './sv-diemso/sv-diemso.component';
 import { SvDiemdanhComponent } from './sv-diemdanh/sv-diemdanh.component';
+import { GvLichDayComponent } from './gv-lichday/gv-lichday.component';
+import { GvQuanlyvantayComponent } from './gv-quanlyvantay/gv-quanlyvantay.component';
+
 
 export const routes: Routes = [
 
@@ -37,9 +40,13 @@ export const routes: Routes = [
         path: 'gv_quanlydiemso',
         component: GvQuanlydiemsoComponent,
     },
+    // {
+    //     path: 'gv_quanlydiemdanh',
+    //     component: GvQuanlydiemdanhComponent,
+    // },
     {
-        path: 'gv_quanlydiemdanh',
-        component: GvQuanlydiemdanhComponent,
+        path: 'gv_lichday',
+        component: GvLichDayComponent,
     },
     {
         path: 'chatbot',
@@ -70,10 +77,15 @@ export const routes: Routes = [
         component:SvDiemdanhComponent,
     },
     {
+        path: 'gv-quanlyvantay',
+        component: GvQuanlyvantayComponent,
+    },
+    {
         path: '',
         redirectTo: '/slideshow',
         pathMatch: 'full'
     },
+   
     {
         path: '**',
         redirectTo: '/slideshow',

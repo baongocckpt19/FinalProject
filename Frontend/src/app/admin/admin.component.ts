@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 
 import { UserService } from '../services/user.service';
 import { ClassService, ClassList } from '../services/class.service';
+import { NotificationService } from '../services/notification.service';
+import { Router } from '@angular/router';
+
 
 interface UserList {
   accountId: number;
@@ -13,7 +16,7 @@ interface UserList {
   email: string | null;
   teacherId?: number | null;
   studentId?: number | null;
-    fingerCount?: number | null;
+  fingerCount?: number | null;
 }
 
 interface ClassDetail {
@@ -41,6 +44,17 @@ interface PendingStudent {
   fullName: string;
   username?: string;
 }
+
+/** LỊCH HỌC THEO NGÀY (ClassSchedule) */
+interface ClassScheduleItem {
+  scheduleId: number;
+  classId: number;
+  scheduleDate: string;   // '2025-11-27'
+  startTime: string;      // '07:00' hoặc '07:00:00'
+  endTime: string;        // '09:00' hoặc '09:00:00'
+  room: string | null;
+  isActive: boolean;      // true = hoạt động, false = tạm hoãn
+}
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -52,13 +66,14 @@ export class AdminComponent {
 
   constructor(
     private userService: UserService,
-    private classService: ClassService
+    private classService: ClassService,
+    private notify: NotificationService,
+     private router: Router
   ) { }
 
   // ================== STATE CHUNG ==================
-  isShowDashboard = true;
-  showAnalytics = false;
-  showUserManagement = false;
+
+  showUserManagement = true;
   showClassManagement = false;
 
   // ================== USER ==================
@@ -101,26 +116,13 @@ export class AdminComponent {
   editClassNewTeacherId: number | null = null;
   editClassNewTeacherName = '';
 
-  // ================== MỞ CÁC TAB ==================
-  openDashboard() {
-    this.isShowDashboard = true;
-    this.showAnalytics = false;
-    this.showClassManagement = false;
-    this.showUserManagement = false;
-  }
 
-  openAnalytics() {
-    this.showAnalytics = true;
-    this.isShowDashboard = false;
-    this.showClassManagement = false;
-    this.showUserManagement = false;
-  }
 
   openUserManagement() {
     this.showUserManagement = true;
-    this.isShowDashboard = false;
+
     this.showClassManagement = false;
-    this.showAnalytics = false;
+
 
     if (this.users.length === 0) {
       this.fetchUsers();
@@ -129,9 +131,8 @@ export class AdminComponent {
 
   openClassManagement() {
     this.showClassManagement = true;
-    this.isShowDashboard = false;
+
     this.showUserManagement = false;
-    this.showAnalytics = false;
 
     if (this.classes.length === 0) {
       this.fetchClasses();
@@ -185,17 +186,18 @@ export class AdminComponent {
   }
 
   deleteUser(accountId: number) {
-    if (!confirm('Bạn có chắc muốn xóa tài khoản này không?')) return;
-
-    this.userService.deleteUser(accountId).subscribe({
-      next: () => {
-        this.users = this.users.filter(u => u.accountId !== accountId);
-        this.filteredUsers = this.filteredUsers.filter(u => u.accountId !== accountId);
-      },
-      error: (err) => {
-        console.error(err);
-        alert('Lỗi khi xóa người dùng');
-      }
+    this.openConfirm('Bạn có chắc muốn xóa tài khoản này không?', () => {
+      this.userService.deleteUser(accountId).subscribe({
+        next: () => {
+          this.users = this.users.filter(u => u.accountId !== accountId);
+          this.filteredUsers = this.filteredUsers.filter(u => u.accountId !== accountId);
+          this.notify.success('Xóa người dùng thành công');
+        },
+        error: (err) => {
+          console.error(err);
+          this.notify.error('Lỗi khi xóa người dùng');
+        }
+      });
     });
   }
 
@@ -261,34 +263,35 @@ export class AdminComponent {
       );
     });
   }
-
   deleteClass(classId: number) {
-    if (!confirm('Bạn có chắc muốn xóa lớp này không?')) return;
-
-    this.classService.deleteClass(classId).subscribe({
-      next: () => {
-        this.classes = this.classes.filter(c => c.classId !== classId);
-      },
-      error: (err) => {
-        console.error(err);
-        alert('Lỗi khi xóa lớp');
-      }
+    this.openConfirm('Bạn có chắc muốn xóa lớp này không?', () => {
+      this.classService.deleteClass(classId).subscribe({
+        next: () => {
+          this.classes = this.classes.filter(c => c.classId !== classId);
+          this.notify.success('Xóa lớp học thành công');
+        },
+        error: (err) => {
+          console.error(err);
+          this.notify.error('Lỗi khi xóa lớp');
+        }
+      });
     });
   }
 
+
   // bật/tắt trạng thái lớp học
   toggleStatus(c: any) {
-  const newStatus = !c.status;
+    const newStatus = !c.status;
 
-  this.classService.toggleStatus(c.classId, newStatus).subscribe({
-    next: () => {
-      c.status = newStatus; // cập nhật trực tiếp giao diện
-    },
-    error: () => {
-      alert("Không thể thay đổi trạng thái lớp");
-    }
-  });
-}
+    this.classService.toggleStatus(c.classId, newStatus).subscribe({
+      next: () => {
+        c.status = newStatus; // cập nhật trực tiếp giao diện
+      },
+      error: () => {
+        alert("Không thể thay đổi trạng thái lớp");
+      }
+    });
+  }
 
   // ================== EDIT CLASS MODAL ==================
 
@@ -370,7 +373,6 @@ export class AdminComponent {
 
     this.classService.updateClass(this.editingClassId, payload).subscribe({
       next: () => {
-        // cập nhật lại trong danh sách hiển thị
         const idx = this.classes.findIndex(c => c.classId === this.editingClassId);
         if (idx !== -1) {
           this.classes[idx] = {
@@ -381,12 +383,14 @@ export class AdminComponent {
           };
         }
         this.closeClassEditModal();
+        this.notify.success('Cập nhật lớp học thành công');
       },
       error: () => {
-        alert('Cập nhật lớp học thất bại');
+        this.notify.error('Cập nhật lớp học thất bại');
       }
     });
   }
+
   //================= TẠO LỚP MỚI ==================
   createClassName = '';
   createClassCode = '';
@@ -428,7 +432,7 @@ export class AdminComponent {
 
   submitCreateClass() {
     if (!this.createClassName || !this.createClassCode) {
-      alert('Vui lòng nhập tên lớp và mã lớp');
+      this.notify.error('Vui lòng nhập tên lớp và mã lớp');
       return;
     }
 
@@ -440,15 +444,16 @@ export class AdminComponent {
 
     this.classService.createClass(payload).subscribe({
       next: () => {
-        // sau khi tạo xong thì tải lại danh sách lớp
         this.fetchClasses();
         this.closeCreateClassModal();
+        this.notify.success('Tạo lớp học thành công');
       },
       error: () => {
-        alert('Tạo lớp học thất bại (có thể mã lớp đã tồn tại)');
+        this.notify.error('Tạo lớp học thất bại (có thể mã lớp đã tồn tại)');
       }
     });
   }
+
 
   //====================== modal thêm sinh viên vào lớp ======================
   showAddStudentModal = false;
@@ -578,14 +583,15 @@ export class AdminComponent {
     this.classService.addStudentsToClass(this.classIdForAddingStudent, studentIds)
       .subscribe({
         next: () => {
-          alert('Đã thêm sinh viên vào lớp');
+          this.notify.success('Đã thêm sinh viên vào lớp');
           this.closeAddStudentModal();
           this.fetchClasses();
         },
         error: () => {
-          alert('Thêm sinh viên thủ công thất bại');
+          this.notify.error('Thêm sinh viên thủ công thất bại');
         }
       });
+
   }
 
   uploadCsvForClass() {
@@ -598,17 +604,16 @@ export class AdminComponent {
     this.classService.importStudentsFromCsv(this.classIdForAddingStudent, formData)
       .subscribe({
         next: (res: any) => {
-          alert(`Import CSV thành công: ${res?.imported ?? 0} SV. Lỗi: ${res?.rejectedCount ?? 0}`);
-          // nếu cần xem chi tiết lỗi:
-          // console.table(res?.rejectedRows || []);
+          this.notify.success(`Import CSV thành công: ${res?.imported ?? 0} SV, lỗi: ${res?.rejectedCount ?? 0}`);
           this.closeAddStudentModal();
           this.fetchClasses();
         },
         error: (err) => {
           console.error(err);
-          alert('Import CSV thất bại');
+          this.notify.error('Import CSV thất bại');
         }
       });
+
   }
 
   //================= MODAL DANH SÁCH SINH VIÊN CỦA LỚP ==================
@@ -639,29 +644,30 @@ export class AdminComponent {
 
   removeStudentFromClass(studentId: number) {
     if (!this.selectedClassForStudentModal) {
-      alert('Không xác định được lớp');
+      this.notify.error('Không xác định được lớp');
       return;
     }
-    if (!confirm('Bạn có chắc muốn xóa sinh viên này khỏi lớp không?')) return;
 
     const classId = this.selectedClassForStudentModal.classId;
 
-    this.classService.removeStudentFromClass(classId, studentId).subscribe({
-      next: () => {
-        // remove trong mảng
-        this.studentsOfSelectedClass = this.studentsOfSelectedClass
-          .filter(s => s.studentId !== studentId);
+    this.openConfirm('Bạn có chắc muốn xóa sinh viên này khỏi lớp không?', () => {
+      this.classService.removeStudentFromClass(classId, studentId).subscribe({
+        next: () => {
+          this.studentsOfSelectedClass = this.studentsOfSelectedClass
+            .filter(s => s.studentId !== studentId);
 
-        // đồng bộ lại bảng lớp (giảm số lượng sinh viên nếu cần)
-        const cls = this.classes.find(c => c.classId === classId);
-        if (cls && cls.studentCount > 0) {
-          cls.studentCount = cls.studentCount - 1;
+          const cls = this.classes.find(c => c.classId === classId);
+          if (cls && cls.studentCount > 0) {
+            cls.studentCount = cls.studentCount - 1;
+          }
+
+          this.notify.success('Đã xóa sinh viên khỏi lớp');
+        },
+        error: (err) => {
+          console.error(err);
+          this.notify.error('Xóa sinh viên khỏi lớp thất bại');
         }
-      },
-      error: (err) => {
-        console.error(err);
-        alert('Xóa sinh viên khỏi lớp thất bại');
-      }
+      });
     });
   }
 
@@ -701,4 +707,262 @@ export class AdminComponent {
       }
     });
   }
+  ngOnInit(): void {
+    this.openUserManagement();
+  }
+
+
+  // ========== LỊCH HỌC CỦA LỚP ==========
+  showClassScheduleModal = false;
+  showCreateScheduleModal = false;
+  showEditScheduleModal = false;
+
+  selectedClassForSchedule: ClassList | null = null;
+  classScheduleItems: ClassScheduleItem[] = [];
+
+  editingScheduleId: number | null = null;
+
+  // form thêm / sửa lịch học
+  scheduleFormDate: string = '';       // '2025-11-27'
+  scheduleFormStartTime: string = '';  // '07:00'
+  scheduleFormEndTime: string = '';    // '09:00'
+  scheduleFormRoom: string = '';
+  scheduleFormIsActive: boolean = true;
+
+  /** Mở modal lịch học khi bấm nút "Lịch học" ở bảng lớp */
+  openClassScheduleModal(cls: ClassList) {
+    this.selectedClassForSchedule = cls;
+    this.showClassScheduleModal = true;
+
+    this.loadSchedulesForClass(cls.classId);
+  }
+
+  /** Đóng modal lịch học */
+  closeClassScheduleModal() {
+    this.showClassScheduleModal = false;
+    this.selectedClassForSchedule = null;
+    this.classScheduleItems = [];
+  }
+
+  /** Gọi service lấy danh sách lịch học của 1 lớp */
+  private loadSchedulesForClass(classId: number) {
+    this.classService.getSchedulesByClassId(classId).subscribe({
+      next: (data: ClassScheduleItem[]) => {
+        this.classScheduleItems = data;
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Không tải được lịch học của lớp');
+      }
+    });
+  }
+
+  /** Mở modal thêm lịch học */
+  openCreateScheduleModal() {
+    if (!this.selectedClassForSchedule) {
+      alert('Không xác định được lớp để thêm lịch học');
+      return;
+    }
+
+    this.showCreateScheduleModal = true;
+    this.showEditScheduleModal = false;
+    this.editingScheduleId = null;
+
+    // reset form
+    this.scheduleFormDate = '';
+    this.scheduleFormStartTime = '';
+    this.scheduleFormEndTime = '';
+    this.scheduleFormRoom = '';
+    this.scheduleFormIsActive = true;
+  }
+
+  /** Mở modal sửa lịch học */
+  openEditScheduleModal(item: ClassScheduleItem) {
+    this.editingScheduleId = item.scheduleId;
+    this.showEditScheduleModal = true;
+    this.showCreateScheduleModal = false;
+
+    this.scheduleFormDate = item.scheduleDate;
+    this.scheduleFormStartTime = item.startTime;
+    this.scheduleFormEndTime = item.endTime;
+    this.scheduleFormRoom = item.room || '';
+    this.scheduleFormIsActive = item.isActive;
+  }
+
+  /** Đóng modal form thêm / sửa lịch học */
+  closeScheduleFormModal() {
+    this.showCreateScheduleModal = false;
+    this.showEditScheduleModal = false;
+    this.editingScheduleId = null;
+  }
+
+  /** Lưu form: nếu có editingScheduleId thì UPDATE, không thì CREATE */
+  saveScheduleForm() {
+    if (!this.selectedClassForSchedule) {
+      alert('Không xác định được lớp');
+      return;
+    }
+
+    if (!this.scheduleFormDate || !this.scheduleFormStartTime || !this.scheduleFormEndTime) {
+      alert('Vui lòng nhập đầy đủ ngày và giờ học');
+      return;
+    }
+
+    // kiểm tra giờ bắt đầu < giờ kết thúc (nếu parse được)
+    const start = new Date(`${this.scheduleFormDate}T${this.scheduleFormStartTime}`);
+    const end = new Date(`${this.scheduleFormDate}T${this.scheduleFormEndTime}`);
+    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end <= start) {
+      alert('Giờ kết thúc phải sau giờ bắt đầu');
+      return;
+    }
+
+    const payload = {
+      classId: this.selectedClassForSchedule.classId,
+      scheduleDate: this.scheduleFormDate,
+      startTime: this.scheduleFormStartTime,
+      endTime: this.scheduleFormEndTime,
+      room: this.scheduleFormRoom,
+      isActive: this.scheduleFormIsActive
+    };
+
+    // EDIT
+    if (this.editingScheduleId) {
+      this.classService.updateSchedule(this.editingScheduleId, payload).subscribe({
+        next: () => {
+          alert('Cập nhật lịch học thành công');
+          this.loadSchedulesForClass(this.selectedClassForSchedule!.classId);
+          this.closeScheduleFormModal();
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Cập nhật lịch học thất bại');
+        }
+      });
+      return;
+    }
+
+    // CREATE
+    this.classService.createSchedule(payload).subscribe({
+      next: () => {
+        alert('Thêm lịch học thành công');
+        this.loadSchedulesForClass(this.selectedClassForSchedule!.classId);
+        this.closeScheduleFormModal();
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Thêm lịch học thất bại');
+      }
+    });
+  }
+
+
+  /** Tick / bỏ tick tạm hoãn: cập nhật IsActive trong ClassSchedule */
+  onToggleScheduleActive(item: ClassScheduleItem, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const isChecked = input.checked;
+
+    const newIsActive = !isChecked; // tick = tạm hoãn => isActive = false
+
+    this.classService.updateScheduleActive(item.scheduleId, newIsActive).subscribe({
+      next: () => {
+        item.isActive = newIsActive;
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Không thể cập nhật trạng thái tạm hoãn');
+        // rollback checkbox
+        input.checked = !isChecked;
+      }
+    });
+  }
+  /** Text trạng thái lớp theo thời gian + IsActive */
+  getScheduleStatusLabel(item: ClassScheduleItem): string {
+    if (!item.isActive) {
+      return 'Tạm hoãn';
+    }
+
+    const now = new Date();
+    const start = new Date(`${item.scheduleDate}T${item.startTime}`);
+    const end = new Date(`${item.scheduleDate}T${item.endTime}`);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return 'Không xác định';
+    }
+
+    if (now < start) {
+      return 'Sắp diễn ra';
+    }
+
+    if (now > end) {
+      return 'Đã kết thúc';
+    }
+
+    return 'Đang diễn ra';
+  }
+
+  /** CSS class để đổi màu badge */
+  getScheduleStatusClass(item: ClassScheduleItem): string {
+    if (!item.isActive) {
+      return 'status-inactive';
+    }
+
+    const now = new Date();
+    const start = new Date(`${item.scheduleDate}T${item.startTime}`);
+    const end = new Date(`${item.scheduleDate}T${item.endTime}`);
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return '';
+    }
+
+    if (now < start) {
+      return 'status-upcoming';
+    }
+
+    if (now > end) {
+      return 'status-finished';
+    }
+
+    return 'status-running';
+  }
+  deleteSchedule(scheduleId: number) {
+    if (!confirm('Bạn có chắc muốn xóa lịch học này không?')) return;
+
+    this.classService.deleteSchedule(scheduleId).subscribe({
+      next: () => {
+        this.classScheduleItems = this.classScheduleItems
+          .filter(s => s.scheduleId !== scheduleId);
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Xóa lịch học thất bại');
+      }
+    });
+  }
+  // ================== CONFIRM DIALOG (XÁC NHẬN XÓA) ==================
+  confirmVisible = false;
+  confirmMessage = '';
+  private confirmCallback: (() => void) | null = null;
+
+  openConfirm(message: string, onConfirm: () => void) {
+    this.confirmMessage = message;
+    this.confirmCallback = onConfirm;
+    this.confirmVisible = true;
+  }
+
+  closeConfirm() {
+    this.confirmVisible = false;
+    this.confirmMessage = '';
+    this.confirmCallback = null;
+  }
+
+  confirmYes() {
+    if (this.confirmCallback) {
+      this.confirmCallback();
+    }
+    this.closeConfirm();
+  }
+logout() {
+  this.router.navigate(['/login']);
+}
+
 }

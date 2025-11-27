@@ -2,6 +2,7 @@ package com.FinalProject.backend.Service;
 
 import com.FinalProject.backend.Dto.AccountDto;
 import com.FinalProject.backend.Repository.AccountRepository;
+import com.FinalProject.backend.Repository.TeacherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class AccountService {
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private TeacherRepository teacherRepository; // ⭐ THÊM DÒNG NÀY
 
     public AccountDto login(String username, String password) {
         Object result = accountRepository.login(username, password);
@@ -28,7 +32,6 @@ public class AccountService {
         return accountDto;
     }
 
-
     public AccountDto getUser(int id) {
         Object result = accountRepository.findById(id);
         if (result == null) {
@@ -46,12 +49,19 @@ public class AccountService {
         return accountDto;
     }
 
-
     @Transactional
     public void softDeleteAccount(int id) {
         accountRepository.softDeleteAccount(id);
     }
 
+    // ⭐ THÊM MỚI: Lấy TeacherId từ username (dùng cho ClassScheduleService)
+    public Integer getTeacherIdByUsername(String username) {
+        Integer teacherId = teacherRepository.findTeacherIdByUsername(username);
+        if (teacherId == null) {
+            throw new RuntimeException("Không tìm thấy Teacher cho username: " + username);
+        }
+        return teacherId;
+    }
 
     // cách mã hoá password: String hashedPassword = passwordEncoder.encode(body.getPassword() + passwordSecret);
     // cách check !passwordEncoder.matches(body.getPassword() + passwordSecret, user.getPasswordHash())

@@ -4,12 +4,16 @@ package com.FinalProject.backend.Models;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Entity
-@Table(name = "Attendance")
 @Data
+@Entity
+@Table(
+        name = "Attendance",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"StudentId", "ScheduleId"})
+        }
+)
 public class Attendance {
 
     @Id
@@ -23,18 +27,12 @@ public class Attendance {
     @Column(name = "ClassId", nullable = false)
     private Integer classId;
 
-    @Column(name = "AttendanceDate", nullable = false)
-    private LocalDate attendanceDate;
+    @Column(name = "ScheduleId", nullable = false)
+    private Integer scheduleId;
 
     @Column(name = "AttendanceTime", nullable = false)
-    private LocalTime attendanceTime;
-
-    @Column(name = "SessionStart", nullable = false)
-    private LocalTime sessionStart;
-
-    @Column(name = "SessionEnd", nullable = false)
-    private LocalTime sessionEnd;
+    private LocalTime attendanceTime;   // giờ chấm vân tay
 
     @Column(name = "Status", nullable = false, length = 50)
-    private String status; // Có mặt / Vắng / Muộn ...
+    private String status;              // "Có mặt" / "Vắng" / "Muộn"
 }

@@ -30,12 +30,22 @@ export interface StudentOfClass {
   email: string;
   fingerCount: number;
 }
-
+/** LỊCH HỌC THEO NGÀY */
+export interface ClassScheduleItem {
+  scheduleId: number;
+  classId: number;
+  scheduleDate: string;
+  startTime: string;
+  endTime: string;
+  room: string | null;
+  isActive: boolean;
+}
 @Injectable({
   providedIn: 'root'
 })
 export class ClassService {
   private apiUrl = 'http://localhost:8080/api/classes'; 
+    private scheduleApiUrl = 'http://localhost:8080/api/class-schedule'; 
 
   constructor(private http: HttpClient) { }
 
@@ -97,7 +107,7 @@ importStudentsFromCsv(classId: number, formData: FormData) {
   return this.http.post(`${this.apiUrl}/${classId}/students/import`, formData);
 }
 
- // lấy danh sách SV của lớp (cho modal)
+ // lấy danh sách SV của lớp (cho modal THUỘC PHẦN LỚP HỌC-GV, ADMIN)
   getStudentsOfClass(classId: number) {
     return this.http.get<StudentOfClass[]>(`${this.apiUrl}/${classId}/students`);
   }
@@ -116,5 +126,54 @@ importStudentsFromCsv(classId: number, formData: FormData) {
     { responseType: 'text' }
   );
 }
+// ================== CLASS SCHEDULE của admin(LỊCH HỌC) ==================
 
+  /** Lấy tất cả lịch học của 1 lớp */
+  getSchedulesByClassId(classId: number): Observable<ClassScheduleItem[]> {
+    // gợi ý API: GET /api/class-schedule/by-class/{classId}
+    return this.http.get<ClassScheduleItem[]>(`${this.scheduleApiUrl}/by-class/${classId}`);
+  }
+
+  /** Tạo mới lịch học */
+  createSchedule(payload: {
+    classId: number;
+    scheduleDate: string;
+    startTime: string;
+    endTime: string;
+    room?: string;
+    isActive: boolean;
+  }) {
+    // gợi ý API: POST /api/class-schedule
+    return this.http.post(this.scheduleApiUrl, payload, {
+      responseType: 'text'
+    });
+  }
+
+  /** Cập nhật lịch học */
+  updateSchedule(scheduleId: number, payload: any) {
+    // gợi ý API: PUT /api/class-schedule/{id}
+    return this.http.put(`${this.scheduleApiUrl}/${scheduleId}`, payload, {
+      responseType: 'text'
+    });
+  }
+
+  /** Bật/tắt IsActive (tạm hoãn) */
+  updateScheduleActive(scheduleId: number, isActive: boolean) {
+    // gợi ý API: PUT /api/class-schedule/{id}/active?isActive=true/false
+    return this.http.put(
+      `${this.scheduleApiUrl}/${scheduleId}/active?isActive=${isActive}`,
+      {},
+      { responseType: 'text' }
+    );
+  }
+
+  /** Xóa 1 lịch học */
+  deleteSchedule(scheduleId: number) {
+    // gợi ý API: DELETE /api/class-schedule/{id}
+    return this.http.delete(`${this.scheduleApiUrl}/${scheduleId}`, {
+      responseType: 'text'
+    });
+  }
+
+ 
 }

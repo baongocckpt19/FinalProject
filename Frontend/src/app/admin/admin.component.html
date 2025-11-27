@@ -22,28 +22,10 @@
             <nav class="admin-nav">
                 <div class="nav-section">
                     <div class="nav-section-title">
-                        Tổng quan
-                    </div>
-                    <div class="admin-nav-item">
-                        <a class="admin-nav-link active" onclick="showSection('dashboard')">
-                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
-                            </svg> Dashboard </a>
-                    </div>
-                    <div class="admin-nav-item">
-                        <a class="admin-nav-link" onclick="showSection('analytics')">
-                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M16 4v4h4V4h-4zm-2-2h8v8h-8V2zm2 10v4h4v-4h-4zm-2-2h8v8h-8v-8zM4 4v4h4V4H4zM2 2h8v8H2V2zm2 10v4h4v-4H4zm-2-2h8v8H2v-8z" />
-                            </svg> Phân tích dữ liệu </a>
-                    </div>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">
                         Quản lý
                     </div>
                     <div class="admin-nav-item">
-                        <a class="admin-nav-link" (click)="openUserManagement()">
+                        <a class="admin-nav-link" (click)="openUserManagement( )">
                             <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
                                 <path
                                     d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
@@ -56,34 +38,20 @@
                                     d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
                             </svg> Quản lý lớp học </a>
                     </div>
-                </div>
-                <!-- phát triển nâng cao -->
-                <div class="nav-section">
-                    <div class="nav-section-title">
-                        Hệ thống
-                    </div>
-                    <div class="admin-nav-item"><a href="#" class="admin-nav-link">
+                    <div class="admin-nav-item">
+                        <a class="admin-nav-link" (click)="logout()">
                             <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-                            </svg> Bảo mật </a>
-                    </div>
-                    <div class="admin-nav-item"><a href="#" class="admin-nav-link">
-                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" />
-                            </svg> Cài đặt </a>
-                    </div>
-                    <div class="admin-nav-item"><a href="#" class="admin-nav-link">
-                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" />
-                            </svg> Hỗ trợ </a>
+                                <path d="M16 13v-2H7V8l-5 4 5 4v-3h9zm3-11H5c-1.1 0-2 .9-2 2v4h2V4h14v16H5v-4H3v4c0 
+      1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+                            </svg> Đăng xuất </a>
                     </div>
                 </div>
+
             </nav>
         </div>
         <!-- Main Content -->
-        <div class="admin-main"><!-- Top Header -->
+        <div class="admin-main">
+            <!-- Top Header -->
             <header class="top-header">
                 <div class="header-left">
                     <div>
@@ -96,16 +64,13 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <div class="search-box">
-                        <svg class="search-icon" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-                        </svg><input type="text" class="search-input" placeholder="Tìm kiếm...">
-                    </div><button class="notification-btn">
+                    <button class="notification-btn">
                         <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
                             <path
                                 d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-                        </svg><span class="notification-badge">5</span> </button>
+                        </svg>
+                        <span class="notification-badge">5</span>
+                    </button>
                     <div class="admin-profile">
                         <div class="admin-avatar">
                             AD
@@ -117,363 +82,6 @@
                     </div>
                 </div>
             </header>
-            <!-- Dashboard Section -->
-            <div id="dashboard" class="content-section active" *ngIf="isShowDashboard"><!-- Stats Cards -->
-                <div class="stats-grid">
-                    <div class="stat-card users">
-                        <div class="stat-header">
-                            <div class="stat-icon users">
-                                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zM4 18v-4h3v4h2v-7.5c0-.83.67-1.5 1.5-1.5S12 9.67 12 10.5V18h2v-4h3v4h2V8.5c0-1.1-.9-2-2-2h-3c-.55 0-1.05.22-1.41.59L9.59 10.5c-.36.36-.59.86-.59 1.41V18H4z" />
-                                </svg>
-                            </div>
-                            <div class="stat-trend up">
-                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M7 14l5-5 5 5z" />
-                                </svg> +12.5%
-                            </div>
-                        </div>
-                        <div class="stat-number">
-                            1,234
-                        </div>
-                        <div class="stat-label">
-                            Tổng người dùng
-                        </div>
-                        <div class="stat-description">
-                            +89 người dùng mới trong tuần
-                        </div>
-                    </div>
-                    <div class="stat-card classes">
-                        <div class="stat-header">
-                            <div class="stat-icon classes">
-                                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                                </svg>
-                            </div>
-                            <div class="stat-trend up">
-                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M7 14l5-5 5 5z" />
-                                </svg> +15.3%
-                            </div>
-                        </div>
-                        <div class="stat-number">
-                            2,847
-                        </div>
-                        <div class="stat-label">
-                            Lớp học hoạt động
-                        </div>
-                        <div class="stat-description">
-                            +234 lớp mới trong tháng
-                        </div>
-                    </div>
-                    <div class="stat-card attendance">
-                        <div class="stat-header">
-                            <div class="stat-icon attendance">
-                                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div class="stat-trend up">
-                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M7 14l5-5 5 5z" />
-                                </svg> +8.2%
-                            </div>
-                        </div>
-                        <div class="stat-number">
-                            94.2%
-                        </div>
-                        <div class="stat-label">
-                            Tỷ lệ điểm danh
-                        </div>
-                        <div class="stat-description">
-                            Tăng 2.1% so với tháng trước
-                        </div>
-                    </div>
-                    <div class="stat-card revenue">
-                        <div class="stat-header">
-                            <div class="stat-icon revenue">
-                                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                            </div>
-                            <div class="stat-trend up">
-                                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M7 14l5-5 5 5z" />
-                                </svg> +22.1%
-                            </div>
-                        </div>
-                        <div class="stat-number">
-                            8.7
-                        </div>
-                        <div class="stat-label">
-                            Điểm trung bình
-                        </div>
-                        <div class="stat-description">
-                            Tăng 0.3 điểm so với kỳ trước
-                        </div>
-                    </div>
-                </div><!-- Charts Section -->
-                <div class="charts-section">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">Thống kê người dùng</h3>
-                            <div class="chart-filter"><button class="filter-btn active">7 ngày</button> <button
-                                    class="filter-btn">30 ngày</button> <button class="filter-btn">3 tháng</button>
-                            </div>
-                        </div>
-                        <div class="chart-placeholder">
-                            📊 Biểu đồ thống kê người dùng theo thời gian
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">Phân bố vai trò</h3>
-                        </div>
-                        <div class="chart-placeholder">
-                            🥧 Biểu đồ tròn phân bố vai trò người dùng
-                        </div>
-                    </div>
-                </div><!-- Recent Activity -->
-                <div class="activity-section">
-                    <div class="activity-card">
-                        <div class="activity-header">
-                            <h3 class="activity-title">Hoạt động gần đây</h3><a href="#" class="view-all-btn">Xem tất
-                                cả</a>
-                        </div>
-                        <div class="activity-list">
-                            <div class="activity-item">
-                                <div class="activity-avatar">
-                                    GV
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        Giảng viên Nguyễn Văn A tạo lớp học mới
-                                    </div>
-                                    <div class="activity-time">
-                                        2 phút trước
-                                    </div>
-                                </div>
-                                <div class="activity-status status-success">
-                                    Thành công
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-avatar">
-                                    SV
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        156 sinh viên mới đăng ký tài khoản
-                                    </div>
-                                    <div class="activity-time">
-                                        15 phút trước
-                                    </div>
-                                </div>
-                                <div class="activity-status status-success">
-                                    Hoàn thành
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-avatar">
-                                    HT
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        Lỗi đồng bộ dữ liệu điểm danh
-                                    </div>
-                                    <div class="activity-time">
-                                        1 giờ trước
-                                    </div>
-                                </div>
-                                <div class="activity-status status-error">
-                                    Cần xử lý
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-avatar">
-                                    BT
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        Cập nhật hệ thống phiên bản 2.1.0
-                                    </div>
-                                    <div class="activity-time">
-                                        3 giờ trước
-                                    </div>
-                                </div>
-                                <div class="activity-status status-warning">
-                                    Đang xử lý
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="activity-card">
-                        <div class="activity-header">
-                            <h3 class="activity-title">Thông báo hệ thống</h3><a href="#" class="view-all-btn">Xem tất
-                                cả</a>
-                        </div>
-                        <div class="activity-list">
-                            <div class="activity-item">
-                                <div class="activity-avatar">
-                                    🔧
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        Bảo trì hệ thống định kỳ vào 2:00 AM
-                                    </div>
-                                    <div class="activity-time">
-                                        Hôm nay
-                                    </div>
-                                </div>
-                                <div class="activity-status status-warning">
-                                    Sắp tới
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-avatar">
-                                    🚀
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        Ra mắt tính năng AI Chat Bot mới
-                                    </div>
-                                    <div class="activity-time">
-                                        Hôm qua
-                                    </div>
-                                </div>
-                                <div class="activity-status status-success">
-                                    Hoàn thành
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-avatar">
-                                    📊
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        Báo cáo tháng 12 đã sẵn sàng
-                                    </div>
-                                    <div class="activity-time">
-                                        2 ngày trước
-                                    </div>
-                                </div>
-                                <div class="activity-status status-success">
-                                    Sẵn sàng
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <div class="activity-avatar">
-                                    🔒
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-text">
-                                        Cập nhật chính sách bảo mật
-                                    </div>
-                                    <div class="activity-time">
-                                        1 tuần trước
-                                    </div>
-                                </div>
-                                <div class="activity-status status-success">
-                                    Áp dụng
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Analytics Section -->
-            <div id="analytics" class="content-section active" *ngIf="showAnalytics">
-                <div class="analytics-grid">
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <h3 class="metric-title">Tổng số buổi học</h3>
-                        </div>
-                        <div class="metric-value">
-                            15,847
-                        </div>
-                        <div class="metric-change positive">
-                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M7 14l5-5 5 5z" />
-                            </svg> +18.2% so với tháng trước
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <h3 class="metric-title">Tỷ lệ tham gia trung bình</h3>
-                        </div>
-                        <div class="metric-value">
-                            87.3%
-                        </div>
-                        <div class="metric-change positive">
-                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M7 14l5-5 5 5z" />
-                            </svg> +3.1% so với tháng trước
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <h3 class="metric-title">Điểm trung bình toàn trường</h3>
-                        </div>
-                        <div class="metric-value">
-                            7.8
-                        </div>
-                        <div class="metric-change positive">
-                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M7 14l5-5 5 5z" />
-                            </svg> +0.4 điểm so với kỳ trước
-                        </div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <h3 class="metric-title">Số lượng bài tập đã nộp</h3>
-                        </div>
-                        <div class="metric-value">
-                            23,456
-                        </div>
-                        <div class="metric-change positive">
-                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M7 14l5-5 5 5z" />
-                            </svg> +25.7% so với tháng trước
-                        </div>
-                    </div>
-                </div>
-                <div class="charts-section">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">Xu hướng điểm danh theo thời gian</h3>
-                            <div class="chart-filter"><button class="filter-btn active">Tuần</button> <button
-                                    class="filter-btn">Tháng</button> <button class="filter-btn">Quý</button>
-                            </div>
-                        </div>
-                        <div class="chart-placeholder">
-                            📈 Biểu đồ xu hướng tỷ lệ điểm danh theo thời gian
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3 class="chart-title">Top 5 lớp có tỷ lệ tham gia cao nhất</h3>
-                        </div>
-                        <div class="chart-placeholder">
-                            🏆 Bảng xếp hạng lớp học
-                        </div>
-                    </div>
-                </div>
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Phân tích chi tiết theo khoa</h3>
-                        <div class="chart-filter"><button class="filter-btn active">Tất cả</button> <button
-                                class="filter-btn">CNTT</button> <button class="filter-btn">Kinh tế</button> <button
-                                class="filter-btn">Ngoại ngữ</button>
-                        </div>
-                    </div>
-                    <div class="chart-placeholder">
-                        📊 Biểu đồ so sánh hiệu suất giữa các khoa
-                    </div>
-                </div>
-            </div>
             <!-- Users Management Section -->
             <div id="users" class="content-section active" *ngIf="showUserManagement">
                 <div class="data-table">
@@ -601,7 +209,7 @@
                                     <th>Trạng thái</th>
                                     <th>Sinh viên đã có vân tay</th>
                                     <th>Thêm SV</th>
-                                    <th>Xuất danh sách SV</th>
+                                    <th>Lịch học</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
@@ -639,16 +247,21 @@
                                         </button>
                                     </td>
                                     <td>
-                                        <button class="btn btn-xuatbaocao" style="padding: 6px 12px; font-size: 12px;"
-                                            (click)="onExportStudentsOfClass(c.classId); $event.stopPropagation()">
-                                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                <path
-                                                    d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
-                                            </svg> Xuất DS SV
+                                        <button class="btn btn-lichhoc" style="padding: 6px 12px; font-size: 12px;"
+                                            (click)="openClassScheduleModal(c); $event.stopPropagation()">
+                                            Lịch học
                                         </button>
                                     </td>
                                     <td>
                                         <div class="action-buttons">
+                                            <button class="action-btn export"
+                                                style="padding: 6px 12px; font-size: 12px;"
+                                                (click)="onExportStudentsOfClass(c.classId); $event.stopPropagation()">
+                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+                                                </svg>
+                                            </button>
                                             <button class="action-btn edit"
                                                 (click)="openClassEditModal(c); $event.stopPropagation()">
                                                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
@@ -976,7 +589,8 @@
                                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                                     <path
                                         d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                                </svg> {{ selectedUser.teacherId ? 'Mã giảng viên' : (selectedUser.studentId ? 'Mã sinh viên' : 'Mã tài khoản} }') }}
+                                </svg> {{ selectedUser.teacherId ? 'Mã giảng viên' :
+                                (selectedUser.studentId ? 'Mã sinh viên' : 'Mã tài khoản} }') }}
                             </label>
                             <div
                                 style="padding: 12px 16px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; font-weight: 600; color: #1e293b;">
@@ -1083,7 +697,7 @@
                                     <th>Tên sinh viên</th>
                                     <th>Username</th>
                                     <th>Email</th>
-                                    <th>Số lượng vân tay</th>
+                                    <th>Số vân tay</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
@@ -1121,5 +735,211 @@
                 </div>
             </div>
         </div>
+
+        <!-- modal lịch học của lớp đang chọn -->
+        <!-- Modal lịch học của lớp đang chọn -->
+        <div class="modal show" *ngIf="showClassScheduleModal">
+            <div class="modal-content" style="max-width: 900px;">
+                <div class="modal-header">
+                    <h3>
+                        Lịch học - {{ selectedClassForSchedule?.className }}
+                        <span *ngIf="selectedClassForSchedule?.classCode">
+                            ({{ selectedClassForSchedule?.classCode }})
+                        </span>
+                    </h3>
+                    <button class="modal-close" (click)="closeClassScheduleModal()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="modal-form">
+                    <!-- Thông tin tổng quan lớp -->
+                    <div class="schedule-class-info">
+                        <div class="info-item">
+                            <span class="info-label">Giảng viên</span>
+                            <span class="info-value">{{ selectedClassForSchedule?.teacherName || '---' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Số sinh viên</span>
+                            <span class="info-value">{{ selectedClassForSchedule?.studentCount || 0 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Trạng thái lớp</span>
+                            <span class="status-badge"
+                                [ngClass]="selectedClassForSchedule?.status ? 'status-inactive' : 'status-active'">
+                                {{ selectedClassForSchedule?.status ? 'Đã hoàn thành' : 'Hoạt động' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="schedule-header">
+                        <h4 class="schedule-title">Danh sách lịch học</h4>
+                        <button class="btn btn-primary" (click)="openCreateScheduleModal()">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                            </svg>
+                            Thêm lịch học
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Ngày</th>
+                                    <th>Thời gian học</th>
+                                    <th>Phòng</th>
+                                    <th>Trạng thái lớp</th>
+                                    <th>Tạm hoãn</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of classScheduleItems; let i = index">
+                                    <td>{{ i + 1 }}</td>
+                                    <td>{{ item.scheduleDate | date:'dd/MM/yyyy' }}</td>
+                                    <td>{{ item.startTime }} - {{ item.endTime }}</td>
+                                    <td>{{ item.room || '---' }}</td>
+                                    <td>
+                                        <span class="status-badge" [ngClass]="getScheduleStatusClass(item)">
+                                            {{ getScheduleStatusLabel(item) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <label class="toggle-checkbox">
+                                            <input type="checkbox" [checked]="item.isActive === false"
+                                                (change)="onToggleScheduleActive(item, $event)" />
+                                            <span class="checkbox-label">
+                                                {{ item.isActive === false ? 'Đang tạm hoãn' : 'Bình thường' }}
+                                            </span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="action-btn edit" (click)="openEditScheduleModal(item)">
+                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                                </svg>
+                                            </button>
+                                            <button class="action-btn delete" (click)="deleteSchedule(item.scheduleId)">
+                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr *ngIf="!classScheduleItems || classScheduleItems.length === 0">
+                                    <td colspan="7" style="text-align: center; padding: 12px;">
+                                        Chưa có lịch học nào cho lớp này.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary"
+                            (click)="closeClassScheduleModal()">Đóng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal thêm / chỉnh sửa lịch học -->
+        <div class="modal show" *ngIf="showCreateScheduleModal || showEditScheduleModal">
+            <div class="modal-content" style="max-width: 520px;">
+                <div class="modal-header">
+                    <h3>{{ showEditScheduleModal ? 'Chỉnh sửa lịch học' : 'Thêm lịch học' }}</h3>
+                    <button class="modal-close" (click)="closeScheduleFormModal()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="modal-form">
+                    <div class="form-group">
+                        <label>Ngày học</label>
+                        <input type="date" [(ngModel)]="scheduleFormDate" name="scheduleFormDate">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Giờ bắt đầu</label>
+                            <input type="time" [(ngModel)]="scheduleFormStartTime" name="scheduleFormStartTime">
+                        </div>
+                        <div class="form-group">
+                            <label>Giờ kết thúc</label>
+                            <input type="time" [(ngModel)]="scheduleFormEndTime" name="scheduleFormEndTime">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phòng học</label>
+                        <input type="text" [(ngModel)]="scheduleFormRoom" name="scheduleFormRoom"
+                            placeholder="Nhập tên phòng, ví dụ: P101, Lab 3...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="toggle-checkbox">
+                            <input type="checkbox" [(ngModel)]="scheduleFormIsActive" name="scheduleFormIsActive">
+                            <span class="checkbox-label">
+                                Lịch hoạt động (bỏ tick nếu tạm hoãn)
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" (click)="closeScheduleFormModal()">Hủy</button>
+                        <button type="button" class="btn btn-primary" (click)="saveScheduleForm()">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                            </svg>
+                            {{ showEditScheduleModal ? 'Cập nhật' : 'Thêm lịch học' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Modal xác nhận xóa -->
+        <div class="modal show" *ngIf="confirmVisible">
+            <div class="modal-content" style="max-width: 400px;">
+                <div class="modal-header">
+                    <h3>Xác nhận</h3>
+                    <button class="modal-close" (click)="closeConfirm()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-form">
+                    <p style="margin-bottom: 24px; font-size: 14px; color: #1e293b;">
+                        {{ confirmMessage }}
+                    </p>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" (click)="closeConfirm()">
+                            Hủy
+                        </button>
+                        <button type="button" class="btn btn-primary" (click)="confirmYes()">
+                            Đồng ý
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
+
 </body>

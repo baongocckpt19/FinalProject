@@ -12,4 +12,14 @@ public interface TeacherRepository extends JpaRepository<Teacher, Integer> {
     //  Lấy TeacherId theo AccountId (tài khoản đang đăng nhập)
     @Query(value = "SELECT TeacherId FROM Teacher WHERE AccountId = ?1", nativeQuery = true)
     Integer findTeacherIdByAccountId(int accountId);
+
+
+    // ⭐ THÊM MỚI: Lấy TeacherId theo Username
+    @Query(value = """
+        SELECT t.TeacherId
+        FROM Teacher t
+        JOIN Account a ON t.AccountId = a.AccountId
+        WHERE a.Username = ?1
+        """, nativeQuery = true)
+    Integer findTeacherIdByUsername(String username);
 }

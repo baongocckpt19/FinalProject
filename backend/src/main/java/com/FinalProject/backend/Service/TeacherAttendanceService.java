@@ -1,313 +1,221 @@
 package com.FinalProject.backend.Service;
 
-import com.FinalProject.backend.Dto.AttendanceCalendarDayDto;
-import com.FinalProject.backend.Dto.AttendanceClassSummaryDto;
-import com.FinalProject.backend.Dto.AttendanceStudentDto;
-import com.FinalProject.backend.Dto.StudentAttendanceDetailDto;
+import com.FinalProject.backend.Dto.ClassAttendanceStudentDto;
 import com.FinalProject.backend.Dto.StudentAttendanceHistoryDto;
+import com.FinalProject.backend.Models.Attendance;
+import com.FinalProject.backend.Models.ClassSchedule;
 import com.FinalProject.backend.Models.Clazz;
 import com.FinalProject.backend.Repository.AttendanceRepository;
-import com.FinalProject.backend.Repository.ClassRepository;
-import com.FinalProject.backend.Repository.StudentRepository;
+import com.FinalProject.backend.Repository.ClassScheduleRepository;
 import com.FinalProject.backend.Repository.TeacherRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
+import java.nio.charset.StandardCharsets;
 import java.sql.Time;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class TeacherAttendanceService {
 
-    private final TeacherRepository teacherRepository;
     private final AttendanceRepository attendanceRepository;
-    private final StudentRepository studentRepository;
-    private final ClassRepository classRepository;
+    private final ClassScheduleRepository classScheduleRepository;
+    private final TeacherRepository teacherRepository;   // ⭐ thêm vào
 
-    public TeacherAttendanceService(TeacherRepository teacherRepository,
-                                    AttendanceRepository attendanceRepository,
-                                    StudentRepository studentRepository,
-                                    ClassRepository classRepository) {
-        this.teacherRepository = teacherRepository;
-        this.attendanceRepository = attendanceRepository;
-        this.studentRepository = studentRepository;
-        this.classRepository = classRepository;
-    }
+    // ====== 1) Lấy chi tiết điểm danh lớp theo 1 buổi (JSON cho FE) ======
+    public List<ClassAttendanceStudentDto> getClassAttendanceBySchedule(Integer scheduleId) {
+        // (đã bỏ check quyền như bạn muốn)
 
-    // ====== 1) Calendar theo khoảng ngày ======
-    public List<AttendanceCalendarDayDto> getCalendarForAccount(int accountId,
-                                                                LocalDate start,
-                                                                LocalDate end) {
-        Integer teacherId = teacherRepository.findTeacherIdByAccountId(accountId);
-        if (teacherId == null) {
-            return List.of();
-        }
-
-        List<Object[]> rows = attendanceRepository.findCalendarForTeacher(
-                teacherId,
-                Date.valueOf(start),
-                Date.valueOf(end)
-        );
-
-        return rows.stream().map(r -> {
-            AttendanceCalendarDayDto dto = new AttendanceCalendarDayDto();
-            Date d = (Date) r[0];
-            dto.setDate(d.toLocalDate().toString());                 // yyyy-MM-dd
-            dto.setClassCount(((Number) r[1]).intValue());
-            return dto;
-        }).toList();
-    }
-
-    // ====== 2) Danh sách lớp có điểm danh trong 1 ngày ======
-    public List<AttendanceClassSummaryDto> getClassesForAccountAndDate(int accountId,
-                                                                       LocalDate date) {
-        Integer teacherId = teacherRepository.findTeacherIdByAccountId(accountId);
-        if (teacherId == null) {
-            return List.of();
-        }
-
-        List<Object[]> rows = attendanceRepository.findClassesForTeacherAndDate(
-                teacherId,
-                Date.valueOf(date)
-        );
+        List<Object[]> rows = attendanceRepository.findClassAttendanceBySchedule(scheduleId);
 
         return rows.stream().map(r -> {
             int i = 0;
-            AttendanceClassSummaryDto dto = new AttendanceClassSummaryDto();
-            dto.setClassId(((Number) r[i++]).intValue());     // 0
-            dto.setClassCode(r[i++].toString());              // 1
-            dto.setClassName(r[i++].toString());              // 2
+            ClassAttendanceStudentDto dto = new ClassAttendanceStudentDto();
+            dto.setClassId(((Number) r[i++]).intValue());          // 0
+            dto.setScheduleId(((Number) r[i++]).intValue());       // 1
+            dto.setStudentId(((Number) r[i++]).intValue());        // 2
+            dto.setFullName((String) r[i++]);                      // 3
+            dto.setUsername((String) r[i++]);                      // 4
 
-            Time startTimeSql = (Time) r[i++];                // 3
-            Time endTimeSql   = (Time) r[i++];                // 4
-            LocalTime startTime = startTimeSql.toLocalTime();
-            LocalTime endTime   = endTimeSql.toLocalTime();
-            dto.setTime(String.format("%02d:%02d - %02d:%02d",
-                    startTime.getHour(), startTime.getMinute(),
-                    endTime.getHour(), endTime.getMinute()));
+            // ⭐ map email / phone
+            dto.setEmail((String) r[i++]);                         // 5
+            dto.setPhone((String) r[i++]);                         // 6
 
-            Object statusRaw = r[i++];                        // 5
-            boolean isActive;
-            if (statusRaw instanceof Boolean b) {
-                isActive = !b; // 0/false = hoạt động, 1/true = kết thúc
-            } else if (statusRaw instanceof Number n) {
-                isActive = n.intValue() == 0;
-            } else {
-                String s = statusRaw != null ? statusRaw.toString() : "";
-                isActive = "0".equals(s) || "false".equalsIgnoreCase(s);
-            }
-            dto.setStatus(isActive ? "Đang hoạt động" : "Đã kết thúc");
+            Object attIdObj = r[i++];                              // 7
+            dto.setAttendanceId(attIdObj != null
+                    ? ((Number) attIdObj).intValue()
+                    : null);
 
-            int total   = ((Number) r[i++]).intValue();       // 6
-            int present = ((Number) r[i++]).intValue();       // 7
-            int absent  = ((Number) r[i++]).intValue();       // 8
-            int late    = ((Number) r[i++]).intValue();       // 9
+            String statusVi = (String) r[i++];                     // 8
+            dto.setStatus(mapStatusViToCode(statusVi));            // present/absent/late/none
 
-            dto.setTotal(total);
-            dto.setPresent(present);
-            dto.setAbsent(absent);
-            dto.setLate(late);
-
-            double rate = total == 0 ? 0.0 : (present * 100.0 / total);
-            dto.setRate(rate);
+            Time t = (Time) r[i++];                                // 9
+            dto.setAttendanceTime(t != null ? t.toString() : null);
 
             return dto;
         }).toList();
     }
 
-    // ===================== 3) DS SV trong 1 lớp ở 1 ngày =====================
+    // ====== 2) Cập nhật / tạo mới điểm danh (giữ nguyên như bạn đang dùng) ======
+    public void upsertAttendance(Integer scheduleId,
+                                 Integer studentId,
+                                 String statusCode) {
+        ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy buổi học"));
 
-    public List<AttendanceStudentDto> getStudentsForClassAndDate(
-            int accountId,
-            int classId,
-            LocalDate date
-    ) {
-        // kiểm tra lớp có phải của GV đang đăng nhập không (an toàn hơn)
-        Integer teacherId = teacherRepository.findTeacherIdByAccountId(accountId);
-        if (teacherId == null) return List.of();
-
-        Optional<Clazz> clazzOpt = classRepository.findById(classId);
-        if (clazzOpt.isEmpty()) return List.of();
-        Clazz clazz = clazzOpt.get();
-        if (clazz.getTeacherId() == null || !clazz.getTeacherId().equals(teacherId)) {
-            // không phải lớp của GV này
-            return List.of();
+        Clazz clazz = schedule.getClazz();
+        if (clazz == null) {
+            throw new IllegalArgumentException("Buổi học không gắn với lớp nào");
         }
 
-        List<Object[]> rows = attendanceRepository
-                .findStudentAttendanceForClassAndDate(classId, Date.valueOf(date));
+        String statusVi = mapStatusCodeToVi(statusCode);
 
-        return rows.stream().map(r -> {
-            int i = 0;
-            AttendanceStudentDto dto = new AttendanceStudentDto();
-            dto.setAttendanceId(((Number) r[i++]).intValue());     // 0
-            dto.setStudentId(((Number) r[i++]).intValue());        // 1
-            dto.setFullName((String) r[i++]);                      // 2
-            dto.setUsername((String) r[i++]);                      // 3
+        Attendance att = attendanceRepository.findByStudentIdAndScheduleId(studentId, scheduleId);
+        if (att == null) {
+            att = new Attendance();
+            att.setStudentId(studentId);
+            att.setClassId(clazz.getClassId());
+            att.setScheduleId(scheduleId);
+        }
 
-            String statusVi = (String) r[i++];                     // 4
-            dto.setStatus(mapStatusViToCode(statusVi));            // present/absent/late
+        att.setStatus(statusVi);
+        att.setAttendanceTime(LocalTime.now());
 
-            Time time = (Time) r[i++];                             // 5
-            dto.setAttendanceTime(time != null ? time.toString() : null);
-
-            Integer totalSessions   = asInt(r[i++]);               // 6
-            Integer presentSessions = asInt(r[i++]);               // 7
-            Integer lateSessions    = asInt(r[i++]);               // 8
-            Integer absentSessions  = asInt(r[i++]);               // 9
-
-            dto.setTotalSessions(totalSessions != null ? totalSessions : 0);
-            dto.setPresentSessions(presentSessions != null ? presentSessions : 0);
-            dto.setLateSessions(lateSessions != null ? lateSessions : 0);
-            dto.setAbsentSessions(absentSessions != null ? absentSessions : 0);
-
-            int total = dto.getTotalSessions();
-            int joined = dto.getPresentSessions() + dto.getLateSessions();
-            double rate = (total == 0) ? 0.0 : (joined * 100.0 / total);
-            dto.setAttendanceRate(rate);
-
-            return dto;
-        }).toList();
+        attendanceRepository.save(att);
     }
 
-    // ===================== 4) Chi tiết 1 sinh viên trong lớp =====================
+    // ====== 3) Xuất CSV (logic nằm ở service) ======
 
-    public StudentAttendanceDetailDto getStudentDetailForClass(
-            int accountId,
-            int classId,
-            int studentId
-    ) {
-        Integer teacherId = teacherRepository.findTeacherIdByAccountId(accountId);
-        if (teacherId == null) return null;
+    @Transactional(readOnly = true)
+    public byte[] exportAttendanceCsv(Integer scheduleId) {
+        // 3.1 Lấy thông tin schedule + lớp + giảng viên
+        ClassSchedule schedule = classScheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy buổi học"));
 
-        Optional<Clazz> clazzOpt = classRepository.findById(classId);
-        if (clazzOpt.isEmpty()) return null;
-        Clazz clazz = clazzOpt.get();
-        if (clazz.getTeacherId() == null || !clazz.getTeacherId().equals(teacherId)) {
-            return null;
-        }
+        Clazz clazz = schedule.getClazz();   // Lúc này vẫn còn session, LAZY load OK
+        String className  = clazz != null ? clazz.getClassName()  : "";
+        String classCode  = clazz != null ? clazz.getClassCode()  : "";
+        Integer teacherId = clazz != null ? clazz.getTeacherId()  : null;
 
-        // Thông tin lớp
-        String classCode = clazz.getClassCode();
-        String className = clazz.getClassName();
-
-        // Thông tin sinh viên + username, email, phone...
-        Object info = studentRepository.findStudentInfoById(studentId);
-        if (info == null) return null;
-        Object[] o = (Object[]) info;
-        int i = 0;
-        Integer sId        = (Integer) o[i++]; // 0
-        String fullName    = (String)  o[i++]; // 1
-        String username    = (String)  o[i++]; // 2
-        String dateOfBirth = (String)  o[i++]; // 3
-        String gender      = (String)  o[i++]; // 4
-        String address     = (String)  o[i++]; // 5
-        String email       = (String)  o[i++]; // 6
-        String phone       = (String)  o[i++]; // 7
-
-        // Lịch sử điểm danh
-        List<Object[]> rows = attendanceRepository
-                .findAttendanceHistoryForStudentInClass(classId, studentId);
-
-        final int[] totalSessions = {0};
-        final int[] present = {0};
-        final int[] late = { 0 };
-        final int[] absent = { 0 };
-
-        List<StudentAttendanceHistoryDto> history = rows.stream().map(r -> {
-            StudentAttendanceHistoryDto h = new StudentAttendanceHistoryDto();
-            int j = 0;
-            h.setAttendanceId(((Number) r[j++]).intValue()); // 0
-            Date d = (Date) r[j++];                          // 1
-            Time sessionStart = (Time) r[j++];               // 2
-            Time sessionEnd   = (Time) r[j++];               // 3
-            String statusVi   = (String) r[j++];             // 4
-            Time attTime      = (Time) r[j++];               // 5
-
-            h.setDate(d.toLocalDate().toString());
-            h.setSessionTime(String.format("%02d:%02d - %02d:%02d",
-                    sessionStart.toLocalTime().getHour(), sessionStart.toLocalTime().getMinute(),
-                    sessionEnd.toLocalTime().getHour(), sessionEnd.toLocalTime().getMinute()));
-            String statusCode = mapStatusViToCode(statusVi);
-            h.setStatus(statusCode);
-            h.setAttendanceTime(attTime != null ? attTime.toString() : null);
-
-            // thống kê
-            totalSessions[0]++;
-            switch (statusCode) {
-                case "present" -> present[0]++;
-                case "late"    -> late[0]++;
-                case "absent"  -> absent[0]++;
+        String teacherName = "";
+        if (teacherId != null) {
+            Object t = teacherRepository.findTeacherShortById(teacherId);
+            if (t != null) {
+                Object[] arr = (Object[]) t;
+                teacherName = (String) arr[1]; // TeacherId, FullName
             }
-
-            return h;
-        }).toList();
-
-        // Nếu muốn tổng buổi là tổng buổi của lớp, dùng countTotalSessionsForClass
-        Integer totalFromClass = attendanceRepository.countTotalSessionsForClass(classId);
-        if (totalFromClass != null && totalFromClass > totalSessions[0]) {
-            totalSessions[0] = totalFromClass;
         }
 
-        int joined = present[0] + late[0];
-        double rate = (totalSessions[0] == 0) ? 0.0 : (joined * 100.0 / totalSessions[0]);
+        String ngayDay   = schedule.getScheduleDate() != null ? schedule.getScheduleDate().toString() : "";
+        String timeRange = "";
+        if (schedule.getStartTime() != null && schedule.getEndTime() != null) {
+            timeRange = schedule.getStartTime() + " - " + schedule.getEndTime();
+        }
+        String room = schedule.getRoom() != null ? schedule.getRoom() : "";
 
-        StudentAttendanceDetailDto dto = new StudentAttendanceDetailDto();
-        dto.setStudentId(sId);
-        dto.setFullName(fullName);
-        dto.setUsername(username);
-        dto.setEmail(email);
-        dto.setPhone(phone);
+        // 3.2 Lấy danh sách sinh viên & điểm danh
+        List<ClassAttendanceStudentDto> rows = getClassAttendanceBySchedule(scheduleId);
 
-        dto.setClassId(classId);
-        dto.setClassCode(classCode);
-        dto.setClassName(className);
+        StringBuilder sb = new StringBuilder();
 
-        dto.setTotalSessions(totalSessions[0]);
-        dto.setPresentSessions(present[0]);
-        dto.setLateSessions(late[0]);
-        dto.setAbsentSessions(absent[0]);
-        dto.setAttendanceRate(rate);
+        // ⭐ Thêm BOM để Excel nhận đúng UTF-8, fix CÃ³ máº·t
+        sb.append('\uFEFF');
 
-        dto.setHistory(history);
-        return dto;
+        // Header thông tin lớp
+        sb.append("Lớp,").append(escapeCsv(className))
+                .append(" (").append(classCode).append(")").append('\n');
+        sb.append("Giảng viên,").append(escapeCsv(teacherName)).append('\n');
+        sb.append("Ngày dạy,").append(ngayDay).append('\n');
+        sb.append("Thời gian,").append(timeRange).append('\n');
+        sb.append("Phòng,").append(escapeCsv(room)).append('\n');
+
+        sb.append('\n'); // dòng trống
+
+        // Header bảng sinh viên
+        sb.append("STT,Tên,Mã số sinh viên,Thời gian điểm danh,Trạng thái điểm danh\n");
+
+        int index = 1;
+        for (ClassAttendanceStudentDto r : rows) {
+            String statusText = mapStatusCodeToVi(r.getStatus());  // present/absent/late -> Có mặt/Vắng/Muộn
+            String time = r.getAttendanceTime() != null ? r.getAttendanceTime() : "";
+
+            sb.append(index++).append(',')
+                    .append(escapeCsv(r.getFullName())).append(',')
+                    // Mã số sinh viên = StudentId theo yêu cầu
+                    .append(r.getStudentId() != null ? r.getStudentId() : 0).append(',')
+                    .append(time).append(',')
+                    .append(statusText)
+                    .append('\n');
+        }
+
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 
-    // ===================== 5) Cập nhật trạng thái 1 bản ghi =====================
+    // ====== Helper: map tiếng Việt <-> code ======
+    private static String mapStatusViToCode(String statusVi) {
+        if (statusVi == null) return "none";
+        statusVi = statusVi.trim();
+        if (statusVi.equalsIgnoreCase("Có mặt")) return "present";
+        if (statusVi.equalsIgnoreCase("Muộn"))   return "late";
+        if (statusVi.equalsIgnoreCase("Vắng"))   return "absent";
+        return "none";
+    }
 
-    @Transactional
-    public void updateAttendanceStatus(int accountId, int attendanceId, String newStatusCode) {
-        // map statusCode -> tiếng Việt trong DB
-        String statusVi = switch (newStatusCode) {
+    private static String mapStatusCodeToVi(String code) {
+        if (code == null) return "Vắng";
+        return switch (code) {
             case "present" -> "Có mặt";
             case "late"    -> "Muộn";
             case "absent"  -> "Vắng";
-            default -> throw new IllegalArgumentException("Trạng thái không hợp lệ: " + newStatusCode);
+            default        -> "Vắng";
         };
-
-        attendanceRepository.updateAttendanceStatus(attendanceId, statusVi);
     }
 
-    // ===================== Helpers =====================
-
-    private static String mapStatusViToCode(String statusVi) {
-        if (statusVi == null) return "absent";
-        statusVi = statusVi.trim();
-        if (statusVi.equalsIgnoreCase("Có mặt")) return "present";
-        if (statusVi.equalsIgnoreCase("Muộn")) return "late";
-        if (statusVi.equalsIgnoreCase("Vắng")) return "absent";
-        return "absent";
-    }
-
-    private static Integer asInt(Object o) {
-        if (o == null) return null;
-        if (o instanceof Number n) return n.intValue();
-        try { return Integer.parseInt(o.toString()); } catch (Exception e) { return null; }
+    private String escapeCsv(String value) {
+        if (value == null) return "";
+        String v = value.replace("\"", "\"\"");
+        if (v.contains(",") || v.contains("\"") || v.contains("\n")) {
+            return "\"" + v + "\"";
+        }
+        return v;
     }
 
 
+    // ====== 3b) Lịch sử điểm danh của 1 sinh viên trong 1 lớp ======
+    @Transactional(readOnly = true)
+    public List<StudentAttendanceHistoryDto> getStudentHistory(Integer classId, Integer studentId) {
+        List<Object[]> rows = attendanceRepository.findStudentHistoryByClass(classId, studentId);
+
+        return rows.stream().map(r -> {
+            int i = 0;
+            Integer scheduleId = ((Number) r[i++]).intValue();     // 0
+            Date dateSql       = (Date) r[i++];                    // 1
+            Time startSql      = (Time) r[i++];                    // 2
+            Time endSql        = (Time) r[i++];                    // 3
+            String statusVi    = (String) r[i++];                  // 4
+            Time attTimeSql    = (Time) r[i++];                    // 5
+
+            LocalDate date = dateSql != null ? dateSql.toLocalDate() : null;
+            LocalTime start = startSql != null ? startSql.toLocalTime() : null;
+            LocalTime end = endSql != null ? endSql.toLocalTime() : null;
+
+            String statusCode = mapStatusViToCode(statusVi);       // present/absent/late/none
+            String attendanceTime = attTimeSql != null ? attTimeSql.toString() : null;
+
+            StudentAttendanceHistoryDto dto = new StudentAttendanceHistoryDto();
+            dto.setScheduleId(scheduleId);
+            dto.setDate(date);
+            dto.setStartTime(start);
+            dto.setEndTime(end);
+            dto.setStatus(statusCode);
+            dto.setAttendanceTime(attendanceTime);
+
+            return dto;
+        }).toList();
+    }
 }
