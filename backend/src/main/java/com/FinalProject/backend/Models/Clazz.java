@@ -1,4 +1,5 @@
-package com.FinalProject.backend.Models;
+//ĐÂY LÀ CLAzz.JAVA
+ package com.FinalProject.backend.Models;
 
 import jakarta.persistence.*;
 import lombok.Data;

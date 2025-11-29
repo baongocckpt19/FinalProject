@@ -507,7 +507,7 @@ export class GvQuanlydiemsoComponent {
           fullName: item.fullName,
           username: item.username,
           mssv: item.studentId.toString(), // MSSV hiển thị = StudentId
-          diemChuyenCan: item.attendanceGrade ?? 0,
+          diemChuyenCan: item.attendanceGrade?? 0,
           diemGiuaKy: item.midtermGrade ?? 0,
           diemCuoiKy: item.finalGrade ?? 0,
           diemTrungbinh: item.averageGrade ?? 0,

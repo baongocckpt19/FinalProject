@@ -33,4 +33,9 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
         WHERE a.Username = ?1
         """, nativeQuery = true)
     Integer findStudentIdByUsername(String username);
+    /**
+     * Tìm sinh viên tương ứng với 1 tài khoản (AccountId).
+     *  - Bảng Student có cột AccountId (FK sang Account).
+     */
+    Student findByAccountId(Integer accountId);
 }

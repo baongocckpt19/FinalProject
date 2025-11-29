@@ -1,232 +1,140 @@
 <body>
-    <div class="container"><!-- Main Content -->
+    <div class="container">
+        <!-- Main Content -->
         <main class="main-content">
             <!-- Content -->
-            <div class="content"><!-- Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card total">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-                            </svg>
-                        </div>
-                        <div class="stat-label">
-                            Tổng số lớp
-                        </div>
-                        <div class="stat-value">
-                            12
-                        </div>
-                    </div>
-                    <div class="stat-card completed">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                            </svg>
-                        </div>
-                        <div class="stat-label">
-                            Đã hoàn thành
-                        </div>
-                        <div class="stat-value">
-                            8
-                        </div>
-                    </div>
-                    <div class="stat-card in-progress">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                            </svg>
-                        </div>
-                        <div class="stat-label">
-                            Đang học
-                        </div>
-                        <div class="stat-value">
-                            4
-                        </div>
-                    </div>
-                    <div class="stat-card gpa">
-                        <div class="stat-icon">
-                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                            </svg>
-                        </div>
-                        <div class="stat-label">
-                            GPA Trung bình
-                        </div>
-                        <div class="stat-value">
-                            3.65
-                        </div>
-                    </div>
-                </div><!-- Classes Section -->
+            <div class="content">
+                <!-- Classes Section -->
                 <div class="classes-section">
                     <div class="section-header">
                         <h2 class="section-title">Danh sách lớp học</h2>
+
+                        <!-- Filter Tabs -->
                         <div class="filter-tabs">
-                            <button class="filter-tab active" onclick="filterClasses('all')">Tất cả
+                            <button class="filter-tab" [class.active]="currentFilter === 'all'"
+                                (click)="setFilter('all')">
+                                Tất cả
                             </button>
-                            <button class="filter-tab" onclick="filterClasses('in-progress')">Đang học
+
+                            <button class="filter-tab" [class.active]="currentFilter === 'in-progress'"
+                                (click)="setFilter('in-progress')">
+                                Đang học
                             </button>
-                            <button class="filter-tab" onclick="filterClasses('completed')">Đã hoànthành
+
+                            <button class="filter-tab" [class.active]="currentFilter === 'completed'"
+                                (click)="setFilter('completed')">
+                                Đã hoàn thành
                             </button>
                         </div>
-                    </div><!-- Search Bar -->
+                    </div>
+
+                    <!-- Search Bar -->
                     <div class="search-bar" style="max-width: 500px;">
                         <svg class="search-icon" fill="currentColor" viewBox="0 0 24 24">
                             <path
                                 d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                         </svg>
+
                         <input type="text" id="searchInput" class="search-input" placeholder="Tìm kiếm lớp học..."
-                            oninput="searchClasses()">
-                        <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display: none;">
+                            [(ngModel)]="searchKeyword" (input)="onSearchChange()" />
+
+                        <button class="search-clear" id="searchClear" *ngIf="searchKeyword"
+                            (click)="searchKeyword = ''; onSearchChange()">
                             <svg fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
                                 <path
                                     d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
                             </svg>
                         </button>
                     </div>
-                    <div class="classes-grid" id="classesGrid"><!-- Class Card 1 -->
-                        <div class="class-card" data-status="completed">
+
+                    <!-- Classes Grid -->
+                    <div class="classes-grid" id="classesGrid">
+                        <!-- Card lớp -->
+                        <div class="class-card" *ngFor="let c of pagedClasses"
+                            [attr.data-status]="c.status ? 'completed' : 'in-progress'">
                             <div class="class-header">
                                 <div class="class-info">
-                                    <h3>Lập trình Web</h3>
-                                    <p class="class-code">Mã lớp: WEB01</p>
+                                    <h3>{{ c.className }}</h3>
+                                    <p class="class-code">Mã lớp: {{ c.classCode }}</p>
                                 </div>
-                                <span class="class-status completed">Đã hoàn thành
+
+                                <span class="class-status" [ngClass]="getStatusCss(c)">
+                                    {{ getStatusText(c) }}
                                 </span>
                             </div>
+
                             <div class="class-meta">
                                 <div class="meta-item">
                                     <svg class="meta-icon" fill="currentColor" viewBox="0 0 24 24">
                                         <path
-                                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                                    </svg> 30 buổi
-                                </div>
-                                <div class="meta-item">
-                                    <svg class="meta-icon" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
                                             d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.65 0 3 1.35 3 3s-1.35 3-3 3-3-1.35-3-3 1.35-3 3-3zm6 12H6v-1c0-2 4-3.1 6-3.1s6 1.1 6 3.1v1z" />
-                                    </svg> TS. Nguyễn Văn A
+                                    </svg>
+                                    {{ c.teacherName || 'Chưa phân công' }}
                                 </div>
                             </div>
+
+                            <!-- 3 đầu điểm -->
                             <div class="class-grades">
                                 <div class="grade-item">
-                                    <div class="grade-label">
-                                        TX
-                                    </div>
+                                    <div class="grade-label">TX</div>
                                     <div class="grade-value">
-                                        8.5
+                                        {{ displayGrade(c.attendanceGrade) }}
                                     </div>
                                 </div>
+
                                 <div class="grade-item">
-                                    <div class="grade-label">
-                                        GK
-                                    </div>
+                                    <div class="grade-label">GK</div>
                                     <div class="grade-value">
-                                        9.0
+                                        {{ displayGrade(c.midtermGrade) }}
                                     </div>
                                 </div>
+
                                 <div class="grade-item">
-                                    <div class="grade-label">
-                                        CK
-                                    </div>
+                                    <div class="grade-label">CK</div>
                                     <div class="grade-value">
-                                        8.7
-                                    </div>
-                                </div>
-                                <div class="grade-item">
-                                    <div class="grade-label">
-                                        BTL
-                                    </div>
-                                    <div class="grade-value">
-                                        9.5
+                                        {{ displayGrade(c.finalGrade) }}
                                     </div>
                                 </div>
                             </div>
-                            <div class="class-final"><span class="final-label">Điểm tổng kết</span>
-                                <div class="final-grade"><span class="grade-number">8.9</span> <span
-                                        class="grade-letter a">A</span>
-                                </div>
-                            </div>
-                        </div><!-- Class Card 2 -->
-                        <div class="class-card" data-status="in-progress">
-                            <div class="class-header">
-                                <div class="class-info">
-                                    <h3>Cơ sở d�� liệu</h3>
-                                    <p class="class-code">Mã Lớp: DB01</p>
-                                </div><span class="class-status in-progress">Đang học</span>
-                            </div>
-                            <div class="class-meta">
-                                <div class="meta-item">
-                                    <svg class="meta-icon" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                                    </svg> 25 buổi học
-                                </div>
-                                <div class="meta-item">
-                                    <svg class="meta-icon" fill="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.65 0 3 1.35 3 3s-1.35 3-3 3-3-1.35-3-3 1.35-3 3-3zm6 12H6v-1c0-2 4-3.1 6-3.1s6 1.1 6 3.1v1z" />
-                                    </svg>Trần Thị B
-                                </div>
-                            </div>
-                            <div class="class-grades">
-                                <div class="grade-item">
-                                    <div class="grade-label">
-                                        TX
-                                    </div>
-                                    <div class="grade-value">
-                                        9.0
-                                    </div>
-                                </div>
-                                <div class="grade-item">
-                                    <div class="grade-label">
-                                        GK
-                                    </div>
-                                    <div class="grade-value">
-                                        8.8
-                                    </div>
-                                </div>
-                                <div class="grade-item">
-                                    <div class="grade-label">
-                                        CK
-                                    </div>
-                                    <div class="grade-value">
-                                        -
-                                    </div>
-                                </div>
-                                <div class="grade-item">
-                                    <div class="grade-label">
-                                        BTL
-                                    </div>
-                                    <div class="grade-value">
-                                        -
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="class-final"><span class="final-label">
-                                    Điểm tổng kết
-                                </span>
-                                <div class="final-grade"><span class="grade-number">-</span>
-                                    <span class="grade-letter b">Chưa có
+
+                            <!-- Điểm tổng kết (nếu đủ 3 đầu điểm, đã tính 25-25-50 ở backend) -->
+                            <div class="class-final">
+                                <span class="final-label">Điểm tổng kết</span>
+                                <div class="final-grade">
+                                    <span class="grade-number">
+                                        {{ displayGrade(c.averageGrade) }}
                                     </span>
                                 </div>
                             </div>
                         </div>
-                       
-                    </div><!-- Pagination -->
-                    <div class="pagination" id="pagination"><button class="pagination-button" id="prevBtn"
-                            onclick="changePage(-1)">
+
+                        <!-- Trường hợp không có lớp nào -->
+                        <div *ngIf="!pagedClasses.length && !loading" class="no-data">
+                            Không có lớp nào để hiển thị.
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination" id="pagination" *ngIf="totalPages > 1">
+                        <button class="pagination-button" id="prevBtn" (click)="changePage(-1)"
+                            [disabled]="currentPage === 1">
                             <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
                                 <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
-                            </svg> Trước </button>
+                            </svg>
+                            Trước
+                        </button>
+
                         <div class="pagination-info" id="pageInfo">
-                            Trang 1 / 1
-                        </div><button class="pagination-button" id="nextBtn" onclick="changePage(1)"> Sau
+                            Trang {{ currentPage }} / {{ totalPages }}
+                        </div>
+
+                        <button class="pagination-button" id="nextBtn" (click)="changePage(1)"
+                            [disabled]="currentPage === totalPages">
+                            Sau
                             <svg fill="currentColor" viewBox="0 0 24 24" width="16" height="16">
                                 <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z" />
-                            </svg></button>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>

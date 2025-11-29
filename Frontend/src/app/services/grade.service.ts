@@ -25,6 +25,18 @@ export interface StudentGradeSaveDto {
   finalGrade: number;
 }
 
+export interface StudentClassGrade {
+  classId: number;
+  classCode: string;
+  className: string;
+  status: boolean;              // false = đang học, true = đã hoàn thành
+  teacherName: string | null;
+  attendanceGrade: number | null;
+  midtermGrade: number | null;
+  finalGrade: number | null;
+  averageGrade: number | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -84,6 +96,15 @@ export class GradeService {
     return this.http.post(
       `${this.apiBase}/api/classes/${classId}/grades/import`,
       form
+    );
+  }
+
+  //====================Phần sinh viên====================
+
+  /** Lấy danh sách lớp + điểm của sinh viên đang đăng nhập */
+  getStudentClassesWithGrades(): Observable<StudentClassGrade[]> {
+    return this.http.get<StudentClassGrade[]>(
+      `${this.apiBase}/api/student/grades/classes`
     );
   }
 

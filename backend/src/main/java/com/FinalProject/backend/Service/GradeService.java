@@ -233,4 +233,44 @@ public class GradeService {
         }
         return line;
     }
+
+
+    // ================== phần sinh vieeen================
+    // ================== DASHBOARD ĐIỂM CHO SINH VIÊN ==================
+    public List<com.FinalProject.backend.Dto.StudentClassGradeDto>
+    getClassesWithGradesForStudent(Integer studentId) {
+
+        List<Object[]> rows = gradeRepository.findClassGradesForStudent(studentId);
+
+        return rows.stream().map(r -> {
+            int i = 0;
+            Integer classId      = (Integer) r[i++];
+            String classCode     = (String)  r[i++];
+            String className     = (String)  r[i++];
+            Boolean status       = r[i] != null ? (Boolean) r[i] : null; i++;
+            String teacherName   = (String)  r[i++];
+            Double att           = r[i] != null ? ((Number) r[i]).doubleValue() : null; i++;
+            Double mid           = r[i] != null ? ((Number) r[i]).doubleValue() : null; i++;
+            Double fin           = r[i] != null ? ((Number) r[i]).doubleValue() : null; i++;
+
+            Double avg = null;
+            if (att != null && mid != null && fin != null) {
+                avg = 0.25 * att + 0.25 * mid + 0.5 * fin;   // thang điểm 10
+            }
+
+            com.FinalProject.backend.Dto.StudentClassGradeDto dto =
+                    new com.FinalProject.backend.Dto.StudentClassGradeDto();
+            dto.setClassId(classId);
+            dto.setClassCode(classCode);
+            dto.setClassName(className);
+            dto.setStatus(status);
+            dto.setTeacherName(teacherName);
+            dto.setAttendanceGrade(att);
+            dto.setMidtermGrade(mid);
+            dto.setFinalGrade(fin);
+            dto.setAverageGrade(avg);
+            return dto;
+        }).toList();
+    }
+
 }

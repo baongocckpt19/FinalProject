@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -11,7 +12,8 @@ import { NavigationEnd, Router } from '@angular/router';
 export class SidebarComponent {
   activeRoute: string = ''; // lưu trữ route đang hiển thị
   titleService: string = '';
-  constructor(private router: Router) {
+  currentFullName: string | null = null;
+  constructor(private router: Router, private authService: AuthService) {
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.activeRoute = event.urlAfterRedirects; // cập nhật route đang hiển thị
@@ -39,7 +41,10 @@ export class SidebarComponent {
         }
       }
     });
-
+    this.authService.currentUser$.subscribe(account => {
+      this.currentFullName = account?.fullName ?? null;
+      console.log('sidebar - currentRoleName = ', account);
+    });
   }
 
 

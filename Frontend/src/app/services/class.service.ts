@@ -44,8 +44,8 @@ export interface ClassScheduleItem {
   providedIn: 'root'
 })
 export class ClassService {
-  private apiUrl = 'http://localhost:8080/api/classes'; 
-    private scheduleApiUrl = 'http://localhost:8080/api/class-schedule'; 
+  private apiUrl = 'http://localhost:8080/api/classes';
+  private scheduleApiUrl = 'http://localhost:8080/api/class-schedule';
 
   constructor(private http: HttpClient) { }
 
@@ -58,56 +58,56 @@ export class ClassService {
   }
 
   exportExcel() {
-  return this.http.get(this.apiUrl + '/export/excel', {
-    responseType: 'blob'
-  });
-}
-// export danh sách sinh viên của lớp
-exportStudents(classId: number) {
-  return this.http.get(this.apiUrl + '/' + classId + '/export/students', {
-    responseType: 'blob'
-  });
-}
-// lấy chi tiết lớp học để thưc hiện chỉnh sửa
-getClassById(id: number) {
-  return this.http.get<ClassDetail>(this.apiUrl + '/' + id);
-}
-// cập nhật lớp học ở modal chỉnh sửa
-updateClass(id: number, payload: any) {
-  return this.http.put(this.apiUrl + '/' + id, payload, {
-    responseType: 'text'
-  });
-}
-//lấy thông tin giáo viên theo id ở modal chỉnh sửa lớp
-getTeacherById(id: number) {
-  return this.http.get<{ teacherId: number, fullName: string }>('http://localhost:8080/api/teachers/' + id);
-}
+    return this.http.get(this.apiUrl + '/export/excel', {
+      responseType: 'blob'
+    });
+  }
+  // export danh sách sinh viên của lớp
+  exportStudents(classId: number) {
+    return this.http.get(this.apiUrl + '/' + classId + '/export/students', {
+      responseType: 'blob'
+    });
+  }
+  // lấy chi tiết lớp học để thưc hiện chỉnh sửa
+  getClassById(id: number) {
+    return this.http.get<ClassDetail>(this.apiUrl + '/' + id);
+  }
+  // cập nhật lớp học ở modal chỉnh sửa
+  updateClass(id: number, payload: any) {
+    return this.http.put(this.apiUrl + '/' + id, payload, {
+      responseType: 'text'
+    });
+  }
+  //lấy thông tin giáo viên theo id ở modal chỉnh sửa lớp
+  getTeacherById(id: number) {
+    return this.http.get<{ teacherId: number, fullName: string }>('http://localhost:8080/api/teachers/' + id);
+  }
 
-// tạo lớp học mới
-createClass(payload: { classCode: string; className: string; teacherId?: number | null }) {
-  return this.http.post(this.apiUrl, payload, {
-    responseType: 'text'
-  });
-}
+  // tạo lớp học mới
+  createClass(payload: { classCode: string; className: string; teacherId?: number | null }) {
+    return this.http.post(this.apiUrl, payload, {
+      responseType: 'text'
+    });
+  }
 
-// lấy thông tin sinh viên theo id để hiển thị trong modal thêm sinh viên vào lớp
-getStudentById(studentId: number) {
-  return this.http.get<any>('http://localhost:8080/api/students/' + studentId);
-}
-// thêm sinh viên vào lớp học
-addStudentsToClass(classId: number, studentIds: number[]) {
-  return this.http.post('http://localhost:8080/api/classes/' + classId + '/students', {
-    studentIds
-  });
-}
+  // lấy thông tin sinh viên theo id để hiển thị trong modal thêm sinh viên vào lớp
+  getStudentById(studentId: number) {
+    return this.http.get<any>('http://localhost:8080/api/students/' + studentId);
+  }
+  // thêm sinh viên vào lớp học
+  addStudentsToClass(classId: number, studentIds: number[]) {
+    return this.http.post('http://localhost:8080/api/classes/' + classId + '/students', {
+      studentIds
+    });
+  }
 
 
   // class.service.ts
-importStudentsFromCsv(classId: number, formData: FormData) {
-  return this.http.post(`${this.apiUrl}/${classId}/students/import`, formData);
-}
+  importStudentsFromCsv(classId: number, formData: FormData) {
+    return this.http.post(`${this.apiUrl}/${classId}/students/import`, formData);
+  }
 
- // lấy danh sách SV của lớp (cho modal THUỘC PHẦN LỚP HỌC-GV, ADMIN)
+  // lấy danh sách SV của lớp (cho modal THUỘC PHẦN LỚP HỌC-GV, ADMIN)
   getStudentsOfClass(classId: number) {
     return this.http.get<StudentOfClass[]>(`${this.apiUrl}/${classId}/students`);
   }
@@ -120,13 +120,13 @@ importStudentsFromCsv(classId: number, formData: FormData) {
   }
   // bật/tắt trạng thái lớp học
   toggleStatus(classId: number, newStatus: boolean) {
-  return this.http.put(
-    `${this.apiUrl}/${classId}/status?status=${newStatus}`,
-    {},
-    { responseType: 'text' }
-  );
-}
-// ================== CLASS SCHEDULE của admin(LỊCH HỌC) ==================
+    return this.http.put(
+      `${this.apiUrl}/${classId}/status?status=${newStatus}`,
+      {},
+      { responseType: 'text' }
+    );
+  }
+  // ================== CLASS SCHEDULE của admin(LỊCH HỌC) ==================
 
   /** Lấy tất cả lịch học của 1 lớp */
   getSchedulesByClassId(classId: number): Observable<ClassScheduleItem[]> {
@@ -175,5 +175,5 @@ importStudentsFromCsv(classId: number, formData: FormData) {
     });
   }
 
- 
+
 }
