@@ -1,3 +1,15 @@
-<app-sidebar *ngIf="!isLogInPage && !isSlideshow && !isAdmin"></app-sidebar>
+<!-- Sidebar giảng viên -->
+<app-sidebar
+  *ngIf="!isLogInPage && !isSlideshow && !isAdminPage && currentRoleName === 'Giảng viên'">
+</app-sidebar>
+
+<!-- Sidebar sinh viên -->
+<app-sv-sidebar
+  *ngIf="!isLogInPage && !isSlideshow && !isAdminPage && currentRoleName === 'Học sinh'">
+</app-sv-sidebar>
+
+<!-- Nội dung -->
 <router-outlet></router-outlet>
+
+<!-- Toast -->
 <app-toast></app-toast>

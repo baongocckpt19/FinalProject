@@ -1,6 +1,8 @@
 // FILE: src/main/java/com/FinalProject/backend/Dto/DeviceFingerprintInfoDto.java
 package com.FinalProject.backend.Dto;
+import lombok.Data;
 
+@Data
 public class DeviceFingerprintInfoDto {
     private Integer deviceId;
     private String deviceCode;
@@ -19,15 +21,4 @@ public class DeviceFingerprintInfoDto {
         this.sensorSlot = sensorSlot;
     }
 
-    // getters & setters
-    public Integer getDeviceId() { return deviceId; }
-    public void setDeviceId(Integer deviceId) { this.deviceId = deviceId; }
-    public String getDeviceCode() { return deviceCode; }
-    public void setDeviceCode(String deviceCode) { this.deviceCode = deviceCode; }
-    public String getDeviceName() { return deviceName; }
-    public void setDeviceName(String deviceName) { this.deviceName = deviceName; }
-    public String getRoom() { return room; }
-    public void setRoom(String room) { this.room = room; }
-    public Integer getSensorSlot() { return sensorSlot; }
-    public void setSensorSlot(Integer sensorSlot) { this.sensorSlot = sensorSlot; }
 }

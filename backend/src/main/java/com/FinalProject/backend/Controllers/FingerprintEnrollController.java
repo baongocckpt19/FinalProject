@@ -1,3 +1,4 @@
+//ĐÂY LÀ FINGERPRINTENROLLCONTROLLER.JAVA
 package com.FinalProject.backend.Controllers;
 
 import com.FinalProject.backend.Dto.*;
@@ -68,14 +69,31 @@ public class FingerprintEnrollController {
      * body: { studentId, sessionCode }
      */
     @PostMapping("/enroll/confirm")
-    public ResponseEntity<Map<String, Object>> confirmEnroll(
+    public ResponseEntity<ConfirmEnrollResponse> confirmEnroll(
             @RequestBody ConfirmEnrollRequest req
     ) {
-        fingerprintEnrollService.confirmEnroll(req);
+        ConfirmEnrollResponse res = fingerprintEnrollService.confirmEnroll(req);
+        return ResponseEntity.ok(res);
+    }
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("success", true);
-        body.put("message", "Enroll confirmed");
-        return ResponseEntity.ok(body);
+
+    /**
+     * ESP32: Poll lấy "lệnh enroll" tiếp theo cho device
+     * GET /api/fingerprint/enroll/next-command?deviceCode=ESP_ROOM_LAB1
+     * <p>
+     * - Nếu KHÔNG có lệnh -> trả về 204 No Content
+     * - Nếu CÓ lệnh -> 200 OK, body = sessionCode (text/plain)
+     */
+    @GetMapping("/enroll/next-command")
+    public ResponseEntity<String> getNextCommand(
+            @RequestParam String deviceCode
+    ) {
+        String sessionCode = fingerprintEnrollService.getNextEnrollSessionForDevice(deviceCode);
+        if (sessionCode == null) {
+            return ResponseEntity.noContent().build(); // 204
+        }
+        return ResponseEntity.ok(sessionCode);         // 200 + "STU4-ABC123"
     }
 }
+
+

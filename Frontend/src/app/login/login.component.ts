@@ -87,7 +87,9 @@ export class LoginComponent implements OnInit {
             this.showSuccess('Đăng nhập thành công!');
             if (account?.roleName == "Admin") {
               this.router.navigate(['/admin']);
-            } else if (account?.roleName == "Giảng viên") {
+            }  if (account?.roleName == "Học sinh") {
+              this.router.navigate(['/sv-trangchu']);
+            }  else if (account?.roleName == "Giảng viên") {
               this.router.navigate(['/gv_trangchu']);}
             // } else {
             //   this.router.navigate(['/trangcanhan']);

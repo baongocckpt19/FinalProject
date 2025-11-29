@@ -65,4 +65,30 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, In
     @Modifying
     @Query("UPDATE ClassSchedule cs SET cs.isDeleted = true WHERE cs.scheduleId = :id")
     void softDelete(@Param("id") Integer id);
+
+    // tìm lịch theo Room + ngày (IsActive, chưa xóa)
+    List<ClassSchedule> findByRoomAndScheduleDateAndIsActiveTrueAndIsDeletedFalse(
+            String room,
+            LocalDate scheduleDate
+    );
+
+    /**
+     * Các buổi học đã kết thúc (dùng cho auto Vắng)
+     * Dùng native query + CAST(:currentTime AS time) để tránh lỗi
+     * "The data types time and datetime are incompatible in the less than or equal to operator."
+     */
+    @Query(value = """
+        SELECT *
+        FROM ClassSchedule cs
+        WHERE cs.IsDeleted = 0
+          AND cs.IsActive = 1
+          AND (
+                cs.ScheduleDate < :today
+             OR (cs.ScheduleDate = :today AND cs.EndTime <= CAST(:currentTime AS time))
+          )
+        """, nativeQuery = true)
+    List<ClassSchedule> findFinishedSchedules(
+            @Param("today") LocalDate today,
+            @Param("currentTime") String currentTime
+    );
 }

@@ -1,26 +1,13 @@
 // DeviceEnrollResultRequest.java
 package com.FinalProject.backend.Dto;
+import lombok.Data;
 
 /**
  * ESP32 gửi lên khi đã enroll xong và biết sensorSlot.
  */
+@Data
+
 public class DeviceEnrollResultRequest {
     private String sessionCode;
     private Integer sensorSlot;
-
-    public String getSessionCode() {
-        return sessionCode;
-    }
-
-    public void setSessionCode(String sessionCode) {
-        this.sessionCode = sessionCode;
-    }
-
-    public Integer getSensorSlot() {
-        return sensorSlot;
-    }
-
-    public void setSensorSlot(Integer sensorSlot) {
-        this.sensorSlot = sensorSlot;
-    }
 }

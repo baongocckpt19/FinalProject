@@ -10,4 +10,9 @@ public interface FingerprintEnrollSessionRepository
         extends JpaRepository<FingerprintEnrollSession, Integer> {
 
     Optional<FingerprintEnrollSession> findBySessionCode(String sessionCode);
+
+
+    // 🔹 THÊM MỚI: lấy session sớm nhất cho 1 device với status cho trước
+    Optional<FingerprintEnrollSession>
+    findFirstByDeviceIdAndStatusOrderByCreatedAtAsc(Integer deviceId, String status);
 }

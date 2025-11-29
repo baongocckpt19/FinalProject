@@ -74,6 +74,7 @@ export class GvQuanlyvantayComponent {
   }
 
   // tạo session enroll
+  // tạo session enroll
   createEnrollSession(): void {
     if (!this.selectedStudent) {
       this.lastEnrollMessage = 'Vui lòng chọn sinh viên trước.';
@@ -86,13 +87,23 @@ export class GvQuanlyvantayComponent {
     this.currentSessionCode = null;
     this.currentSensorSlot = null;
 
-    this.fingerprintService.createEnrollSession(this.selectedStudent.studentId).subscribe({
+    const deviceCode = 'ESP_ROOM_LAB1'; // 🔹 tạm thời fix cứng
+
+    this.fingerprintService.createEnrollSession(
+      this.selectedStudent.studentId,
+      deviceCode
+    ).subscribe({
       next: (res) => {
         this.currentSessionCode = res.sessionCode;
         this.enrollState = 'waitingDevice';
         this.creatingSession = false;
-        this.lastEnrollMessage = 'Đã tạo phiên. Hãy nhập sessionCode này vào ESP32 để bắt đầu quét.';
-        // BẮT ĐẦU POLL 2S/LẦN
+
+        // Không cần nhập sessionCode vào ESP nữa, chỉ hiển thị cho debug
+        this.lastEnrollMessage =
+          'Đã tạo phiên. Thiết bị đang chờ quét vân tay cho session: ' +
+          res.sessionCode;
+
+        // BẮT ĐẦU POLL 2S/LẦN (giữ nguyên)
         this.startPollingSession();
       },
       error: (err) => {
@@ -166,29 +177,46 @@ export class GvQuanlyvantayComponent {
       return;
     }
     if (this.enrollState !== 'receivedFromDevice' && this.enrollState !== 'waitingDevice') {
-      // tuỳ bạn muốn chặt chẽ thế nào, ở đây cho phép cả khi waitingDevice (backend sẽ kiểm tra)
-      // nhưng tốt nhất là bấm "Kiểm tra" trước -> chuyển sang receivedFromDevice.
+      // tuỳ bạn muốn chặt chẽ thế nào
     }
 
     this.enrollState = 'saving';
     this.lastEnrollMessage = 'Đang lưu vân tay cho sinh viên...';
 
-    this.fingerprintService.confirmEnroll(this.selectedStudent.studentId, this.currentSessionCode).subscribe({
-      next: () => {
-        this.enrollState = 'done';
-        this.lastEnrollMessage = 'Đã lưu vân tay cho sinh viên.';
-        this.refreshStudentInfo();
-      },
-      error: (err) => {
-        console.error('confirmEnroll error', err);
-        this.enrollState = 'error';
-        if (err.error && typeof err.error === 'string') {
-          this.lastEnrollMessage = 'Lỗi: ' + err.error;
-        } else {
-          this.lastEnrollMessage = 'Không thể lưu vân tay. Vui lòng kiểm tra lại session hoặc thiết bị.';
+    this.fingerprintService
+      .confirmEnroll(this.selectedStudent.studentId, this.currentSessionCode)
+      .subscribe({
+        next: (res) => {
+          this.enrollState = 'done';
+          this.lastEnrollMessage = res.message || 'Đã lưu vân tay cho sinh viên.';
+
+          // cập nhật slot hiện tại ở UI
+          if (typeof res.sensorSlot === 'number') {
+            this.currentSensorSlot = res.sensorSlot;
+          }
+
+          // cập nhật cờ hasFingerprint cho đúng sinh viên
+          if (this.selectedStudent && res.studentId === this.selectedStudent.studentId) {
+            this.selectedStudent.hasFingerprint = true;
+          }
+
+          // lấy lại info để cập nhật danh sách devices, slot,... từ backend
+          this.refreshStudentInfo();
+        },
+        error: (err) => {
+          console.error('confirmEnroll error', err);
+          this.enrollState = 'error';
+
+          if (err.error && typeof err.error === 'string') {
+            this.lastEnrollMessage = 'Lỗi: ' + err.error;
+          } else if (err.error && err.error.message) {
+            this.lastEnrollMessage = 'Lỗi: ' + err.error.message;
+          } else {
+            this.lastEnrollMessage =
+              'Không thể lưu vân tay. Vui lòng kiểm tra lại session hoặc thiết bị.';
+          }
         }
-      }
-    });
+      });
   }
 
   // sau khi confirm thành công, lấy lại info để cập nhật hasFingerprint + devices

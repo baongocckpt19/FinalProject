@@ -6,8 +6,5 @@ public class ConfirmEnrollRequest {
     private Integer studentId;
     private String sessionCode;
 
-    public Integer getStudentId() { return studentId; }
-    public void setStudentId(Integer studentId) { this.studentId = studentId; }
-    public String getSessionCode() { return sessionCode; }
-    public void setSessionCode(String sessionCode) { this.sessionCode = sessionCode; }
+
 }

@@ -176,7 +176,7 @@ public class FingerprintEnrollService {
 
     // ---------- 5) POST /api/fingerprint/enroll/confirm ----------
     @Transactional
-    public void confirmEnroll(ConfirmEnrollRequest req) {
+    public ConfirmEnrollResponse confirmEnroll(ConfirmEnrollRequest req) {
         if (req.getStudentId() == null || req.getSessionCode() == null) {
             throw new RuntimeException("studentId & sessionCode are required");
         }
@@ -235,5 +235,37 @@ public class FingerprintEnrollService {
         // 3) Cập nhật trạng thái session
         session.setStatus("COMPLETED");
         sessionRepo.save(session);
+
+        // 4) Trả response về cho frontend
+        return new ConfirmEnrollResponse(
+                true,
+                "Enroll confirmed",
+                session.getSensorSlot(),
+                req.getStudentId()
+        );
+    }
+    // ---------- 6) DEVICE: lấy "lệnh enroll" tiếp theo cho 1 ESP theo deviceCode ----------
+    // Flow:
+    //  - Frontend tạo session với deviceCode -> session.status = "PENDING"
+    //  - ESP gọi API này: /api/fingerprint/enroll/next-command?deviceCode=...
+    //  - Service tìm session PENDING của device đó, đổi sang WAITING_DEVICE, trả về sessionCode
+    //  - Nếu không có, trả null
+    @Transactional
+    public String getNextEnrollSessionForDevice(String deviceCode) {
+        if (deviceCode == null || deviceCode.isBlank()) {
+            throw new RuntimeException("deviceCode is required");
+        }
+
+        Device device = deviceRepo.findByDeviceCode(deviceCode)
+                .orElseThrow(() -> new RuntimeException("Device not found: " + deviceCode));
+
+        return sessionRepo
+                .findFirstByDeviceIdAndStatusOrderByCreatedAtAsc(device.getDeviceId(), "PENDING")
+                .map(session -> {
+                    session.setStatus("WAITING_DEVICE");
+                    sessionRepo.save(session);
+                    return session.getSessionCode();
+                })
+                .orElse(null);
     }
 }
