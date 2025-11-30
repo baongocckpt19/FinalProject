@@ -12,7 +12,7 @@ export class AccountService {
   constructor(private http: HttpClient) { }
 
   getCurrentAccount(): Observable<any>{
-    const token = localStorage.getItem('jwt_token');
+    const token = localStorage.getItem('token');
     let headers: HttpHeaders | undefined = undefined;
 
     if (token) {
