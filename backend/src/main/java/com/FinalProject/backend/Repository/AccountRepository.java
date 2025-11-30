@@ -5,6 +5,7 @@ import com.FinalProject.backend.Models.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -195,6 +196,16 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
       AND a.AccountId = ?1
     """, nativeQuery = true)
     Object findUserDetailByAccountId(int accountId);
+
+
+    @Query(value = """
+    SELECT s.StudentId
+    FROM Account a
+    JOIN Student s ON a.AccountId = s.AccountId
+    WHERE a.Username = :username
+    """, nativeQuery = true)
+    Integer findStudentIdByUsername(@Param("username") String username);
+
 
 
 }

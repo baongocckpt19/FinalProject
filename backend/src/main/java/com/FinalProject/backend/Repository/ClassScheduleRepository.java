@@ -1,4 +1,3 @@
-// src/main/java/com/FinalProject/backend/Repository/ClassScheduleRepository.java
 package com.FinalProject.backend.Repository;
 
 import com.FinalProject.backend.Models.ClassSchedule;
@@ -49,6 +48,50 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, In
     );
 
     /**
+
+     * - sc: để filter chỉ những lớp mà sinh viên đang học
+     * - scAll: để đếm tổng số sinh viên trong lớp (StudentCount)
+     */
+    /**
+     * Lịch học của sinh viên trong khoảng tháng (dùng cho /api/student/schedules)
+     * ĐÃ LỌC IsDeleted = 0
+     */
+    /**
+     * Lịch học của sinh viên trong khoảng tháng (dùng cho /api/student/schedules)
+     * ĐÃ LỌC IsDeleted = 0
+     */
+    @Query(value = """
+    SELECT
+        cs.ScheduleId,          -- 0
+        cs.ClassId,             -- 1
+        c.ClassCode,            -- 2
+        c.ClassName,            -- 3
+        cs.ScheduleDate,        -- 4
+        cs.StartTime,           -- 5
+        cs.EndTime,             -- 6
+        cs.Room,                -- 7
+        cs.IsActive,            -- 8
+        COUNT(sc2.StudentId) AS StudentCount   -- 9 tổng số SV trong lớp
+    FROM Student s
+    JOIN Account acc ON s.AccountId = acc.AccountId
+    JOIN StudentClass sc ON sc.StudentId = s.StudentId AND sc.IsDeleted = 0
+    JOIN ClassSchedule cs ON cs.ClassId = sc.ClassId AND cs.IsDeleted = 0
+    JOIN Class c ON cs.ClassId = c.ClassId
+    LEFT JOIN StudentClass sc2
+           ON sc2.ClassId = c.ClassId
+          AND sc2.IsDeleted = 0
+    WHERE s.StudentId = :studentId
+      AND cs.ScheduleDate BETWEEN :startDate AND :endDate
+    GROUP BY cs.ScheduleId, cs.ClassId, c.ClassCode, c.ClassName,
+             cs.ScheduleDate, cs.StartTime, cs.EndTime, cs.Room, cs.IsActive
+    ORDER BY cs.ScheduleDate, cs.StartTime
+    """, nativeQuery = true)
+    List<Object[]> findScheduleOfStudentBetween(
+            @Param("studentId") Integer studentId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+    /**
      * Lấy lịch học theo ClassId (dùng cho Admin modal Lịch học)
      * ĐÃ LỌC IsDeleted = 0
      */
@@ -91,4 +134,6 @@ public interface ClassScheduleRepository extends JpaRepository<ClassSchedule, In
             @Param("today") LocalDate today,
             @Param("currentTime") String currentTime
     );
+
+
 }

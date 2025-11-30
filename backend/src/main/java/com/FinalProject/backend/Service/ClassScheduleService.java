@@ -1,8 +1,8 @@
-// src/main/java/com/FinalProject/backend/Service/ClassScheduleService.java
 package com.FinalProject.backend.Service;
 
 import com.FinalProject.backend.Dto.ClassScheduleDto;
 import com.FinalProject.backend.Dto.TeacherScheduleDto;
+import com.FinalProject.backend.Dto.StudentScheduleDto;
 import com.FinalProject.backend.Models.ClassSchedule;
 import com.FinalProject.backend.Models.Clazz;
 import com.FinalProject.backend.Repository.ClassRepository;
@@ -21,11 +21,11 @@ import java.util.List;
 public class ClassScheduleService {
 
     private final ClassScheduleRepository classScheduleRepository;
-    private final AccountService accountService;   // bạn đã có sẵn
+    private final AccountService accountService;   // backend AccountService (lấy teacherId / studentId)
     private final ClassRepository classRepository; // để lấy entity Clazz
 
     /* =====================================================================
-       1) API CHO GIẢNG VIÊN – LỊCH DẠY THEO THÁNG (GIỮ NGUYÊN Ý)
+       1) API CHO GIẢNG VIÊN – LỊCH DẠY THEO THÁNG
        ===================================================================== */
     public List<TeacherScheduleDto> getSchedulesForCurrentTeacher(int year, int month) {
         // Lấy teacherId từ tài khoản đăng nhập hiện tại
@@ -45,6 +45,41 @@ public class ClassScheduleService {
             dto.setClassCode((String) r[2]);
             dto.setClassName((String) r[3]);
             dto.setScheduleDate(((java.sql.Date) r[4]).toLocalDate());
+            dto.setStartTime(((java.sql.Time) r[5]).toLocalTime());
+            dto.setEndTime(((java.sql.Time) r[6]).toLocalTime());
+            dto.setRoom((String) r[7]);
+            dto.setIsActive(r[8] != null ? ((Boolean) r[8]) : Boolean.TRUE);
+            dto.setStudentCount(r[9] == null ? 0L : ((Number) r[9]).longValue());
+            return dto;
+        }).toList();
+    }
+
+    /* =====================================================================
+      1b) API CHO SINH VIÊN – LỊCH HỌC THEO THÁNG
+      ===================================================================== */
+    @Transactional(readOnly = true)
+    public List<StudentScheduleDto> getSchedulesForCurrentStudent(int year, int month) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            // tuỳ bạn muốn 401 hay 403
+            throw new RuntimeException("Không xác định được thông tin tài khoản hiện tại");
+        }
+
+        String username = auth.getName();
+        Integer studentId = accountService.getStudentIdByUsername(username);
+
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        var rows = classScheduleRepository.findScheduleOfStudentBetween(studentId, start, end);
+
+        return rows.stream().map(r -> {
+            StudentScheduleDto dto = new StudentScheduleDto();
+            dto.setScheduleId(((Number) r[0]).intValue());
+            dto.setClassId(((Number) r[1]).intValue());
+            dto.setClassCode((String) r[2]);
+            dto.setClassName((String) r[3]);
+            dto.setDate(((java.sql.Date) r[4]).toLocalDate());
             dto.setStartTime(((java.sql.Time) r[5]).toLocalTime());
             dto.setEndTime(((java.sql.Time) r[6]).toLocalTime());
             dto.setRoom((String) r[7]);
@@ -123,7 +158,6 @@ public class ClassScheduleService {
         classScheduleRepository.save(cs);
     }
 
-
     /**
      * Bật / tắt IsActive (tạm hoãn) – dùng cho checkbox
      */
@@ -164,4 +198,5 @@ public class ClassScheduleService {
         // dto không cần IsDeleted, FE không dùng
         return dto;
     }
+
 }

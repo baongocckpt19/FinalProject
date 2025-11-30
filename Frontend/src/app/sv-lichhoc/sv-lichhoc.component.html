@@ -1,0 +1,259 @@
+<body>
+    <div class="dashboard-container">
+        <div class="main-content">
+            <div class="dashboard-content">
+                <!-- HEADER -->
+                <div class="page-header">
+                    <div class="page-title-section">
+                        <h2 class="page-title">Lịch học của bạn</h2>
+                        <p class="page-subtitle">
+                            Chọn ngày trên lịch để xem các lớp bạn có lịch học trong ngày đó
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CALENDAR -->
+                <div class="calendar-section">
+                    <div class="calendar-header">
+                        <h3 class="calendar-title">Lịch học tháng {{ currentMonthLabel }}</h3>
+                        <div class="calendar-nav">
+                            <button class="calendar-nav-btn" (click)="previousMonth()">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                                </svg>
+                            </button>
+                            <span class="calendar-month">{{ currentMonthLabel }}</span>
+                            <button class="calendar-nav-btn" (click)="nextMonth()">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="calendar-grid">
+                        <div class="calendar-day-header">CN</div>
+                        <div class="calendar-day-header">T2</div>
+                        <div class="calendar-day-header">T3</div>
+                        <div class="calendar-day-header">T4</div>
+                        <div class="calendar-day-header">T5</div>
+                        <div class="calendar-day-header">T6</div>
+                        <div class="calendar-day-header">T7</div>
+
+                        <ng-container *ngFor="let day of calendarDays">
+                            <!-- ngày có dữ liệu -->
+                            <div class="calendar-day" *ngIf="!day.isEmpty" [class.today]="day.isToday"
+                                [class.selected]="day.isSelected" [class.has-attendance]="day.hasAttendance"
+                                (click)="selectDate(day.dateStr!)">
+                                <div class="day-number">{{ day.dayNumber }}</div>
+                                <div class="day-classes">
+                                    {{ day.classCount && day.classCount > 0 ? day.classCount + ' lớp' : '' }}
+                                </div>
+                            </div>
+
+                            <!-- ô trống đầu tháng -->
+                            <div class="calendar-day other-month" *ngIf="day.isEmpty"></div>
+                        </ng-container>
+                    </div>
+                </div>
+
+                <!-- DANH SÁCH LỚP HỌC TRONG NGÀY -->
+                <div class="schedule-list">
+                    <div class="schedule-list-header">
+                        <h3 class="schedule-list-title">
+                            Các lớp học ngày {{ selectedDate | date: 'dd/MM/yyyy' }}
+                        </h3>
+                        <span class="schedule-list-info">
+                            {{ classesOfSelectedDay.length }} lớp học
+                        </span>
+                    </div>
+
+                    <div class="schedule-table-container">
+                        <table class="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Lớp học</th>
+                                    <th>Phòng học</th>
+                                    <th>Thời gian</th>
+                                    <th>Trạng thái lớp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let cls of classesOfSelectedDay; let i = index" style="cursor: pointer;"
+                                    (click)="onClassRowClick(cls)" [class.cancelled]="!cls.isActive">
+                                    <td>{{ i + 1 }}</td>
+                                    <td>
+                                        <div class="class-info">
+                                            <div class="class-details">
+                                                <h5>{{ cls.className }}</h5>
+                                                <p>{{ cls.classCode }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="class-info">
+                                            <div class="class-details">
+                                                <h5>{{ cls.room }}</h5>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {{ cls.startTime | slice: 0:5 }} - {{ cls.endTime | slice: 0:5 }}
+                                    </td>
+                                    <td>
+                                        <span class="class-status" [ngClass]="getStatusClass(cls)">
+                                            {{ getStatusText(cls) }}
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr *ngIf="classesOfSelectedDay.length === 0">
+                                    <td colspan="5" style="text-align: center; padding: 12px 0;">
+                                        Không có lớp học trong ngày này
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- MODAL CHI TIẾT SINH VIÊN (READ-ONLY) -->
+                <div class="modal active" *ngIf="showStudentDetailModal && studentDetail">
+                    <div class="modal-content" style="max-width: 1000px;">
+                        <div class="modal-header">
+                            <h3 class="modal-title">Chi tiết điểm danh của bạn</h3>
+                            <button class="modal-close" (click)="closeStudentDetailModal()">
+                                <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <!-- THÔNG TIN CƠ BẢN -->
+                            <div class="student-profile-section">
+                                <div class="student-profile-header">
+                                    <div class="student-avatar-large">
+                                        {{ (studentDetail.fullName || 'SV') | slice: 0:1 }}
+                                    </div>
+                                    <div class="student-profile-info">
+                                        <h3 class="student-profile-name">
+                                            {{ studentDetail.fullName }}
+                                        </h3>
+                                        <p class="student-profile-id">
+                                            {{ studentDetail.username }}
+                                        </p>
+                                        <div class="student-profile-stats">
+                                            <div class="profile-stat">
+                                                <span class="profile-stat-label">Email:</span>
+                                                <span class="profile-stat-value">{{ studentDetail.email }}</span>
+                                            </div>
+                                            <div class="profile-stat">
+                                                <span class="profile-stat-label">SĐT:</span>
+                                                <span class="profile-stat-value">{{ studentDetail.phone }}</span>
+                                            </div>
+                                            <div class="profile-stat">
+                                                <span class="profile-stat-label">Lớp:</span>
+                                                <span class="profile-stat-value">
+                                                    {{ studentDetail.classCode }} - {{ studentDetail.className }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- THỐNG KÊ -->
+                            <div class="modal-stats">
+                                <div class="stat-item">
+                                    <div class="stat-number">
+                                        {{ studentDetail.totalSessions || 0 }}
+                                    </div>
+                                    <div class="stat-label">Tổng buổi học</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number present">
+                                        {{ studentDetail.presentSessions || 0 }}
+                                    </div>
+                                    <div class="stat-label">Có mặt</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number late">
+                                        {{ studentDetail.lateSessions || 0 }}
+                                    </div>
+                                    <div class="stat-label">Muộn</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number absent">
+                                        {{ studentDetail.absentSessions || 0 }}
+                                    </div>
+                                    <div class="stat-label">Vắng mặt</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number rate">
+                                        {{ studentDetail.attendanceRate || 0 | number: '1.0-0' }}%
+                                    </div>
+                                    <div class="stat-label">Tỷ lệ tham gia</div>
+                                </div>
+                            </div>
+
+                            <!-- LỊCH SỬ ĐIỂM DANH -->
+                            <div class="attendance-history-section">
+                                <h4 class="section-title">Lịch sử điểm danh của bạn trong lớp này</h4>
+
+                                <div class="history-table-container">
+                                    <table class="history-table">
+                                        <thead>
+                                            <tr>
+                                                <th>STT</th>
+                                                <th>Ngày</th>
+                                                <th>Thời gian</th>
+                                                <th>Trạng thái</th>
+                                                <th>Giờ điểm danh</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let h of studentDetail.history; let i = index">
+                                                <td>{{ i + 1 }}</td>
+                                                <td>{{ formatDate(h.date) }}</td>
+                                                <td>{{ h.sessionTime }}</td>
+                                                <td>
+                                                    <!-- KHÔNG CÓ (click) -> chỉ xem -->
+                                                    <span class="attendance-status" [ngClass]="{
+                            present: h.status === 'present',
+                            late: h.status === 'late',
+                            absent: h.status === 'absent'
+                          }">
+                                                        {{
+                                                        h.status === 'present'
+                                                        ? 'Có mặt'
+                                                        : h.status === 'late'
+                                                        ? 'Muộn'
+                                                        : h.status === 'absent'
+                                                        ? 'Vắng mặt'
+                                                        : '--'
+                                                        }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ h.attendanceTime || '-' }}</td>
+                                            </tr>
+
+                                            <tr *ngIf="studentDetail.history.length === 0">
+                                                <td colspan="5" style="text-align: center; padding: 12px 0;">
+                                                    Chưa có dữ liệu điểm danh cho lớp này
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END MODAL -->
+            </div>
+        </div>
+    </div>
+</body>

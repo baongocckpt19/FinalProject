@@ -2,6 +2,7 @@ package com.FinalProject.backend.Service;
 
 import com.FinalProject.backend.Dto.AccountDto;
 import com.FinalProject.backend.Repository.AccountRepository;
+import com.FinalProject.backend.Repository.StudentRepository;
 import com.FinalProject.backend.Repository.TeacherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,11 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AccountService {
+
     @Autowired
     private AccountRepository accountRepository;
 
     @Autowired
     private TeacherRepository teacherRepository; // ⭐ THÊM DÒNG NÀY
+    @Autowired
+    private StudentRepository studentRepository;  // ⭐ THÊM
 
     public AccountDto login(String username, String password) {
         Object result = accountRepository.login(username, password);
@@ -54,7 +58,7 @@ public class AccountService {
         accountRepository.softDeleteAccount(id);
     }
 
-    // ⭐ THÊM MỚI: Lấy TeacherId từ username (dùng cho ClassScheduleService)
+    // ⭐ Lấy TeacherId từ username (dùng cho lịch GIẢNG VIÊN)
     public Integer getTeacherIdByUsername(String username) {
         Integer teacherId = teacherRepository.findTeacherIdByUsername(username);
         if (teacherId == null) {
@@ -63,6 +67,14 @@ public class AccountService {
         return teacherId;
     }
 
+    // ⭐ THÊM MỚI: Lấy StudentId từ username (dùng cho schedule student)
+    public Integer getStudentIdByUsername(String username) {
+        Integer studentId = studentRepository.findStudentIdByUsername(username);
+        if (studentId == null) {
+            throw new RuntimeException("Không tìm thấy Student cho username: " + username);
+        }
+        return studentId;
+    }
     // cách mã hoá password: String hashedPassword = passwordEncoder.encode(body.getPassword() + passwordSecret);
     // cách check !passwordEncoder.matches(body.getPassword() + passwordSecret, user.getPasswordHash())
 }

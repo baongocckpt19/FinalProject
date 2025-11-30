@@ -25,14 +25,15 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
         """, nativeQuery = true)
     Object findStudentInfoById(int studentId);
 
-    // Tìm StudentId dựa theo Username (MSSV)
+     // Tìm StudentId từ Username (Account.Username)
     @Query(value = """
         SELECT s.StudentId
         FROM Student s
         JOIN Account a ON s.AccountId = a.AccountId
-        WHERE a.Username = ?1
+        WHERE a.Username = :username
         """, nativeQuery = true)
     Integer findStudentIdByUsername(String username);
+
     /**
      * Tìm sinh viên tương ứng với 1 tài khoản (AccountId).
      *  - Bảng Student có cột AccountId (FK sang Account).

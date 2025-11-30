@@ -16,6 +16,7 @@ import { SvDiemsoComponent } from './sv-diemso/sv-diemso.component';
 import { SvDiemdanhComponent } from './sv-diemdanh/sv-diemdanh.component';
 import { GvLichDayComponent } from './gv-lichday/gv-lichday.component';
 import { GvQuanlyvantayComponent } from './gv-quanlyvantay/gv-quanlyvantay.component';
+import { SvLichHocComponent } from './sv-lichhoc/sv-lichhoc.component';
 
 
 export const routes: Routes = [
@@ -79,6 +80,10 @@ export const routes: Routes = [
     {
         path: 'gv-quanlyvantay',
         component: GvQuanlyvantayComponent,
+    },
+    {
+        path:'sv-lichhoc',
+        component: SvLichHocComponent,
     },
     {
         path: '',
