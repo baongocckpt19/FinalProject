@@ -1,5 +1,5 @@
-﻿/*======================================================
-= 0) TẠO DATABASE
+﻿/*====================================================== 
+= 0) TẠO MỚI DATABASE
 ======================================================*/
 USE master;
 IF DB_ID('StudentAttendanceDB') IS NOT NULL
@@ -14,8 +14,12 @@ USE StudentAttendanceDB;
 GO
 
 /*======================================================
-= 1) BẢNG VAI TRÒ
+= 1) TẠO TOÀN BỘ CÁC BẢNG + CONSTRAINT
 ======================================================*/
+
+--------------------------------------------------------
+-- 1.1 BẢNG VAI TRÒ
+--------------------------------------------------------
 IF OBJECT_ID('Role') IS NOT NULL DROP TABLE Role;
 CREATE TABLE Role (
     RoleId   INT IDENTITY(1,1) PRIMARY KEY,
@@ -23,68 +27,72 @@ CREATE TABLE Role (
 );
 GO
 
-/*======================================================
-= 2) BẢNG TÀI KHOẢN ĐĂNG NHẬP
-======================================================*/
+--------------------------------------------------------
+-- 1.2 BẢNG TÀI KHOẢN
+--------------------------------------------------------
 IF OBJECT_ID('Account') IS NOT NULL DROP TABLE Account;
 CREATE TABLE Account (
     AccountId    INT IDENTITY(1,1) PRIMARY KEY,
     Username     NVARCHAR(50)  NOT NULL UNIQUE,
     PasswordHash NVARCHAR(255) NOT NULL,
     RoleId       INT           NOT NULL FOREIGN KEY REFERENCES Role(RoleId),
-    IsDeleted    BIT           NOT NULL DEFAULT 0 -- 0 hiển thị, 1 ẩn
+    IsDeleted    BIT           NOT NULL DEFAULT 0
 );
 GO
 
-/*======================================================
-= 3) BẢNG GIẢNG VIÊN
-======================================================*/
+--------------------------------------------------------
+-- 1.3 BẢNG GIẢNG VIÊN
+--------------------------------------------------------
 IF OBJECT_ID('Teacher') IS NOT NULL DROP TABLE Teacher;
 CREATE TABLE Teacher (
-    TeacherId  INT IDENTITY(1,1) PRIMARY KEY,
-    AccountId  INT NOT NULL FOREIGN KEY REFERENCES Account(AccountId),
-    FullName   NVARCHAR(100) NOT NULL,
-    Email      NVARCHAR(100),
-    Phone      NVARCHAR(20),
-    Department NVARCHAR(100),
-    Address    NVARCHAR(200),
+    TeacherId   INT IDENTITY(1,1) PRIMARY KEY,
+    AccountId   INT NOT NULL FOREIGN KEY REFERENCES Account(AccountId),
+    FullName    NVARCHAR(100) NOT NULL,
+    Email       NVARCHAR(100),
+    Phone       NVARCHAR(20),
+    Department  NVARCHAR(100),
+    Address     NVARCHAR(200),
     DateOfBirth DATE NULL,
-    Gender     NVARCHAR(10) NULL,
+    Gender      NVARCHAR(10) NULL,
     CONSTRAINT CHK_Teacher_Gender CHECK (Gender IN (N'Nam', N'Nữ', N'Khác', NULL))
 );
 GO
 
-/*======================================================
-= 4) BẢNG HỌC SINH
-======================================================*/
+--------------------------------------------------------
+-- 1.4 BẢNG HỌC SINH
+--------------------------------------------------------
 IF OBJECT_ID('Student') IS NOT NULL DROP TABLE Student;
 CREATE TABLE Student (
-    StudentId  INT IDENTITY(1,1) PRIMARY KEY,
-    AccountId  INT NOT NULL FOREIGN KEY REFERENCES Account(AccountId),
-    FullName   NVARCHAR(100) NOT NULL,
-    Email      NVARCHAR(100),
-    Phone      NVARCHAR(20),
-    Address    NVARCHAR(200),
+    StudentId   INT IDENTITY(1,1) PRIMARY KEY,
+    AccountId   INT NOT NULL FOREIGN KEY REFERENCES Account(AccountId),
+    FullName    NVARCHAR(100) NOT NULL,
+    Email       NVARCHAR(100),
+    Phone       NVARCHAR(20),
+    Address     NVARCHAR(200),
     DateOfBirth DATE NULL,
-    Gender     NVARCHAR(10) NULL,
+    Gender      NVARCHAR(10) NULL,
     CONSTRAINT CHK_Student_Gender CHECK (Gender IN (N'Nam', N'Nữ', N'Khác', NULL))
 );
 GO
 
-/*======================================================
-= 5) BẢNG VÂN TAY
-======================================================*/
+--------------------------------------------------------
+-- 1.5 BẢNG VÂN TAY ĐƠN GIẢN (Fingerprint) - GIỮ LẠI
+--------------------------------------------------------
 IF OBJECT_ID('Fingerprint') IS NOT NULL DROP TABLE Fingerprint;
 CREATE TABLE Fingerprint (
-    FingerprintID INT IDENTITY(1,1) PRIMARY KEY,   -- ID từng vân tay
+    FingerprintID INT IDENTITY(1,1) PRIMARY KEY,
     StudentId     INT NOT NULL FOREIGN KEY REFERENCES Student(StudentId),
-    Fingerprint   NVARCHAR(255) NOT NULL
+    SensorSlot    INT NOT NULL
 );
 GO
 
-/*======================================================
-= 6) BẢNG LỚP HỌC
-======================================================*/
+ALTER TABLE Fingerprint
+ADD CONSTRAINT UQ_Fingerprint_SensorSlot UNIQUE (SensorSlot);
+GO
+
+--------------------------------------------------------
+-- 1.6 BẢNG LỚP HỌC
+--------------------------------------------------------
 IF OBJECT_ID('Class') IS NOT NULL DROP TABLE Class;
 CREATE TABLE Class (
     ClassId     INT IDENTITY(1,1) PRIMARY KEY,
@@ -92,14 +100,30 @@ CREATE TABLE Class (
     ClassName   NVARCHAR(100) NOT NULL,
     TeacherId   INT FOREIGN KEY REFERENCES Teacher(TeacherId),
     CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    Status      BIT NOT NULL DEFAULT 1,  -- 1 = Đang hoạt động, 0 = Tạm dừng
-    IsDeleted   BIT NOT NULL DEFAULT 0   -- 0: hiển thị, 1: ẩn (đã xóa)
+    Status      BIT NOT NULL DEFAULT 1, --0: HOAT DONG/1: KHONG HOAT DONG
+    IsDeleted   BIT NOT NULL DEFAULT 0
 );
 GO
 
-/*======================================================
-= 7) BẢNG SINH VIÊN - LỚP (N-N)
-======================================================*/
+--------------------------------------------------------
+-- 1.7 BẢNG LỊCH HỌC
+--------------------------------------------------------
+IF OBJECT_ID('ClassSchedule') IS NOT NULL DROP TABLE ClassSchedule;
+CREATE TABLE ClassSchedule (
+    ScheduleId   INT IDENTITY(1,1) PRIMARY KEY,
+    ClassId      INT NOT NULL FOREIGN KEY REFERENCES Class(ClassId),
+    ScheduleDate DATE NOT NULL,
+    StartTime    TIME NOT NULL,
+    EndTime      TIME NOT NULL,
+    Room         NVARCHAR(50) NULL,
+    IsActive     BIT NOT NULL DEFAULT 1,
+    IsDeleted    BIT NOT NULL DEFAULT 0
+);
+GO
+
+--------------------------------------------------------
+-- 1.8 BẢNG SINH VIÊN - LỚP
+--------------------------------------------------------
 IF OBJECT_ID('StudentClass') IS NOT NULL DROP TABLE StudentClass;
 CREATE TABLE StudentClass (
     StudentId INT NOT NULL FOREIGN KEY REFERENCES Student(StudentId),
@@ -109,25 +133,27 @@ CREATE TABLE StudentClass (
 );
 GO
 
-/*======================================================
-= 8) BẢNG ĐIỂM DANH
-======================================================*/
+--------------------------------------------------------
+-- 1.9 BẢNG ĐIỂM DANH
+--------------------------------------------------------
 IF OBJECT_ID('Attendance') IS NOT NULL DROP TABLE Attendance;
 CREATE TABLE Attendance (
     AttendanceId   INT IDENTITY(1,1) PRIMARY KEY,
     StudentId      INT NOT NULL FOREIGN KEY REFERENCES Student(StudentId),
     ClassId        INT NOT NULL FOREIGN KEY REFERENCES Class(ClassId),
-    AttendanceDate DATE NOT NULL,
+    ScheduleId     INT NOT NULL FOREIGN KEY REFERENCES ClassSchedule(ScheduleId),
     AttendanceTime TIME NOT NULL,
-    SessionStart   TIME NOT NULL,
-    SessionEnd     TIME NOT NULL,
-    Status         NVARCHAR(50) NOT NULL -- Có mặt / Vắng / Muộn ...
+    Status         NVARCHAR(50) NOT NULL
 );
 GO
 
-/*======================================================
-= 9) BẢNG ĐIỂM SỐ
-======================================================*/
+ALTER TABLE Attendance
+ADD CONSTRAINT UQ_Attendance_Student_Schedule UNIQUE (StudentId, ScheduleId);
+GO
+
+--------------------------------------------------------
+-- 1.10 BẢNG ĐIỂM SỐ
+--------------------------------------------------------
 IF OBJECT_ID('Grade') IS NOT NULL DROP TABLE Grade;
 CREATE TABLE Grade (
     GradeId         INT IDENTITY(1,1) PRIMARY KEY,
@@ -139,65 +165,155 @@ CREATE TABLE Grade (
 );
 GO
 
+--------------------------------------------------------
+-- 1.11 BẢNG DEVICE (THIẾT BỊ VÂN TAY)
+--------------------------------------------------------
+IF OBJECT_ID('Device') IS NOT NULL DROP TABLE Device;
+CREATE TABLE Device (
+    DeviceId     INT IDENTITY(1,1) PRIMARY KEY,
+    DeviceCode   NVARCHAR(50) UNIQUE NOT NULL,
+    DeviceName   NVARCHAR(100) NULL,
+    Room         NVARCHAR(50) NULL,
+    IsActive     BIT NOT NULL DEFAULT 1
+);
+GO
+
+--------------------------------------------------------
+-- 1.12 BẢNG FINGERPRINT TEMP (nếu cần)
+--------------------------------------------------------
+IF OBJECT_ID('FingerprintTemp') IS NOT NULL DROP TABLE FingerprintTemp;
+GO
+
+CREATE TABLE FingerprintTemp (
+    TempId      INT IDENTITY(1,1) PRIMARY KEY,
+    SessionCode NVARCHAR(100) NOT NULL UNIQUE,
+    SensorSlot  INT NULL,
+    CreatedAt   DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+--------------------------------------------------------
+-- 1.13 BẢNG FINGERPRINT TEMPLATE (LƯU TEMPLATE NHỊ PHÂN)
+--------------------------------------------------------
+IF OBJECT_ID('FingerprintTemplate') IS NOT NULL DROP TABLE FingerprintTemplate;
+GO
+
+CREATE TABLE FingerprintTemplate (
+    TemplateId   INT IDENTITY(1,1) PRIMARY KEY,
+    StudentId    INT NOT NULL FOREIGN KEY REFERENCES Student(StudentId),
+    TemplateData VARBINARY(MAX) NOT NULL,
+    CreatedAt    DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+CREATE UNIQUE INDEX UX_FingerprintTemplate_Student
+ON FingerprintTemplate(StudentId);
+GO
+
+--------------------------------------------------------
+-- 1.14 BẢNG DEVICE - FINGERPRINT SLOT (MAP DEVICE + STUDENT + SLOT)
+--------------------------------------------------------
+IF OBJECT_ID('DeviceFingerprintSlot') IS NOT NULL DROP TABLE DeviceFingerprintSlot;
+GO
+
+CREATE TABLE DeviceFingerprintSlot (
+    DeviceId   INT NOT NULL FOREIGN KEY REFERENCES Device(DeviceId),
+    StudentId  INT NOT NULL FOREIGN KEY REFERENCES Student(StudentId),
+    SensorSlot INT NOT NULL,
+
+    CONSTRAINT PK_DeviceFingerprintSlot PRIMARY KEY (DeviceId, StudentId),
+    CONSTRAINT UQ_Device_SensorSlot UNIQUE (DeviceId, SensorSlot)
+);
+GO
+
+--------------------------------------------------------
+-- 1.15 BẢNG FINGERPRINT ENROLL SESSION
+--------------------------------------------------------
+IF OBJECT_ID('FingerprintEnrollSession') IS NOT NULL DROP TABLE FingerprintEnrollSession;
+GO
+
+CREATE TABLE FingerprintEnrollSession (
+    SessionId    INT IDENTITY(1,1) PRIMARY KEY,
+    SessionCode  NVARCHAR(100) NOT NULL UNIQUE,
+    StudentId    INT NOT NULL FOREIGN KEY REFERENCES Student(StudentId),
+    DeviceId     INT NULL FOREIGN KEY REFERENCES Device(DeviceId),
+    SensorSlot   INT NULL,
+    TemplateData VARBINARY(MAX) NULL,
+    Status       NVARCHAR(20) NOT NULL, 
+    CreatedAt    DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+--------------------------------------------------------
+-- 1.16 BẢNG ESP LOG
+--------------------------------------------------------
+IF OBJECT_ID('EspLog') IS NOT NULL DROP TABLE EspLog;
+GO
+
+CREATE TABLE EspLog (
+    LogId      INT IDENTITY(1,1) PRIMARY KEY,
+    DeviceCode NVARCHAR(50) NOT NULL,
+    Message    NVARCHAR(255) NOT NULL,
+    CreatedAt  DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
 /*======================================================
-= 10) DỮ LIỆU MẪU
+= 2) DỮ LIỆU MẪU
 ======================================================*/
 
 -----------------------
--- 10.1 ROLE
+-- 2.1 ROLE
 -----------------------
 INSERT INTO Role (RoleName)
 VALUES (N'Admin'), (N'Giảng viên'), (N'Học sinh');
--- RoleId: 1=Admin, 2=Giảng viên, 3=Học sinh
-
------------------------
--- 10.2 ACCOUNT
------------------------
--- Admin
-INSERT INTO Account (Username, PasswordHash, RoleId, IsDeleted)
-VALUES ('admin01', 'admin123', 1, 0);   -- AccountId = 1
-
--- 6 Giảng viên
-INSERT INTO Account (Username, PasswordHash, RoleId, IsDeleted)
-VALUES 
-('teacher01', '12345', 2, 0),   -- AccountId = 2
-('teacher02', '12345', 2, 0),   -- 3
-('teacher03', '12345', 2, 0),   -- 4
-('teacher04', '12345', 2, 0),   -- 5
-('teacher05', '12345', 2, 0),   -- 6
-('teacher06', '12345', 2, 0);   -- 7
-
--- 24 Sinh viên
-INSERT INTO Account (Username, PasswordHash, RoleId, IsDeleted)
-VALUES
-('student01', '12345', 3, 0),   -- 8
-('student02', '12345', 3, 0),   -- 9
-('student03', '12345', 3, 0),   -- 10
-('student04', '12345', 3, 0),   -- 11
-('student05', '12345', 3, 0),   -- 12
-('student06', '12345', 3, 0),   -- 13
-('student07', '12345', 3, 0),   -- 14
-('student08', '12345', 3, 0),   -- 15
-('student09', '12345', 3, 0),   -- 16
-('student10', '12345', 3, 0),   -- 17
-('student11', '12345', 3, 0),   -- 18
-('student12', '12345', 3, 0),   -- 19
-('student13', '12345', 3, 0),   -- 20
-('student14', '12345', 3, 0),   -- 21
-('student15', '12345', 3, 0),   -- 22
-('student16', '12345', 3, 0),   -- 23
-('student17', '12345', 3, 0),   -- 24
-('student18', '12345', 3, 0),   -- 25
-('student19', '12345', 3, 0),   -- 26
-('student20', '12345', 3, 0),   -- 27
-('student21', '12345', 3, 0),   -- 28
-('student22', '12345', 3, 0),   -- 29
-('student23', '12345', 3, 0),   -- 30
-('student24', '12345', 3, 0);   -- 31
 GO
 
 -----------------------
--- 10.3 TEACHER  (dùng AccountId 2..7)
+-- 2.2 ACCOUNT
+-----------------------
+INSERT INTO Account (Username, PasswordHash, RoleId, IsDeleted)
+VALUES ('admin01', 'admin123', 1, 0);   -- Admin
+
+INSERT INTO Account (Username, PasswordHash, RoleId, IsDeleted)
+VALUES 
+('teacher01', '12345', 2, 0),
+('teacher02', '12345', 2, 0),
+('teacher03', '12345', 2, 0),
+('teacher04', '12345', 2, 0),
+('teacher05', '12345', 2, 0),
+('teacher06', '12345', 2, 0);
+
+INSERT INTO Account (Username, PasswordHash, RoleId, IsDeleted)
+VALUES
+('student01', '12345', 3, 0),
+('student02', '12345', 3, 0),
+('student03', '12345', 3, 0),
+('student04', '12345', 3, 0),
+('student05', '12345', 3, 0),
+('student06', '12345', 3, 0),
+('student07', '12345', 3, 0),
+('student08', '12345', 3, 0),
+('student09', '12345', 3, 0),
+('student10', '12345', 3, 0),
+('student11', '12345', 3, 0),
+('student12', '12345', 3, 0),
+('student13', '12345', 3, 0),
+('student14', '12345', 3, 0),
+('student15', '12345', 3, 0),
+('student16', '12345', 3, 0),
+('student17', '12345', 3, 0),
+('student18', '12345', 3, 0),
+('student19', '12345', 3, 0),
+('student20', '12345', 3, 0),
+('student21', '12345', 3, 0),
+('student22', '12345', 3, 0),
+('student23', '12345', 3, 0),
+('student24', '12345', 3, 0);
+GO
+
+-----------------------
+-- 2.3 TEACHER
 -----------------------
 INSERT INTO Teacher (AccountId, FullName, Email, Phone, Department, Address, DateOfBirth, Gender)
 VALUES
@@ -208,10 +324,9 @@ VALUES
 (6, N'Hoàng Minh E', 'e.hoang@univ.edu.vn',   '0901000005', N'Vật lý',              N'Ninh Kiều, Cần Thơ', '1979-01-05', N'Nam'),
 (7, N'Vũ Thị F',     'f.vu@univ.edu.vn',      '0901000006', N'Khoa học dữ liệu',    N'Thủ Đức, TP.HCM', '1985-07-30', N'Nữ');
 GO
--- TeacherId: 1..6 theo thứ tự trên
 
 -----------------------
--- 10.4 STUDENT  (dùng AccountId 8..31)
+-- 2.4 STUDENT
 -----------------------
 INSERT INTO Student (AccountId, FullName, Email, Phone, Address, DateOfBirth, Gender)
 VALUES
@@ -240,144 +355,171 @@ VALUES
 (30, N'Phan Thị Giang',      'giang.phan@student.edu.vn',    '0912000023', N'Ba Đình, Hà Nội',      '2004-08-28', N'Nữ'),
 (31, N'Bùi Anh Khánh',       'khanh.bui@student.edu.vn',     '0912000024', N'Sơn Trà, Đà Nẵng',     '2003-10-30', N'Nam');
 GO
--- StudentId = 1..24 theo thứ tự trên
 
 -----------------------
--- 10.5 CLASS  (sử dụng TeacherId 1..5)
+-- 2.5 CLASS
 -----------------------
 INSERT INTO Class (ClassCode, ClassName, TeacherId, Status)
 VALUES
-('CNTT101', N'Lập trình Web',                         1, 1), -- hoạt động
-('CNTT102', N'Cơ sở dữ liệu',                         1, 1), -- hoạt động
-('CNTT201', N'Kiến trúc máy tính',                    1, 0), -- tạm dừng
+('CNTT101', N'Lập trình Web',                         1, 1),
+('CNTT102', N'Cơ sở dữ liệu',                         1, 1),
+('CNTT201', N'Kiến trúc máy tính',                    1, 0),
 ('MATH201', N'Toán rời rạc',                          2, 1),
 ('MATH202', N'Xác suất thống kê',                     2, 1),
 ('PHY101',  N'Vật lý đại cương',                      3, 1),
 ('ENG101',  N'Tiếng Anh cơ bản',                      4, 1),
 ('AI301',   N'Nhập môn Trí tuệ nhân tạo',             5, 0);
 GO
--- ClassId = 1..8
-/*======================================================
-= StudentClass - Gán sinh viên vào lớp
-======================================================*/
 
--- CNTT101: SV 1..8
+-----------------------
+-- 2.6 CLASS SCHEDULE
+-----------------------
+INSERT INTO ClassSchedule (ClassId, ScheduleDate, StartTime, EndTime, Room, IsActive, IsDeleted)
+VALUES
+(1, '2025-10-01', '07:45', '09:15', N'Phòng Lab 1', 1, 0),
+(1, '2025-10-08', '07:45', '09:15', N'Phòng Lab 1', 1, 0),
+(2, '2025-10-01', '10:00', '11:30', N'Phòng Lab 2', 1, 0),
+(4, '2025-10-08', '13:00', '14:30', N'Phòng 202-A', 1, 0),
+
+(1, '2025-11-27', '07:00', '09:00', N'Phòng Lab 1', 1, 0),
+(1, '2025-12-04', '07:00', '09:00', N'Phòng Lab 1', 1, 0),
+(1, '2025-12-11', '07:00', '09:00', N'Phòng Lab 1', 1, 0),
+
+(2, '2025-11-27', '10:00', '11:30', N'Phòng Lab 2', 1, 0),
+(4, '2025-11-27', '13:00', '14:30', N'Phòng 202-A', 1, 0),
+
+(1, '2025-10-15', '07:45', '09:15', N'Phòng Lab test', 0, 0);
+GO
+
+-----------------------
+-- 2.7 STUDENTCLASS
+-----------------------
 INSERT INTO StudentClass (StudentId, ClassId, IsDeleted)
 VALUES
 (1,1,0),(2,1,0),(3,1,0),(4,1,0),(5,1,0),(6,1,0),(7,1,0),(8,1,0);
 
--- CNTT102: SV 5..12
 INSERT INTO StudentClass (StudentId, ClassId, IsDeleted)
 VALUES
 (5,2,0),(6,2,0),(7,2,0),(8,2,0),(9,2,0),(10,2,0),(11,2,0),(12,2,0);
 
--- CNTT201: SV 9..14
 INSERT INTO StudentClass (StudentId, ClassId, IsDeleted)
 VALUES
 (9,3,0),(10,3,0),(11,3,0),(12,3,0),(13,3,0),(14,3,0);
 
--- MATH201: SV 1,2,3 và 9,10,11
 INSERT INTO StudentClass (StudentId, ClassId, IsDeleted)
 VALUES
 (1,4,0),(2,4,0),(3,4,0),(9,4,0),(10,4,0),(11,4,0);
 
--- MATH202: SV 12..18
 INSERT INTO StudentClass (StudentId, ClassId, IsDeleted)
 VALUES
 (12,5,0),(13,5,0),(14,5,0),(15,5,0),(16,5,0),(17,5,0),(18,5,0);
 
--- PHY101: SV 15..20
 INSERT INTO StudentClass (StudentId, ClassId, IsDeleted)
 VALUES
 (15,6,0),(16,6,0),(17,6,0),(18,6,0),(19,6,0),(20,6,0);
 
--- ENG101: SV 18..24
 INSERT INTO StudentClass (StudentId, ClassId, IsDeleted)
 VALUES
 (18,7,0),(19,7,0),(20,7,0),(21,7,0),(22,7,0),(23,7,0),(24,7,0);
 
--- AI301: SV mang tính nâng cao
 INSERT INTO StudentClass (StudentId, ClassId, IsDeleted)
 VALUES
 (3,8,0),(4,8,0),(7,8,0),(8,8,0),(11,8,0),(14,8,0),(17,8,0),(20,8,0);
-
-
------------------------
--- 10.7 FINGERPRINT  (một số SV có vân tay)
------------------------
-INSERT INTO Fingerprint (StudentId, Fingerprint)
-VALUES
-(1,  N'FPT-TEMPLATE-0001'),
-(2,  N'FPT-TEMPLATE-0002'),
-(3,  N'FPT-TEMPLATE-0003'),
-(4,  N'FPT-TEMPLATE-0004'),
-(5,  N'FPT-TEMPLATE-0005'),
-(6,  N'FPT-TEMPLATE-0006'),
-(7,  N'FPT-TEMPLATE-0007'),
-(8,  N'FPT-TEMPLATE-0008'),
-(10, N'FPT-TEMPLATE-0010'),
-(12, N'FPT-TEMPLATE-0012'),
-(15, N'FPT-TEMPLATE-0015'),
-(18, N'FPT-TEMPLATE-0018'),
-(20, N'FPT-TEMPLATE-0020'),
-(22, N'FPT-TEMPLATE-0022'),
-(24, N'FPT-TEMPLATE-0024');
 GO
 
 -----------------------
--- 10.8 ATTENDANCE  (điểm danh nhiều buổi cho vài lớp)
+-- 2.8 FINGERPRINT SAMPLE (GIỮ LẠI)
 -----------------------
--- Ngày 2025-10-01: CNTT101 (ClassId = 1)
-INSERT INTO Attendance (StudentId, ClassId, AttendanceDate, AttendanceTime, SessionStart, SessionEnd, Status)
+INSERT INTO Fingerprint (StudentId, SensorSlot)
 VALUES
-(1,1,'2025-10-01','07:55','07:45','09:15',N'Có mặt'),
-(2,1,'2025-10-01','08:10','07:45','09:15',N'Muộn'),
-(3,1,'2025-10-01','07:50','07:45','09:15',N'Có mặt'),
-(4,1,'2025-10-01','08:30','07:45','09:15',N'Vắng'),
-(5,1,'2025-10-01','07:47','07:45','09:15',N'Có mặt'),
-(6,1,'2025-10-01','07:59','07:45','09:15',N'Có mặt'),
-(7,1,'2025-10-01','08:20','07:45','09:15',N'Muộn'),
-(8,1,'2025-10-01','08:05','07:45','09:15',N'Có mặt');
-
--- Ngày 2025-10-08: CNTT101
-INSERT INTO Attendance (StudentId, ClassId, AttendanceDate, AttendanceTime, SessionStart, SessionEnd, Status)
-VALUES
-(1,1,'2025-10-08','07:53','07:45','09:15',N'Có mặt'),
-(2,1,'2025-10-08','08:12','07:45','09:15',N'Muộn'),
-(3,1,'2025-10-08','07:49','07:45','09:15',N'Có mặt'),
-(4,1,'2025-10-08','08:35','07:45','09:15',N'Vắng'),
-(5,1,'2025-10-08','07:46','07:45','09:15',N'Có mặt'),
-(6,1,'2025-10-08','07:58','07:45','09:15',N'Có mặt'),
-(7,1,'2025-10-08','08:18','07:45','09:15',N'Muộn'),
-(8,1,'2025-10-08','08:03','07:45','09:15',N'Có mặt');
-
--- Ngày 2025-10-01: CNTT102 (ClassId = 2)
-INSERT INTO Attendance (StudentId, ClassId, AttendanceDate, AttendanceTime, SessionStart, SessionEnd, Status)
-VALUES
-(5,2,'2025-10-01','10:05','10:00','11:30',N'Có mặt'),
-(6,2,'2025-10-01','10:15','10:00','11:30',N'Muộn'),
-(7,2,'2025-10-01','10:02','10:00','11:30',N'Có mặt'),
-(8,2,'2025-10-01','10:20','10:00','11:30',N'Muộn'),
-(9,2,'2025-10-01','10:01','10:00','11:30',N'Có mặt'),
-(10,2,'2025-10-01','10:25','10:00','11:30',N'Vắng'),
-(11,2,'2025-10-01','10:08','10:00','11:30',N'Có mặt'),
-(12,2,'2025-10-01','10:12','10:00','11:30',N'Muộn');
-
--- Ngày 2025-10-08: MATH201 (ClassId = 4)
-INSERT INTO Attendance (StudentId, ClassId, AttendanceDate, AttendanceTime, SessionStart, SessionEnd, Status)
-VALUES
-(1,4,'2025-10-08','13:03','13:00','14:30',N'Có mặt'),
-(2,4,'2025-10-08','13:15','13:00','14:30',N'Muộn'),
-(3,4,'2025-10-08','13:02','13:00','14:30',N'Có mặt'),
-(9,4,'2025-10-08','13:25','13:00','14:30',N'Vắng'),
-(10,4,'2025-10-08','13:05','13:00','14:30',N'Có mặt'),
-(11,4,'2025-10-08','13:10','13:00','14:30',N'Có mặt');
+(1,  1),
+(2,  2),
+(3,  3),
+(4,  4),
+(5,  5),
+(6,  6),
+(7,  7),
+(8,  8),
+(10, 10),
+(12, 12),
+(15, 15),
+(18, 18),
+(20, 20),
+(22, 22),
+(24, 24);
 GO
 
 -----------------------
--- 10.9 GRADE  (điểm số cho một số lớp quan trọng)
+-- 2.9 ATTENDANCE SAMPLE
 -----------------------
--- CNTT101 (ClassId = 1)
+DECLARE 
+    @SCH_CNTT101_20251001 INT,
+    @SCH_CNTT101_20251008 INT,
+    @SCH_CNTT102_20251001 INT,
+    @SCH_MATH201_20251008 INT;
+
+SELECT @SCH_CNTT101_20251001 = ScheduleId 
+FROM ClassSchedule 
+WHERE ClassId = 1 AND ScheduleDate = '2025-10-01' AND StartTime = '07:45' AND EndTime = '09:15';
+
+SELECT @SCH_CNTT101_20251008 = ScheduleId 
+FROM ClassSchedule 
+WHERE ClassId = 1 AND ScheduleDate = '2025-10-08' AND StartTime = '07:45' AND EndTime = '09:15';
+
+SELECT @SCH_CNTT102_20251001 = ScheduleId 
+FROM ClassSchedule 
+WHERE ClassId = 2 AND ScheduleDate = '2025-10-01' AND StartTime = '10:00' AND EndTime = '11:30';
+
+SELECT @SCH_MATH201_20251008 = ScheduleId 
+FROM ClassSchedule 
+WHERE ClassId = 4 AND ScheduleDate = '2025-10-08' AND StartTime = '13:00' AND EndTime = '14:30';
+
+INSERT INTO Attendance (StudentId, ClassId, ScheduleId, AttendanceTime, Status)
+VALUES
+(1,1,@SCH_CNTT101_20251001,'07:55',N'Có mặt'),
+(2,1,@SCH_CNTT101_20251001,'08:10',N'Muộn'),
+(3,1,@SCH_CNTT101_20251001,'07:50',N'Có mặt'),
+(4,1,@SCH_CNTT101_20251001,'08:30',N'Vắng'),
+(5,1,@SCH_CNTT101_20251001,'07:47',N'Có mặt'),
+(6,1,@SCH_CNTT101_20251001,'07:59',N'Có mặt'),
+(7,1,@SCH_CNTT101_20251001,'08:20',N'Muộn'),
+(8,1,@SCH_CNTT101_20251001,'08:05',N'Có mặt');
+
+INSERT INTO Attendance (StudentId, ClassId, ScheduleId, AttendanceTime, Status)
+VALUES
+(1,1,@SCH_CNTT101_20251008,'07:53',N'Có mặt'),
+(2,1,@SCH_CNTT101_20251008,'08:12',N'Muộn'),
+(3,1,@SCH_CNTT101_20251008,'07:49',N'Có mặt'),
+(4,1,@SCH_CNTT101_20251008,'08:35',N'Vắng'),
+(5,1,@SCH_CNTT101_20251008,'07:46',N'Có mặt'),
+(6,1,@SCH_CNTT101_20251008,'07:58',N'Có mặt'),
+(7,1,@SCH_CNTT101_20251008,'08:18',N'Muộn'),
+(8,1,@SCH_CNTT101_20251008,'08:03',N'Có mặt');
+
+INSERT INTO Attendance (StudentId, ClassId, ScheduleId, AttendanceTime, Status)
+VALUES
+(5,2,@SCH_CNTT102_20251001,'10:05',N'Có mặt'),
+(6,2,@SCH_CNTT102_20251001,'10:15',N'Muộn'),
+(7,2,@SCH_CNTT102_20251001,'10:02',N'Có mặt'),
+(8,2,@SCH_CNTT102_20251001,'10:20',N'Muộn'),
+(9,2,@SCH_CNTT102_20251001,'10:01',N'Có mặt'),
+(10,2,@SCH_CNTT102_20251001,'10:25',N'Vắng'),
+(11,2,@SCH_CNTT102_20251001,'10:08',N'Có mặt'),
+(12,2,@SCH_CNTT102_20251001,'10:12',N'Muộn');
+
+INSERT INTO Attendance (StudentId, ClassId, ScheduleId, AttendanceTime, Status)
+VALUES
+(1,4,@SCH_MATH201_20251008,'13:03',N'Có mặt'),
+(2,4,@SCH_MATH201_20251008,'13:15',N'Muộn'),
+(3,4,@SCH_MATH201_20251008,'13:02',N'Có mặt'),
+(9,4,@SCH_MATH201_20251008,'13:25',N'Vắng'),
+(10,4,@SCH_MATH201_20251008,'13:05',N'Có mặt'),
+(11,4,@SCH_MATH201_20251008,'13:10',N'Có mặt');
+GO
+
+-----------------------
+-- 2.10 GRADE SAMPLE
+-----------------------
 INSERT INTO Grade (StudentId, ClassId, AttendanceGrade, MidtermGrade, FinalGrade)
 VALUES
 (1,1,9.0, 8.0, 8.5),
@@ -389,7 +531,6 @@ VALUES
 (7,1,7.0, 6.5, 7.0),
 (8,1,9.0, 8.0, 8.0);
 
--- CNTT102 (ClassId = 2)
 INSERT INTO Grade (StudentId, ClassId, AttendanceGrade, MidtermGrade, FinalGrade)
 VALUES
 (5,2,8.5, 7.5, 8.0),
@@ -401,7 +542,6 @@ VALUES
 (11,2,8.5,7.5, 8.0),
 (12,2,7.5,7.0, 7.0);
 
--- MATH201 (ClassId = 4)
 INSERT INTO Grade (StudentId, ClassId, AttendanceGrade, MidtermGrade, FinalGrade)
 VALUES
 (1,4,9.0, 8.5, 8.5),
@@ -411,7 +551,6 @@ VALUES
 (10,4,8.5,7.5, 8.0),
 (11,4,9.0,8.5, 8.5);
 
--- MATH202 (ClassId = 5)
 INSERT INTO Grade (StudentId, ClassId, AttendanceGrade, MidtermGrade, FinalGrade)
 VALUES
 (12,5,8.5,7.5,8.0),
@@ -423,19 +562,23 @@ VALUES
 (18,5,8.5,8.0,8.0);
 GO
 
+-----------------------
+-- 2.11 DEVICE SAMPLE (để ESP chạy được)
+-----------------------
+INSERT INTO Device (DeviceCode, DeviceName, Room, IsActive)
+VALUES 
+  (N'ESP_ROOM_LAB1', N'Thiết bị Lab 1', N'Phòng Lab 1', 1),
+  (N'ESP_ROOM_LAB2', N'Thiết bị vân tay phòng Lab 2', N'LAB2', 1),
+  (N'ESP_ROOM_A101', N'Thiết bị vân tay phòng A101', N'A101', 1);
+GO
+
 /*======================================================
-= 11) KIỂM TRA NHANH
+= 3) KIỂM TRA NHANH
 ======================================================*/
--- Tổng GV
 SELECT COUNT(*) AS TotalTeachers FROM Teacher;
-
--- Tổng SV
 SELECT COUNT(*) AS TotalStudents FROM Student;
-
--- Tổng lớp đang hoạt động
 SELECT COUNT(*) AS ActiveClasses FROM Class WHERE Status = 1 AND IsDeleted = 0;
 
--- Dữ liệu mẫu cho dashboard teacher01 (TeacherId = 1)
 SELECT * FROM Class WHERE TeacherId = 1;
 
 SELECT * FROM Grade g
@@ -445,3 +588,4 @@ WHERE c.TeacherId = 1 AND c.Status = 1;
 SELECT * FROM Attendance a
 JOIN Class c ON a.ClassId = c.ClassId
 WHERE c.TeacherId = 1 AND c.Status = 1;
+GO

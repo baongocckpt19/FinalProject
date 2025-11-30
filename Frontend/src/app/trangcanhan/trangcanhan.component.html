@@ -1,130 +1,434 @@
 <body>
-    <div class="dashboard-container">
+    <div class="app-container">
         <!-- Main Content -->
-        <div class="main-content">
-            <!-- Profile Content -->
-            <main class="profile-content">
-                <!-- Profile Header -->
-                <div class="profile-header">
-                    <div class="profile-header-content">
-                        <div class="profile-avatar-section">
-                            <div class="profile-avatar-large">
-                                GV
+        <main class="main-content">
+            <!-- Content Panel -->
+            <div class="content-panel">
+                <!-- Profile View -->
+                <div id="profileView" class="page-view" [class.active]="!isEditing">
+                    <div class="main-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Hồ sơ người dùng</h2>
+                            <div class="panel-actions">
+                                <button class="btn btn-primary" (click)="onEditClick()">
+                                    <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                    </svg>
+                                    Chỉnh sửa
+                                </button>
                             </div>
                         </div>
-                        
-                        <div class="profile-info">
-                            <h1 class="profile-name">Nguyễn Văn An</h1>
-                            <p class="profile-role">Giảng viên</p>
-                            
+                        <div class="panel-body">
+                            <div class="profile-view-grid">
+                                <div class="profile-sidebar">
+                                    <div class="profile-card-compact">
+                                        <div class="profile-avatar-large">
+                                            {{ avatarLabel }}
+                                            <!-- thể hiện đây là tài khoản giảng viên -->
+                                        </div>
+                                        <div class="profile-name-large">
+                                            {{ profile?.fullName || 'Chưa cập nhật' }}
+                                        </div>
+                                        <div class="profile-code-large">
+                                            {{ profile?.username || '-' }}
+                                            <!-- đây là username của người dùng -->
+                                        </div>
+                                        <div class="profile-role-badge-large">
+                                            {{ roleBadgeText }}
+                                        </div>
+                                    </div>
+                                    <div class="info-list-compact">
+                                        <div class="info-list-title">
+                                            Liên hệ
+                                        </div>
+                                        <div class="info-item-compact">
+                                            <div class="info-item-label">
+                                                📧 Email
+                                            </div>
+                                            <div class="info-item-value">
+                                                {{ profile?.email || 'Chưa cập nhật' }}
+                                            </div>
+                                        </div>
+                                        <div class="info-item-compact">
+                                            <div class="info-item-label">
+                                                📱 Số điện thoại
+                                            </div>
+                                            <div class="info-item-value">
+                                                {{ profile?.phone || 'Chưa cập nhật' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-sections">
+                                    <div class="form-section">
+                                        <div class="form-section-title">
+                                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                            </svg>
+                                            Thông tin cơ bản
+                                        </div>
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <div class="info-item-label">
+                                                    Họ và tên
+                                                </div>
+                                                <div class="info-item-value">
+                                                    {{ profile?.fullName || 'Chưa cập nhật' }}
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="info-item-label">
+                                                    Mã số
+                                                </div>
+                                                <div class="info-item-value">
+                                                    {{ profile?.studentId || profile?.teacherId || '-' }}
+                                                </div>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="info-item-label">
+                                                    Ngày sinh
+                                                </div>
+                                                <div class="info-item-value">
+                                                    {{
+                                                    profile?.birthDate
+                                                    ? (profile?.birthDate | date: 'dd/MM/yyyy')
+                                                    : 'Chưa cập nhật'
+                                                    }}
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="info-item-label">
+                                                    Giới tính
+                                                </div>
+                                                <div class="info-item-value">
+                                                    {{ formatGender(profile?.gender || null) }}
+                                                </div>
+                                            </div>
+                                            <div class="form-group full-width">
+                                                <div class="info-item-label">
+                                                    Địa chỉ
+                                                </div>
+                                                <div class="info-item-value">
+                                                    {{ profile?.address || 'Chưa cập nhật' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-section">
+                                        <div class="form-section-title">
+                                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                            </svg>
+                                            Phân quyền hệ thống
+                                        </div>
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <div class="info-item-label">
+                                                    Vai trò
+                                                </div>
+                                                <div class="info-item-value">
+                                                    {{ roleBadgeText }}
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="info-item-label">
+                                                    Trạng thái
+                                                </div>
+                                                <div class="info-item-value">
+                                                    ✅ Đang hoạt động
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> <!-- /form-sections -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit View -->
+                <div id="editView" class="page-view" [class.active]="isEditing">
+                    <div class="main-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Cập nhật thông tin cá nhân</h2>
+                        </div>
+                        <div class="panel-body">
+                            <form id="editForm" (ngSubmit)="saveChanges()" *ngIf="editModel">
+                                <div class="form-sections">
+                                    <div class="form-section">
+                                        <div class="form-section-title">
+                                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                            </svg>
+                                            Thông tin cơ bản
+                                        </div>
+                                        <div class="form-grid">
+                                            <div class="form-group full-width">
+                                                <label class="form-label" for="fullName">
+                                                    Họ và tên <span class="required">*</span>
+                                                </label>
+                                                <input type="text" id="fullName" class="form-input"
+                                                    [(ngModel)]="editModel.fullName" name="fullName" required />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="userCode">
+                                                    Mã số <span class="required">*</span>
+                                                </label>
+                                                <input type="text" id="userCode" class="form-input" [readonly]="true"
+                                                    [value]="profile?.studentId || profile?.teacherId" />
+
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="role">
+                                                    Phân quyền <span class="required">*</span>
+                                                </label>
+                                                <select id="role" class="form-select" [ngModel]="editModel.roleName"
+                                                    name="role" disabled required>
+                                                    <option value="Học sinh">🎓 Sinh viên</option>
+                                                    <option value="Giảng viên">👨‍🏫 Giảng viên</option>
+                                                    <option value="Admin">🛡️ Admin</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="birthDate">
+                                                    Ngày sinh <span class="required">*</span>
+                                                </label>
+                                                <input type="date" id="birthDate" class="form-input"
+                                                    [(ngModel)]="editModel.birthDate" name="birthDate" required />
+                                            </div>
+                                            <div class="form-group full-width">
+                                                <label class="form-label">
+                                                    Giới tính <span class="required">*</span>
+                                                </label>
+                                                <div class="radio-group">
+                                                    <div class="radio-option">
+                                                        <input type="radio" id="male" name="gender" class="radio-input"
+                                                            [(ngModel)]="editModel.gender" [value]="'Nam'" required />
+                                                        <label for="male" class="radio-label">
+                                                            👨 Nam
+                                                        </label>
+                                                    </div>
+                                                    <div class="radio-option">
+                                                        <input type="radio" id="female" name="gender"
+                                                            class="radio-input" [(ngModel)]="editModel.gender"
+                                                            [value]="'Nữ'" required />
+                                                        <label for="female" class="radio-label">
+                                                            👩 Nữ
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-section">
+                                        <div class="form-section-title">
+                                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                                            </svg>
+                                            Thông tin liên hệ
+                                        </div>
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label class="form-label" for="email">
+                                                    Email <span class="required">*</span>
+                                                </label>
+                                                <input type="email" id="email" class="form-input"
+                                                    [(ngModel)]="editModel.email" name="email" required />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label" for="phone">
+                                                    Số điện thoại <span class="required">*</span>
+                                                </label>
+                                                <input type="tel" id="phone" class="form-input"
+                                                    [(ngModel)]="editModel.phone" name="phone" required />
+                                            </div>
+                                            <div class="form-group full-width">
+                                                <label class="form-label" for="address">
+                                                    Địa chỉ <span class="required">*</span>
+                                                </label>
+                                                <textarea id="address" class="form-textarea"
+                                                    [(ngModel)]="editModel.address" name="address" required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                                    <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
+                                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                                        </svg>
+                                        Hủy
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" [disabled]="isSaving">
+                                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                        </svg>
+                                        {{ isSaving ? 'Đang lưu...' : 'Lưu thay đổi' }}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Password View -->
+                <div id="passwordView" class="page-view active">
+                    <div class="main-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Thay đổi mật khẩu</h2>
+                        </div>
+                        <div class="panel-body">
+                            <form id="passwordForm" #passwordForm="ngForm" (ngSubmit)="changePassword()">
+                                <div class="form-sections">
+                                    <div class="form-section">
+                                        <div class="form-section-title">
+                                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                                            </svg>
+                                            Mật khẩu mới
+                                        </div>
+
+                                        <div class="form-grid">
+                                            <!-- MẬT KHẨU HIỆN TẠI -->
+                                            <div class="form-group full-width">
+                                                <label class="form-label" for="currentPassword">
+                                                    Mật khẩu hiện tại <span class="required">*</span>
+                                                </label>
+
+                                                <div class="password-input-wrapper">
+                                                    <input [type]="showCurrentPassword ? 'text' : 'password'"
+                                                        id="currentPassword" class="form-input"
+                                                        placeholder="Nhập mật khẩu hiện tại"
+                                                        [(ngModel)]="passwordModel.currentPassword"
+                                                        name="currentPassword" required
+                                                        (blur)="onCurrentPasswordBlur()" />
+
+                                                    <!-- Nút eye -->
+                                                    <button type="button" class="password-eye-btn"
+                                                        (click)="togglePasswordVisibility('current')">
+                                                        <!-- icon đơn giản, bạn có thể thay SVG khác -->
+                                                        {{ showCurrentPassword ? '🙈' : '👁' }}
+                                                    </button>
+
+                                                    <!-- Icon check/X -->
+                                                    <span class="password-status-icon"
+                                                        *ngIf="currentPasswordValid !== null && !currentPasswordChecking"
+                                                        [ngClass]="{
+                'valid': currentPasswordValid === true,
+                'invalid': currentPasswordValid === false
+              }">
+                                                        {{ currentPasswordValid ? '✔' : '✖' }}
+                                                    </span>
+
+                                                    <!-- đang kiểm tra -->
+                                                    <span class="password-status-icon checking"
+                                                        *ngIf="currentPasswordChecking">
+                                                        ...
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <!-- MẬT KHẨU MỚI -->
+                                            <div class="form-group">
+                                                <label class="form-label" for="newPassword">
+                                                    Mật khẩu mới <span class="required">*</span>
+                                                </label>
+
+                                                <div class="password-input-wrapper">
+                                                    <input [type]="showNewPassword ? 'text' : 'password'"
+                                                        id="newPassword" class="form-input"
+                                                        placeholder="Nhập mật khẩu mới"
+                                                        [(ngModel)]="passwordModel.newPassword" name="newPassword"
+                                                        required minlength="8" />
+                                                    <button type="button" class="password-eye-btn"
+                                                        (click)="togglePasswordVisibility('new')">
+                                                        {{ showNewPassword ? '🙈' : '👁' }}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- XÁC NHẬN -->
+                                            <div class="form-group">
+                                                <label class="form-label" for="confirmPassword">
+                                                    Xác nhận mật khẩu <span class="required">*</span>
+                                                </label>
+
+                                                <div class="password-input-wrapper">
+                                                    <input [type]="showConfirmPassword ? 'text' : 'password'"
+                                                        id="confirmPassword" class="form-input"
+                                                        placeholder="Nhập lại mật khẩu mới"
+                                                        [(ngModel)]="passwordModel.confirmPassword"
+                                                        name="confirmPassword" required minlength="8" />
+                                                    <button type="button" class="password-eye-btn"
+                                                        (click)="togglePasswordVisibility('confirm')">
+                                                        {{ showConfirmPassword ? '🙈' : '👁' }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Khối note yêu cầu mật khẩu giữ nguyên -->
+                                        <div
+                                            style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 12px; margin-top: 20px;">
+                                            <p
+                                                style="font-size: 14px; color: #92400e; font-weight: 700; margin-bottom: 10px;">
+                                                🔒 Yêu cầu mật khẩu an toàn:
+                                            </p>
+                                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                                <li
+                                                    style="font-size: 13px; color: #78350f; font-weight: 500; margin-bottom: 6px; padding-left: 20px; position: relative;">
+                                                    <span
+                                                        style="position: absolute; left: 0; color: #f59e0b; font-weight: 700;">✓</span>
+                                                    Tối thiểu 8 ký tự
+                                                </li>
+                                                <li
+                                                    style="font-size: 13px; color: #78350f; font-weight: 500; margin-bottom: 6px; padding-left: 20px; position: relative;">
+                                                    <span
+                                                        style="position: absolute; left: 0; color: #f59e0b; font-weight: 700;">✓</span>
+                                                    Nên chứa chữ hoa, chữ thường và số
+                                                </li>
+                                                <li
+                                                    style="font-size: 13px; color: #78350f; font-weight: 500; padding-left: 20px; position: relative;">
+                                                    <span
+                                                        style="position: absolute; left: 0; color: #f59e0b; font-weight: 700;">✓</span>
+                                                    Không sử dụng thông tin cá nhân dễ đoán
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                                    <button type="button" class="btn btn-secondary"
+                                        (click)="resetPasswordForm(passwordForm)">
+                                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+                                        </svg>
+                                        Đặt lại
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" [disabled]="isChangingPassword">
+                                        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" />
+                                        </svg>
+                                        {{ isChangingPassword ? 'Đang đổi...' : 'Đổi mật khẩu' }}
+                                    </button>
+                                </div>
+                            </form>
 
                         </div>
                     </div>
                 </div>
-                
-                <!-- Profile Content -->
-                <div class="profile-sections">
-                    <!-- Personal Information -->
-                    <div class="profile-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Thông tin cá nhân</h3>
-                            <button class="edit-btn" onclick="toggleEdit('personal-info')">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                                </svg>
-                                Chỉnh sửa
-                            </button>
-                        </div>
-                        
-                        <form id="personal-info">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fullName" class="form-label">Họ và tên</label>
-                                    <input type="text" id="fullName" class="form-input" value="Nguyễn Văn An" disabled>
-                                </div>
-                                <div class="form-group">
-                                    <label for="employeeId" class="form-label">Mã Số</label>
-                                    <input type="text" id="employeeId" class="form-input" value="GV001" disabled>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="email" class="form-label">Email</label>
-                                    <input type="email" id="email" class="form-input" value="nguyenvanan@university.edu.vn" disabled>
-                                </div>
-                                <div class="form-group">
-                                    <label for="phone" class="form-label">Số điện thoại</label>
-                                    <input type="tel" id="phone" class="form-input" value="0123456789" disabled>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="department" class="form-label">Khoa</label>
-                                    <input type="text" id="department" class="form-input" value="Công nghệ Thông tin" disabled>
-                                </div>
-                                <div class="form-group">
-                                    <label for="position" class="form-label">Chức vụ</label>
-                                    <input type="text" id="position" class="form-input" value="Giảng viên" disabled>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="address" class="form-label">Địa chỉ</label>
-                                <input type="text" id="address" class="form-input" value="123 Đường ABC, Quận XYZ, TP.HCM" disabled>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="bio" class="form-label">Giới thiệu</label>
-                                <textarea id="bio" class="form-input form-textarea" disabled>Giảng viên với 5 năm kinh nghiệm trong lĩnh vực Công nghệ Thông tin, chuyên môn về Lập trình Web và Cơ sở dữ liệu. Tôi luôn tận tâm trong việc giảng dạy và hướng dẫn sinh viên.</textarea>
-                            </div>
-                            
-                            <div id="personal-info-actions" style="display: none; margin-top: 20px;">
-                                <button type="button" class="btn btn-primary" onclick="savePersonalInfo()">
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                                    </svg>
-                                    Lưu thay đổi
-                                </button>
-                                <button type="button" class="btn btn-outline" onclick="cancelEdit('personal-info')">Hủy</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <!-- Change Password -->
-                    <div class="profile-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Đổi mật khẩu</h3>
-                        </div>
-                        
-                        <form id="password-form">
-                            <div class="form-group">
-                                <label for="currentPassword" class="form-label">Mật khẩu hiện tại</label>
-                                <input type="password" id="currentPassword" class="form-input" placeholder="Nhập mật khẩu hiện tại">
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="newPassword" class="form-label">Mật khẩu mới</label>
-                                    <input type="password" id="newPassword" class="form-input" placeholder="Nhập mật khẩu mới">
-                                </div>
-                                <div class="form-group">
-                                    <label for="confirmPassword" class="form-label">Xác nhận mật khẩu</label>
-                                    <input type="password" id="confirmPassword" class="form-input" placeholder="Xác nhận mật khẩu mới">
-                                </div>
-                            </div>
-                            
-                            <button type="button" class="btn btn-primary" onclick="changePassword()">
-                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12,17A2,2 0 0,0 14,15C14,13.89 13.1,13 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V10C4,8.89 4.9,8 6,8H7V6A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,3A3,3 0 0,0 9,6V8H15V6A3,3 0 0,0 12,3Z"/>
-                                </svg>
-                                Đổi mật khẩu
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </main>
-        </div>
+            </div>
+        </main>
     </div>
 </body>

@@ -59,10 +59,27 @@ export class AuthService {
     this.userToken.next(token);
 
     // Gọi /api/account để lấy thông tin account hiện tại
+
     this.accountService.getCurrentAccount().subscribe({
       next: (res) => {
         if (res && res.account) {
-          this.currentUserSubject.next(res.account);
+          const raw = res.account;
+
+          const mapped: Account = {
+            accountId: raw.accountId,
+            username: raw.username ?? raw.userName,  // hỗ trợ cả 2 kiểu
+            roleId: raw.roleId,
+            roleName: raw.roleName as any,
+            fullName: raw.fullName,
+
+            studentId: raw.studentId ?? raw.studentID ?? raw.student?.studentId ?? null,
+            teacherId: raw.teacherId ?? raw.teacherID ?? raw.teacher?.teacherId ?? null,
+            email: raw.email ?? null,
+            phone: raw.phone ?? null
+          };
+
+          console.log('Mapped account in AuthService:', mapped);
+          this.currentUserSubject.next(mapped);
         } else {
           this.clearUser();
         }
@@ -71,6 +88,7 @@ export class AuthService {
         this.clearUser();
       }
     });
+
   }
 
   clearUser(removeToken: boolean = true) {

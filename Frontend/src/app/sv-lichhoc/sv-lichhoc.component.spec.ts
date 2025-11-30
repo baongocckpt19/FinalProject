@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SvLichhocComponent } from './sv-lichhoc.component';
+import { SvLichHocComponent } from './sv-lichhoc.component';
 
 describe('SvLichhocComponent', () => {
-  let component: SvLichhocComponent;
-  let fixture: ComponentFixture<SvLichhocComponent>;
+  let component: SvLichHocComponent;
+  let fixture: ComponentFixture<SvLichHocComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SvLichhocComponent]
+      imports: [SvLichHocComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SvLichhocComponent);
+    fixture = TestBed.createComponent(SvLichHocComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

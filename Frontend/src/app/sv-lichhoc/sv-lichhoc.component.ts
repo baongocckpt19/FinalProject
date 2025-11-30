@@ -96,22 +96,22 @@ export class SvLichHocComponent implements OnInit {
     private attendanceService: AttendanceService,
     private authService: AuthService,
     private notify: NotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    // Lấy account hiện tại
     this.authService.currentUser$.subscribe((acc) => {
       this.currentAccount = acc;
-      // Tùy vào Account model của bạn, chỉnh lại field studentId cho đúng
-      if (acc && (acc as any).studentId) {
-        this.currentStudentId = (acc as any).studentId;
+
+      if (acc) {
+        this.currentStudentId = acc.studentId ?? null;
+        console.log('Current account in SvLichHocComponent:', acc);
       }
     });
 
-    // Mặc định chọn hôm nay
     this.selectedDate = this.formatDateKey(this.currentDate);
     this.loadSchedulesForCurrentMonth();
   }
+
 
   // ================== LOAD LỊCH HỌC THEO THÁNG ==================
 
@@ -309,15 +309,15 @@ export class SvLichHocComponent implements OnInit {
       return;
     }
 
-    const studentId = this.currentStudentId;
+    const studentId = this.currentStudentId!;
+    const acc = this.currentAccount!;
 
-    // Skeleton ban đầu
     this.studentDetail = {
       studentId,
-      fullName: (this.currentAccount as any).fullName || this.currentAccount.userName,
-      username: this.currentAccount.userName,
-      email: (this.currentAccount as any).email || '',
-      phone: (this.currentAccount as any).phone || '',
+      fullName: acc.fullName || acc.username,
+      username: acc.username,
+      email: acc.email || '',
+      phone: acc.phone || '',
       classId: cls.classId,
       classCode: cls.classCode,
       className: cls.className,
@@ -328,6 +328,7 @@ export class SvLichHocComponent implements OnInit {
       attendanceRate: 0,
       history: []
     };
+
 
     this.showStudentDetailModal = true;
 
