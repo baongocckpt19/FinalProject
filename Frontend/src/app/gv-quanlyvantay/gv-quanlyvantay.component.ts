@@ -8,7 +8,14 @@ import {
   StudentFingerprintInfo
 } from '../services/fingerprint.service';
 
-type EnrollState = 'idle' | 'waitingDevice' | 'receivedFromDevice' | 'saving' | 'done' | 'error';
+// Trạng thái phiên đăng ký vân tay trên UI
+type EnrollState =
+  | 'idle'
+  | 'waitingDevice'
+  | 'receivedFromDevice'
+  | 'saving'
+  | 'done'
+  | 'error';
 
 @Component({
   selector: 'app-gv-quanlyvantay',
@@ -18,31 +25,72 @@ type EnrollState = 'idle' | 'waitingDevice' | 'receivedFromDevice' | 'saving' | 
   styleUrl: './gv-quanlyvantay.component.scss'
 })
 export class GvQuanlyvantayComponent {
+  // =========================================================
+  // 1. STATE CHO TÌM KIẾM SINH VIÊN
+  // =========================================================
 
-  // nhập MSSV (studentCode)
+  /** MSSV nhập từ ô tìm kiếm */
   studentCodeInput: string = '';
 
-
-  // thông tin sinh viên được tìm thấy (từ API)
+  /** Thông tin sinh viên sau khi tìm */
   selectedStudent: StudentFingerprintInfo | null = null;
 
-  // trạng thái tìm sinh viên
+  /** Cờ loading khi gọi API tìm sinh viên */
   searching = false;
+
+  /** Lỗi hiển thị bên dưới ô tìm kiếm */
   searchStudentError = '';
 
-  // trạng thái phiên đăng ký vân tay
+  // =========================================================
+  // 2. STATE CHO PHIÊN ĐĂNG KÝ VÂN TAY
+  // =========================================================
+
+  /** Trạng thái UI của phiên đăng ký */
   enrollState: EnrollState = 'idle';
+
+  /** Mã phiên do server trả về */
   currentSessionCode: string | null = null;
+
+  /** Slot vân tay (index trên module) */
   currentSensorSlot: number | null = null;
+
+  /** Cờ loading khi đang tạo phiên */
   creatingSession = false;
+
+  /** Message hiển thị bên dưới nhóm nút */
   lastEnrollMessage = '';
 
-  constructor(
-    private fingerprintService: FingerprintService
-  ) { }
+  /** Timer để poll trạng thái từ server */
+  private pollTimer: any;
 
-  // Gọi API backend để tìm theo studentId
+  // =========================================================
+  // 3. DANH SÁCH THIẾT BỊ ĐIỂM DANH
+  // =========================================================
+
+  /** Danh sách thiết bị đang active */
+  devices: DeviceFingerprintInfo[] = [];
+
+  /** Thiết bị đang được chọn trong select */
+  selectedDeviceCode: string = '';
+
+  // =========================================================
+  // 4. CONSTRUCTOR + LIFECYCLE
+  // =========================================================
+
+  constructor(private fingerprintService: FingerprintService) { }
+
+  /** Load danh sách thiết bị khi component khởi tạo */
+  ngOnInit(): void {
+    this.loadDevices();
+  }
+
+  // =========================================================
+  // 5. HÀM TÌM KIẾM SINH VIÊN THEO MSSV
+  // =========================================================
+
+  /** Gọi API backend để tìm theo studentCode (MSSV) */
   searchStudent(): void {
+    // reset state liên quan
     this.searchStudentError = '';
     this.selectedStudent = null;
     this.enrollState = 'idle';
@@ -58,7 +106,6 @@ export class GvQuanlyvantayComponent {
 
     this.searching = true;
 
-    // 🔹 GỌI THEO studentCode (MSSV)
     this.fingerprintService.getStudentFingerprintInfoByCode(code).subscribe({
       next: (info) => {
         this.selectedStudent = info;
@@ -69,85 +116,91 @@ export class GvQuanlyvantayComponent {
         this.searching = false;
         this.selectedStudent = null;
         console.error('searchStudent error', err);
+
         if (err.status === 404) {
           this.searchStudentError = `Không tìm thấy sinh viên với MSSV: ${code}.`;
         } else {
-          this.searchStudentError = 'Có lỗi xảy ra khi tìm sinh viên. Vui lòng thử lại.';
+          this.searchStudentError =
+            'Có lỗi xảy ra khi tìm sinh viên. Vui lòng thử lại.';
         }
       }
     });
   }
-  // Danh sách thiết bị
-devices: DeviceFingerprintInfo[] = [];
-selectedDeviceCode: string = '';
 
-ngOnInit(): void {
-  this.loadDevices();
-}
+  // =========================================================
+  // 6. HÀM LOAD DANH SÁCH THIẾT BỊ
+  // =========================================================
 
-loadDevices(): void {
-  this.fingerprintService.getActiveDevices().subscribe({
-    next: (list) => {
-      this.devices = list;
-      if (list.length > 0) {
-        this.selectedDeviceCode = list[0].deviceCode; // chọn mặc định
+  /** Lấy danh sách thiết bị active từ backend */
+  loadDevices(): void {
+    this.fingerprintService.getActiveDevices().subscribe({
+      next: (list) => {
+        this.devices = list;
+        if (list.length > 0) {
+          // Chọn thiết bị đầu tiên làm mặc định
+          this.selectedDeviceCode = list[0].deviceCode;
+        }
+      },
+      error: () => {
+        console.error('Không lấy được danh sách thiết bị');
       }
-    },
-    error: () => {
-      console.error("Không lấy được danh sách thiết bị");
-    }
-  });
-}
-
-  // tạo session enroll
- createEnrollSession(): void {
-  if (!this.selectedStudent) {
-    this.lastEnrollMessage = 'Vui lòng chọn sinh viên trước.';
-    return;
+    });
   }
 
-  if (!this.selectedDeviceCode) {
-    this.lastEnrollMessage = 'Vui lòng chọn thiết bị.';
-    return;
+  // =========================================================
+  // 7. TẠO PHIÊN ĐĂNG KÝ VÂN TAY
+  // =========================================================
+
+  createEnrollSession(): void {
+    if (!this.selectedStudent) {
+      this.lastEnrollMessage = 'Vui lòng chọn sinh viên trước.';
+      return;
+    }
+
+    if (!this.selectedDeviceCode) {
+      this.lastEnrollMessage = 'Vui lòng chọn thiết bị.';
+      return;
+    }
+
+    this.creatingSession = true;
+    this.lastEnrollMessage = '';
+    this.enrollState = 'idle';
+    this.currentSessionCode = null;
+    this.currentSensorSlot = null;
+
+    this.fingerprintService
+      .createEnrollSession(this.selectedStudent.studentId, this.selectedDeviceCode)
+      .subscribe({
+        next: (res) => {
+          this.currentSessionCode = res.sessionCode;
+          this.enrollState = 'waitingDevice';
+          this.creatingSession = false;
+
+          this.lastEnrollMessage =
+            `Đã tạo phiên cho ${this.selectedDeviceCode}. Session: ` +
+            res.sessionCode;
+
+          this.startPollingSession();
+        },
+        error: (err) => {
+          console.error('createEnrollSession error', err);
+          this.creatingSession = false;
+          this.enrollState = 'error';
+          this.lastEnrollMessage = 'Không thể tạo phiên. Kiểm tra thiết bị!';
+        }
+      });
   }
 
-  this.creatingSession = true;
-  this.lastEnrollMessage = '';
-  this.enrollState = 'idle';
-  this.currentSessionCode = null;
-  this.currentSensorSlot = null;
+  // =========================================================
+  // 8. POLLING CHECK SESSION TỪ SERVER
+  // =========================================================
 
-  this.fingerprintService.createEnrollSession(
-    this.selectedStudent.studentId,
-    this.selectedDeviceCode
-  ).subscribe({
-    next: (res) => {
-      this.currentSessionCode = res.sessionCode;
-      this.enrollState = 'waitingDevice';
-      this.creatingSession = false;
-
-      this.lastEnrollMessage =
-        `Đã tạo phiên cho ${this.selectedDeviceCode}. Session: ` + res.sessionCode;
-
-      this.startPollingSession();
-    },
-    error: (err) => {
-      console.error('createEnrollSession error', err);
-      this.creatingSession = false;
-      this.enrollState = 'error';
-      this.lastEnrollMessage = 'Không thể tạo phiên. Kiểm tra thiết bị!';
-    }
-  });
-}
-
-  private pollTimer: any;
-
-
-
+  /** Bắt đầu poll 2s/lần để kiểm tra xem ESP đã gửi template lên chưa */
   startPollingSession(): void {
     if (this.pollTimer) {
       clearInterval(this.pollTimer);
     }
+
     this.pollTimer = setInterval(() => {
       if (this.enrollState === 'waitingDevice' && this.currentSessionCode) {
         this.checkSessionFromServer();
@@ -157,24 +210,25 @@ loadDevices(): void {
     }, 2000);
   }
 
-  // hủy session enroll (ở UI, nếu backend có API hủy thì nối thêm)
+  /** Hủy session enroll (UI, nếu backend có API hủy thì nối thêm) */
   cancelEnrollSession(): void {
     this.currentSessionCode = null;
     this.currentSensorSlot = null;
     this.enrollState = 'idle';
     this.lastEnrollMessage = 'Đã hủy phiên đăng ký hiện tại.';
+
     if (this.pollTimer) {
       clearInterval(this.pollTimer);
     }
-
-    // nếu có API hủy session trên backend, bạn gọi ở đây
+    // Nếu có API hủy session trên backend => gọi ở đây
   }
 
-  // (tuỳ chọn) Gọi API check trạng thái session / sensorSlot
+  /** (Tùy chọn) Gọi API check trạng thái session / sensorSlot */
   checkSessionFromServer(): void {
     if (!this.currentSessionCode) {
       return;
     }
+
     this.fingerprintService.checkEnrollTemp(this.currentSessionCode).subscribe({
       next: (res) => {
         if (res.found && typeof res.sensorSlot === 'number') {
@@ -182,17 +236,22 @@ loadDevices(): void {
           this.enrollState = 'receivedFromDevice';
           this.lastEnrollMessage = `Đã nhận template từ thiết bị (slot ${res.sensorSlot}). Bạn có thể lưu cho sinh viên.`;
         } else {
-          this.lastEnrollMessage = 'Chưa nhận được template từ thiết bị. Vui lòng kiểm tra lại ESP/LCD.';
+          this.lastEnrollMessage =
+            'Chưa nhận được template từ thiết bị. Vui lòng kiểm tra lại ESP/LCD.';
         }
       },
       error: (err) => {
         console.error('checkSessionFromServer error', err);
-        this.lastEnrollMessage = 'Không thể kiểm tra trạng thái phiên. Vui lòng thử lại.';
+        this.lastEnrollMessage =
+          'Không thể kiểm tra trạng thái phiên. Vui lòng thử lại.';
       }
     });
   }
 
-  // confirm lưu template cho sinh viên
+  // =========================================================
+  // 9. CONFIRM LƯU TEMPLATE CHO SINH VIÊN
+  // =========================================================
+
   confirmEnroll(): void {
     if (!this.selectedStudent) {
       this.lastEnrollMessage = 'Vui lòng chọn sinh viên trước.';
@@ -202,10 +261,8 @@ loadDevices(): void {
       this.lastEnrollMessage = 'Không có sessionCode. Hãy tạo lại phiên đăng ký.';
       return;
     }
-    if (this.enrollState !== 'receivedFromDevice' && this.enrollState !== 'waitingDevice') {
-      // tuỳ bạn muốn chặt chẽ thế nào
-    }
 
+    // Nếu muốn chặt hơn có thể bắt buộc enrollState === 'receivedFromDevice'
     this.enrollState = 'saving';
     this.lastEnrollMessage = 'Đang lưu vân tay cho sinh viên...';
 
@@ -214,19 +271,18 @@ loadDevices(): void {
       .subscribe({
         next: (res) => {
           this.enrollState = 'done';
-          this.lastEnrollMessage = res.message || 'Đã lưu vân tay cho sinh viên.';
+          this.lastEnrollMessage =
+            res.message || 'Đã lưu vân tay cho sinh viên.';
 
-          // cập nhật slot hiện tại ở UI
           if (typeof res.sensorSlot === 'number') {
             this.currentSensorSlot = res.sensorSlot;
           }
 
-          // cập nhật cờ hasFingerprint cho đúng sinh viên
           if (this.selectedStudent && res.studentId === this.selectedStudent.studentId) {
             this.selectedStudent.hasFingerprint = true;
           }
 
-          // lấy lại info để cập nhật danh sách devices, slot,... từ backend
+          // Lấy lại info để cập nhật danh sách devices, slot,... từ backend
           this.refreshStudentInfo();
         },
         error: (err) => {
@@ -245,9 +301,14 @@ loadDevices(): void {
       });
   }
 
-  // sau khi confirm thành công, lấy lại info để cập nhật hasFingerprint + devices
+  // =========================================================
+  // 10. HÀM PHỤ: REFRESH LẠI THÔNG TIN SINH VIÊN SAU KHI LƯU
+  // =========================================================
+
+  /** Sau khi confirm thành công, lấy lại info để cập nhật hasFingerprint + devices */
   private refreshStudentInfo(): void {
     if (!this.selectedStudent) return;
+
     const studentId = this.selectedStudent.studentId;
 
     this.fingerprintService.getStudentFingerprintInfoById(studentId).subscribe({
@@ -259,8 +320,4 @@ loadDevices(): void {
       }
     });
   }
-
-
-
-
 }
