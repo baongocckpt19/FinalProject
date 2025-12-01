@@ -27,6 +27,7 @@ interface StudentHistoryView {
 
 interface StudentDetail {
   studentId: number;
+  studentCode: string;
   fullName: string;
   username: string;
   email?: string | null;
@@ -468,6 +469,7 @@ onClassRowClick(cls: ScheduleItem): void {
     // Tạo skeleton trước, chưa có history
     this.studentDetail = {
       studentId: row.studentId,
+      studentCode: row.studentCode, 
       fullName: row.fullName,
       username: row.username,
       email: row.email || '',

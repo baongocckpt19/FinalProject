@@ -11,14 +11,15 @@ import { NotificationService } from '../services/notification.service';
 
 interface StudentGrade {
   studentId: number;
+  studentCode?: string;
   fullName: string;
   username: string;
   mssv: string;
-  diemChuyenCan: number;
-  diemGiuaKy: number;
-  diemCuoiKy: number;
-  diemTrungbinh: number;
-  xepLoai: string;
+  diemChuyenCan: number| null;
+  diemGiuaKy: number | null;
+  diemCuoiKy: number | null;
+  diemTrungbinh: number | null;
+  xepLoai: string | null;
 }
 
 @Component({
@@ -165,7 +166,7 @@ export class GvQuanlydiemsoComponent {
       //  - so với studentId (số)
       //  - hoặc so với mssv (string)
       const sv = this.sv.find(s =>
-        String(s.studentId) === mssvStr || (s.mssv && s.mssv === mssvStr)
+        String(s.mssv) === mssvStr || (s.mssv && s.mssv === mssvStr)
       );
 
       if (!sv) {
@@ -298,21 +299,23 @@ export class GvQuanlydiemsoComponent {
   isAscending: boolean = true;
 
   searchStudent() {
-    const searchInput = this.searchText.toLowerCase().trim();
+  const searchInput = this.searchText.toLowerCase().trim();
 
-    if (!searchInput) {
-      this.sv = [...this.sinhvienFiltered];
-      this.sortByName();
-      return;
-    }
-
-    this.sv = this.sinhvienFiltered.filter(sinhVien =>
-      (sinhVien.fullName || '').toLowerCase().includes(searchInput) ||
-      (sinhVien.mssv || '').toLowerCase().includes(searchInput) ||
-      (sinhVien.username || '').toLowerCase().includes(searchInput)
-    );
+  if (!searchInput) {
+    this.sv = [...this.sinhvienFiltered];
     this.sortByName();
+    return;
   }
+
+  this.sv = this.sinhvienFiltered.filter(sinhVien =>
+    (sinhVien.fullName || '').toLowerCase().includes(searchInput) ||
+    (sinhVien.studentCode || '').toLowerCase().includes(searchInput) ||
+    (sinhVien.mssv || '').toLowerCase().includes(searchInput) ||
+    (sinhVien.username || '').toLowerCase().includes(searchInput)
+  );
+  this.sortByName();
+}
+
 
   sortByName() {
     this.sv.sort((a, b) =>
@@ -349,56 +352,85 @@ export class GvQuanlydiemsoComponent {
   // ================== CHART PHÂN BỐ ĐIỂM ==================
   gradeDistribution: { range: string, count: number }[] = [];
 
-  updateGradeDistribution() {
-    const ranges = [
-      { min: 0, max: 1 },
-      { min: 1, max: 2 },
-      { min: 2, max: 3 },
-      { min: 3, max: 4 },
-      { min: 4, max: 5 },
-      { min: 5, max: 6 },
-      { min: 6, max: 7 },
-      { min: 7, max: 8 },
-      { min: 8, max: 9 },
-      { min: 9, max: 10 }
-    ];
+ updateGradeDistribution() {
+  const ranges = [
+    { min: 0, max: 1 },
+    { min: 1, max: 2 },
+    { min: 2, max: 3 },
+    { min: 3, max: 4 },
+    { min: 4, max: 5 },
+    { min: 5, max: 6 },
+    { min: 6, max: 7 },
+    { min: 7, max: 8 },
+    { min: 8, max: 9 },
+    { min: 9, max: 10 }
+  ];
 
-    this.gradeDistribution = ranges.map(r => {
-      const count = this.sv.filter(
-        s => s.diemTrungbinh >= r.min && s.diemTrungbinh < r.max
-      ).length;
-      return { range: `${r.min}-${r.max}`, count };
-    });
-  }
+  this.gradeDistribution = ranges.map(r => {
+    const count = this.sv.filter(s => {
+      const avg = s.diemTrungbinh;
+      if (avg == null) return false; // chưa có điểm -> không tính
+      return avg >= r.min && avg < r.max;
+    }).length;
+
+    return { range: `${r.min}-${r.max}`, count };
+  });
+}
+
 
   // ================== DS SINH VIÊN CẦN CHÚ Ý ==================
   attentionGradeType: string = 'average';
   attentionStudents: any[] = [];
 
   updateAttentionList() {
-    const type = this.attentionGradeType;
+  const type = this.attentionGradeType;
 
-    this.attentionStudents = this.sv
-      .filter(sv => {
-        if (type === 'attendance') return sv.diemChuyenCan < 4;
-        if (type === 'midterm') return sv.diemGiuaKy < 4;
-        if (type === 'final') return sv.diemCuoiKy < 4;
-        return sv.diemTrungbinh < 4;
-      })
-      .map(sv => ({
+  this.attentionStudents = this.sv
+    .filter(sv => {
+      if (type === 'attendance') {
+        return sv.diemChuyenCan != null && sv.diemChuyenCan < 4;
+      }
+      if (type === 'midterm') {
+        return sv.diemGiuaKy != null && sv.diemGiuaKy < 4;
+      }
+      if (type === 'final') {
+        return sv.diemCuoiKy != null && sv.diemCuoiKy < 4;
+      }
+      // average
+      return sv.diemTrungbinh != null && sv.diemTrungbinh < 4;
+    })
+    .map(sv => {
+      let gradeValue: number | null;
+      let gradeLabel: string;
+
+      switch (type) {
+        case 'attendance':
+          gradeLabel = 'Chuyên cần';
+          gradeValue = sv.diemChuyenCan;
+          break;
+        case 'midterm':
+          gradeLabel = 'Giữa kỳ';
+          gradeValue = sv.diemGiuaKy;
+          break;
+        case 'final':
+          gradeLabel = 'Cuối kỳ';
+          gradeValue = sv.diemCuoiKy;
+          break;
+        default:
+          gradeLabel = 'Trung bình';
+          gradeValue = sv.diemTrungbinh;
+      }
+
+      return {
         id: sv.studentId,
         name: sv.fullName,
-        mssv: sv.studentId,
-        gradeLabel:
-          type === 'attendance' ? 'Chuyên cần' :
-          type === 'midterm' ? 'Giữa kỳ' :
-          type === 'final' ? 'Cuối kỳ' : 'Trung bình',
-        grade:
-          type === 'attendance' ? sv.diemChuyenCan :
-          type === 'midterm' ? sv.diemGiuaKy :
-          type === 'final' ? sv.diemCuoiKy : sv.diemTrungbinh
-      }));
-  }
+        mssv: sv.studentCode,
+        gradeLabel,
+        grade: gradeValue
+      };
+    });
+}
+
 
   getGradeTypeName(type: string): string {
     switch (type) {
@@ -416,45 +448,62 @@ export class GvQuanlydiemsoComponent {
 
   // ================== STATS TỪ ĐIỂM ==================
   updateStatsFromGrades() {
-    const n = this.sv.length;
-    this.totalStudents = n;
+  const n = this.sv.length;
+  this.totalStudents = n;
 
-    if (n === 0) {
-      this.averageClassScore = 0;
-      this.passRate = 0;
-      this.needImproveCount = 0;
+  if (n === 0) {
+    this.averageClassScore = 0;
+    this.passRate = 0;
+    this.needImproveCount = 0;
+    return;
+  }
+
+  const sum = this.sv.reduce((acc, sv) => acc + (sv.diemTrungbinh ?? 0), 0);
+  this.averageClassScore = sum / n;
+
+  const passed = this.sv.filter(sv => (sv.diemTrungbinh ?? 0) >= 4).length;
+  this.passRate = (passed / n) * 100;
+
+  this.needImproveCount = this.sv.filter(sv => {
+    const avg = sv.diemTrungbinh;
+    if (avg == null) return false; // chưa có điểm -> không tính cần cải thiện
+    return avg < 7;
+  }).length;
+}
+
+
+  // ================== TÍNH ĐIỂM TB & XẾP LOẠI ==================
+ diemTB() {
+  this.sv.forEach(sinhVien => {
+    const hasAt  = sinhVien.diemChuyenCan != null;
+    const hasMid = sinhVien.diemGiuaKy != null;
+    const hasFin = sinhVien.diemCuoiKy != null;
+
+    // Nếu chưa có bất kỳ điểm nào -> không hiển thị điểm TB, không xếp loại
+    if (!hasAt && !hasMid && !hasFin) {
+      sinhVien.diemTrungbinh = null as any;
+      sinhVien.xepLoai = '';
       return;
     }
 
-    const sum = this.sv.reduce((acc, sv) => acc + (sv.diemTrungbinh ?? 0), 0);
-    this.averageClassScore = sum / n;
+    const at  = sinhVien.diemChuyenCan ?? 0;
+    const mid = sinhVien.diemGiuaKy ?? 0;
+    const fin = sinhVien.diemCuoiKy ?? 0;
 
-    const passed = this.sv.filter(sv => sv.diemTrungbinh >= 4).length;
-    this.passRate = (passed / n) * 100;
+    sinhVien.diemTrungbinh = (at * 0.25) + (mid * 0.25) + (fin * 0.5);
 
-    this.needImproveCount = this.sv.filter(sv => sv.diemTrungbinh < 7).length;
-  }
+    if (sinhVien.diemTrungbinh >= 9)      sinhVien.xepLoai = 'Xuất sắc';
+    else if (sinhVien.diemTrungbinh >= 8) sinhVien.xepLoai = 'Giỏi';
+    else if (sinhVien.diemTrungbinh >= 7) sinhVien.xepLoai = 'Khá';
+    else if (sinhVien.diemTrungbinh >= 5) sinhVien.xepLoai = 'Trung bình';
+    else                                  sinhVien.xepLoai = 'Yếu';
+  });
 
-  // ================== TÍNH ĐIỂM TB & XẾP LOẠI ==================
-  diemTB() {
-    this.sv.forEach(sinhVien => {
-      const at = sinhVien.diemChuyenCan ?? 0;
-      const mid = sinhVien.diemGiuaKy ?? 0;
-      const fin = sinhVien.diemCuoiKy ?? 0;
+  this.updateGradeDistribution();
+  this.updateAttentionList();
+  this.updateStatsFromGrades();
+}
 
-      sinhVien.diemTrungbinh = (at * 0.25) + (mid * 0.25) + (fin * 0.5);
-
-      if (sinhVien.diemTrungbinh >= 9)      sinhVien.xepLoai = 'Xuất sắc';
-      else if (sinhVien.diemTrungbinh >= 8) sinhVien.xepLoai = 'Giỏi';
-      else if (sinhVien.diemTrungbinh >= 7) sinhVien.xepLoai = 'Khá';
-      else if (sinhVien.diemTrungbinh >= 5) sinhVien.xepLoai = 'Trung bình';
-      else                                  sinhVien.xepLoai = 'Yếu';
-    });
-
-    this.updateGradeDistribution();
-    this.updateAttentionList();
-    this.updateStatsFromGrades();
-  }
 
   // ================== LIFECYCLE ==================
   ngOnInit() {
@@ -497,33 +546,35 @@ export class GvQuanlydiemsoComponent {
     this.loadGrades();
   }
 
-  private loadGrades() {
-    if (!this.selectedClassId) return;
+ private loadGrades() {
+  if (!this.selectedClassId) return;
 
-    this.gradeService.getClassGrades(this.selectedClassId).subscribe({
-      next: (data: StudentGradeApi[]) => {
-        this.sv = data.map(item => ({
-          studentId: item.studentId,
-          fullName: item.fullName,
-          username: item.username,
-          mssv: item.studentId.toString(), // MSSV hiển thị = StudentId
-          diemChuyenCan: item.attendanceGrade?? 0,
-          diemGiuaKy: item.midtermGrade ?? 0,
-          diemCuoiKy: item.finalGrade ?? 0,
-          diemTrungbinh: item.averageGrade ?? 0,
-          xepLoai: ''
-        }));
+  this.gradeService.getClassGrades(this.selectedClassId).subscribe({
+    next: (data: StudentGradeApi[]) => {
+      this.sv = data.map(item => ({
+        studentId: item.studentId,
+        studentCode: item.studentCode,            
+        fullName: item.fullName,
+        username: item.username,
+        mssv: item.studentCode,                   
+        diemChuyenCan: item.attendanceGrade,
+        diemGiuaKy: item.midtermGrade ,
+        diemCuoiKy: item.finalGrade ,
+        diemTrungbinh: item.averageGrade ,
+        xepLoai: ''
+      }));
 
-        this.sinhvienFiltered = [...this.sv];
-        this.diemTB();
-        this.sortByName();
-      },
-      error: (err) => {
-        console.error('Lỗi load điểm:', err);
-        this.notify.error('Thực hiện thất bại');
-      }
-    });
-  }
+      this.sinhvienFiltered = [...this.sv];
+      this.diemTB();
+      this.sortByName();
+    },
+    error: (err) => {
+      console.error('Lỗi load điểm:', err);
+      this.notify.error('Thực hiện thất bại');
+    }
+  });
+}
+
 
   // ================== LƯU ĐIỂM ==================
   saveStudentGrade(sinhVien: StudentGrade) {

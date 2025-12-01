@@ -2,6 +2,7 @@
 package com.FinalProject.backend.Repository;
 
 import com.FinalProject.backend.Models.Grade;
+import com.FinalProject.backend.Models.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository làm việc với bảng Grade (Điểm).
@@ -20,6 +22,9 @@ import java.util.List;
  */
 @Repository
 public interface GradeRepository extends JpaRepository<Grade, Integer> {
+
+    // Optional<Student> findByStudentCode(String studentCode);
+
 
     /**
      * Lấy danh sách điểm của toàn bộ sinh viên trong 1 lớp.
@@ -40,11 +45,12 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
     @Query(value = """
     SELECT 
         s.StudentId,           -- 0
-        s.FullName,            -- 1
-        a.Username,            -- 2
-        g.AttendanceGrade,     -- 3
-        g.MidtermGrade,        -- 4
-        g.FinalGrade           -- 5
+         s.StudentCode,         --1
+        s.FullName,            -- 2
+        a.Username,            -- 3
+        g.AttendanceGrade,     -- 4
+        g.MidtermGrade,        -- 5
+        g.FinalGrade           -- 6
     FROM StudentClass sc
     JOIN Student s ON sc.StudentId = s.StudentId
     JOIN Account a ON s.AccountId = a.AccountId

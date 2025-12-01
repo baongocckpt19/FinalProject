@@ -1170,3 +1170,32 @@
   color: #1d4ed8;
 }
 
+.status-box {
+  margin-top: 12px;
+  background: #e8f0ff;
+  padding: 10px;
+  border-left: 5px solid #4e7fff;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.form-field {
+  margin: 10px 0;
+}
+
+select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #4e7fff;
+  font-size: 14px;
+  background: #ffffff;
+  color: #333;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #002aff;
+    box-shadow: 0 0 4px rgba(0, 54, 255, 0.4);
+  }
+}
+
+

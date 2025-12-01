@@ -194,17 +194,24 @@
                                         <div class="student-info">
                                             <div class="student-details">
                                                 <h5>{{ sinhVien.fullName }}</h5>
-                                                <p>MSSV: {{ sinhVien.studentId }}</p>
+                                                <p>MSSV: {{ sinhVien.studentCode }}</p>
                                             </div>
                                         </div>
                                     </td>
-                                    <td><input type="number" class="grade-input" min="0" max="10" step="0.1"
-                                            [(ngModel)]="sinhVien.diemChuyenCan" (ngModelChange)="diemTB()"></td>
-                                    <td><input type="number" class="grade-input" min="0" max="10" step="0.1"
-                                            [(ngModel)]="sinhVien.diemGiuaKy" (ngModelChange)="diemTB()"></td>
-                                    <td><input type="number" class="grade-input" min="0" max="10" step="0.1"
-                                            [(ngModel)]="sinhVien.diemCuoiKy" (ngModelChange)="diemTB()"></td>
-                                    <td><span class="total-grade" id="total-1">{{sinhVien.diemTrungbinh | number
+                                    <td>
+                                        <input type="number" class="grade-input" min="0" max="10" step="0.1"
+                                            [(ngModel)]="sinhVien.diemChuyenCan" (ngModelChange)="diemTB()">
+                                    </td>
+                                    <td>
+                                        <input type="number" class="grade-input" min="0" max="10" step="0.1"
+                                            [(ngModel)]="sinhVien.diemGiuaKy" (ngModelChange)="diemTB()">
+                                    </td>
+                                    <td>
+                                        <input type="number" class="grade-input" min="0" max="10" step="0.1"
+                                            [(ngModel)]="sinhVien.diemCuoiKy" (ngModelChange)="diemTB()">
+                                    </td>
+                                    <td>
+                                        <span class="total-grade" id="total-1" *ngIf="sinhVien.diemTrungbinh != null">{{sinhVien.diemTrungbinh | number
                                             :'1.1-1' }}</span>
                                     </td>
                                     <td><span class="grade-badge" [ngClass]="{ 
@@ -288,7 +295,7 @@
                                     style="cursor: pointer;">
                                     <div class="attention-student-info">
                                         <div class="attention-student-name">{{ student.name }}</div>
-                                        <div class="attention-student-id">MSSV: {{ student.id }}</div>
+                                        <div class="attention-student-id">MSSV: {{ student.mssv }}</div>
                                     </div>
                                     <div class="attention-grade">
                                         <div class="attention-grade-type">{{ student.gradeLabel }}</div>
@@ -433,6 +440,6 @@ Hoặc cả 3 điểm:
         </div>
     </div>
 
-   
+
 
 </body>

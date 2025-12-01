@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { UserService } from '../services/user.service';
 import { ClassService, ClassList } from '../services/class.service';
 import { NotificationService } from '../services/notification.service';
+import { DeviceService, Device } from '../services/device.service';
 import { Router } from '@angular/router';
 
 
@@ -16,6 +17,11 @@ interface UserList {
   email: string | null;
   teacherId?: number | null;
   studentId?: number | null;
+
+  teacherCode?: string | null;
+  studentCode?: string | null;
+  userCode?: string | null;
+
   fingerCount?: number | null;
 }
 
@@ -24,6 +30,7 @@ interface ClassDetail {
   classCode: string;
   className: string;
   teacherId: number | null;
+
   teacherName: string | null;
   createdDate: string;
   status: boolean;
@@ -31,6 +38,7 @@ interface ClassDetail {
 }
 interface StudentOfClass {
   studentId: number;
+  studentCode: string;
   fullName: string;
   username: string;
   email: string;
@@ -41,6 +49,7 @@ interface StudentOfClass {
 // thêm interface cho SV trong modal
 interface PendingStudent {
   studentId: number;
+  studentCode?: string;
   fullName: string;
   username?: string;
 }
@@ -68,13 +77,40 @@ export class AdminComponent {
     private userService: UserService,
     private classService: ClassService,
     private notify: NotificationService,
-     private router: Router
+    private deviceService: DeviceService,
+    private router: Router
   ) { }
 
   // ================== STATE CHUNG ==================
 
   showUserManagement = true;
   showClassManagement = false;
+  // THÊM:
+  showDeviceManagement = false;
+
+  // ================== DEVICE ==================
+  devices: Device[] = [];
+  filteredDevices: Device[] = [];
+  loadingDevices = false;
+  deviceError: string | null = null;
+  deviceSearchText: string = '';
+
+  // Modal tạo / sửa thiết bị
+  showCreateDeviceModal = false;
+  showEditDeviceModal = false;
+  editingDeviceId: number | null = null;
+
+  // Form tạo mới
+  createDeviceCode: string = '';
+  createDeviceName: string = '';
+  createDeviceRoom: string = '';
+  createDeviceIsActive: boolean = true;
+
+  // Form chỉnh sửa
+  editDeviceCode: string = '';
+  editDeviceName: string = '';
+  editDeviceRoom: string = '';
+  editDeviceIsActive: boolean = true;
 
   // ================== USER ==================
   users: UserList[] = [];
@@ -115,14 +151,13 @@ export class AdminComponent {
   editClassNewCode = '';
   editClassNewTeacherId: number | null = null;
   editClassNewTeacherName = '';
-
+  editClassNewTeacherCode = '';
 
 
   openUserManagement() {
     this.showUserManagement = true;
-
     this.showClassManagement = false;
-
+    this.showDeviceManagement = false;
 
     if (this.users.length === 0) {
       this.fetchUsers();
@@ -131,13 +166,25 @@ export class AdminComponent {
 
   openClassManagement() {
     this.showClassManagement = true;
-
     this.showUserManagement = false;
+    this.showDeviceManagement = false;
 
     if (this.classes.length === 0) {
       this.fetchClasses();
     }
   }
+
+  // NEW: mở tab thiết bị
+  openDeviceManagement() {
+    this.showDeviceManagement = true;
+    this.showUserManagement = false;
+    this.showClassManagement = false;
+
+    if (this.devices.length === 0) {
+      this.fetchDevices();
+    }
+  }
+
 
   // ================== USER LOGIC ==================
   fetchUsers() {
@@ -152,6 +199,162 @@ export class AdminComponent {
         console.error(err);
         this.userError = 'Không tải được danh sách người dùng';
         this.loadingUsers = false;
+      }
+    });
+  }
+
+    // ================== DEVICE LOGIC ==================
+
+  fetchDevices() {
+    this.loadingDevices = true;
+    this.deviceService.getAllDevices().subscribe({
+      next: (data: Device[]) => {
+        this.devices = data;
+        this.filteredDevices = data;
+        this.loadingDevices = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.deviceError = 'Không tải được danh sách thiết bị';
+        this.loadingDevices = false;
+      }
+    });
+  }
+
+  searchDevices() {
+    const term = (this.deviceSearchText || '').trim().toLowerCase();
+    if (!term) {
+      this.filteredDevices = this.devices;
+      return;
+    }
+
+    this.filteredDevices = this.devices.filter(d => {
+      const code = (d.deviceCode || '').toLowerCase();
+      const name = (d.deviceName || '').toLowerCase();
+      const room = (d.room || '').toLowerCase();
+      const statusText = d.isActive ? 'hoat dong active' : 'khong hoat dong inactive';
+      return (
+        code.includes(term) ||
+        name.includes(term) ||
+        room.includes(term) ||
+        statusText.includes(term)
+      );
+    });
+  }
+
+  // Mở modal tạo thiết bị mới
+  openCreateDeviceModal() {
+    this.showCreateDeviceModal = true;
+    this.createDeviceCode = '';
+    this.createDeviceName = '';
+    this.createDeviceRoom = '';
+    this.createDeviceIsActive = true;
+  }
+
+  closeCreateDeviceModal() {
+    this.showCreateDeviceModal = false;
+  }
+
+  submitCreateDevice() {
+    if (!this.createDeviceCode) {
+      this.notify.error('Vui lòng nhập mã thiết bị (DeviceCode)');
+      return;
+    }
+
+    const payload = {
+      deviceCode: this.createDeviceCode.trim(),
+      deviceName: this.createDeviceName.trim() || null,
+      room: this.createDeviceRoom.trim() || null,
+      isActive: this.createDeviceIsActive
+    };
+
+    this.deviceService.createDevice(payload).subscribe({
+      next: () => {
+        this.notify.success('Thêm thiết bị điểm danh thành công');
+        this.closeCreateDeviceModal();
+        this.fetchDevices();
+      },
+      error: (err) => {
+        console.error(err);
+        this.notify.error('Thêm thiết bị thất bại (có thể trùng DeviceCode)');
+      }
+    });
+  }
+
+  // Mở modal sửa thiết bị
+  openEditDeviceModal(device: Device) {
+    this.editingDeviceId = device.deviceId;
+    this.editDeviceCode = device.deviceCode;
+    this.editDeviceName = device.deviceName || '';
+    this.editDeviceRoom = device.room || '';
+    this.editDeviceIsActive = device.isActive;
+
+    this.showEditDeviceModal = true;
+  }
+
+  closeEditDeviceModal() {
+    this.showEditDeviceModal = false;
+    this.editingDeviceId = null;
+  }
+
+  saveDeviceChanges() {
+    if (!this.editingDeviceId) return;
+
+    if (!this.editDeviceCode) {
+      this.notify.error('Vui lòng nhập mã thiết bị (DeviceCode)');
+      return;
+    }
+
+    const payload = {
+      deviceCode: this.editDeviceCode.trim(),
+      deviceName: this.editDeviceName.trim() || null,
+      room: this.editDeviceRoom.trim() || null,
+      isActive: this.editDeviceIsActive
+    };
+
+    this.deviceService.updateDevice(this.editingDeviceId, payload).subscribe({
+      next: () => {
+        this.notify.success('Cập nhật thiết bị thành công');
+        this.closeEditDeviceModal();
+        this.fetchDevices(); // reload list
+      },
+      error: (err) => {
+        console.error(err);
+        this.notify.error('Cập nhật thiết bị thất bại');
+      }
+    });
+  }
+
+  deleteDevice(deviceId: number) {
+    this.openConfirm('Bạn có chắc muốn xóa thiết bị điểm danh này không?', () => {
+      this.deviceService.deleteDevice(deviceId).subscribe({
+        next: () => {
+          this.devices = this.devices.filter(d => d.deviceId !== deviceId);
+          this.filteredDevices = this.filteredDevices.filter(d => d.deviceId !== deviceId);
+          this.notify.success('Xóa thiết bị thành công');
+        },
+        error: (err) => {
+          console.error(err);
+          this.notify.error('Xóa thiết bị thất bại');
+        }
+      });
+    });
+  }
+
+  toggleDeviceActive(device: Device, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    const newIsActive = !device.isActive;
+
+    this.deviceService.updateActive(device.deviceId, newIsActive).subscribe({
+      next: () => {
+        device.isActive = newIsActive;
+        this.notify.success('Cập nhật trạng thái thiết bị thành công');
+      },
+      error: (err) => {
+        console.error(err);
+        this.notify.error('Không thể cập nhật trạng thái thiết bị');
       }
     });
   }
@@ -172,6 +375,9 @@ export class AdminComponent {
       const teacherId = u.teacherId ? u.teacherId.toString() : '';
       const studentId = u.studentId ? u.studentId.toString() : '';
       const accountId = u.accountId ? u.accountId.toString() : '';
+      const teacherCode = (u.teacherCode || '').toLowerCase();
+      const studentCode = (u.studentCode || '').toLowerCase();
+      const userCode = (u.userCode || '').toLowerCase();
 
       return (
         fullName.includes(term) ||
@@ -180,7 +386,10 @@ export class AdminComponent {
         email.includes(term) ||
         teacherId.includes(term) ||
         studentId.includes(term) ||
-        accountId.includes(term)
+        accountId.includes(term) ||
+        teacherCode.includes(term) ||
+        studentCode.includes(term) ||
+        userCode.includes(term)
       );
     });
   }
@@ -315,6 +524,7 @@ export class AdminComponent {
         this.editClassNewCode = detail.classCode;
         this.editClassNewTeacherId = detail.teacherId ?? null;
         this.editClassNewTeacherName = detail.teacherName || '';
+        this.editClassNewTeacherCode = '';
 
         this.showEditClassModal = true;
       },
@@ -339,28 +549,57 @@ export class AdminComponent {
     this.editClassNewCode = '';
     this.editClassNewTeacherId = null;
     this.editClassNewTeacherName = '';
+    this.editClassNewTeacherCode = '';
   }
 
   /**
    * Khi người dùng gõ mã giảng viên mới
    */
   handleClassTeacherLookup(value: string) {
-    const id = Number(value);
-    if (!id) {
+    const code = (value || '').trim();
+    this.editClassNewTeacherCode = code;
+
+    if (!code) {
       this.editClassNewTeacherId = null;
       this.editClassNewTeacherName = '';
       return;
     }
-    this.classService.getTeacherById(id).subscribe({
+
+    this.classService.getTeacherByCode(code).subscribe({
       next: (t) => {
-        this.editClassNewTeacherId = t.teacherId;
-        this.editClassNewTeacherName = t.fullName;
+        this.editClassNewTeacherId = t.teacherId;   // gửi teacherId cho API updateClass
+        this.editClassNewTeacherName = t.fullName;  // hiển thị tên
       },
       error: () => {
+        this.editClassNewTeacherId = null;
         this.editClassNewTeacherName = 'Không tìm thấy giảng viên';
       }
     });
   }
+
+  lookupTeacherForCreate(value: string) {
+    const code = (value || '').trim();
+    this.createClassTeacherCode = code;
+
+    if (!code) {
+      this.createClassTeacherId = null;
+      this.createClassTeacherName = '';
+      return;
+    }
+
+    this.classService.getTeacherByCode(code).subscribe({
+      next: (t) => {
+        this.createClassTeacherId = t.teacherId;   // lưu ID
+        this.createClassTeacherName = t.fullName;  // hiển thị tên
+      },
+      error: () => {
+        this.createClassTeacherId = null;
+        this.createClassTeacherName = 'Không tìm thấy giảng viên';
+      }
+    });
+  }
+
+
 
   saveClassChanges() {
     if (!this.editingClassId) return;
@@ -396,6 +635,7 @@ export class AdminComponent {
   createClassCode = '';
   createClassTeacherId: number | null = null;
   createClassTeacherName = '';
+  createClassTeacherCode = '';
   showCreateClassModal = false;
 
   openCreateClassModal() {
@@ -406,29 +646,12 @@ export class AdminComponent {
     this.createClassCode = '';
     this.createClassTeacherId = null;
     this.createClassTeacherName = '';
+    this.createClassTeacherCode = '';
   }
   closeCreateClassModal() {
     this.showCreateClassModal = false;
   }
 
-  lookupTeacherForCreate(value: string) {
-    const id = Number(value);
-    if (!id) {
-      this.createClassTeacherId = null;
-      this.createClassTeacherName = '';
-      return;
-    }
-
-    this.classService.getTeacherById(id).subscribe({
-      next: (t) => {
-        this.createClassTeacherId = t.teacherId;
-        this.createClassTeacherName = t.fullName;
-      },
-      error: () => {
-        this.createClassTeacherName = 'Không tìm thấy giảng viên';
-      }
-    });
-  }
 
   submitCreateClass() {
     if (!this.createClassName || !this.createClassCode) {
@@ -467,6 +690,7 @@ export class AdminComponent {
   manualStudentCode: string = '';
   manualStudentName: string = '';
   manualStudentUsername: string = '';
+  manualStudentId: number | null = null;
   canAddManualStudent = false;
 
   // danh sách SV sẽ thêm
@@ -496,51 +720,66 @@ export class AdminComponent {
     this.activeAddStudentTab = tab;
   }
 
-  // khi gõ mã SV
+
+  // khi gõ mã SV (có thể là studentId hoặc studentCode)
   onManualStudentCodeChange(value: string) {
-    this.manualStudentCode = value;
-    const id = Number(value);
-    if (!id) {
+    const code = (value || '').trim();
+    this.manualStudentCode = code;
+
+    // Reset khi xóa input
+    if (!code) {
       this.manualStudentName = '';
-      this.manualStudentUsername = '';
+      this.manualStudentId = null;
       this.canAddManualStudent = false;
       return;
     }
 
-    // gọi backend: /api/students/{id}
-    this.classService.getStudentById(id).subscribe({
-      next: (stu) => {
-        this.manualStudentName = stu.fullName || '';
-        this.manualStudentUsername = stu.username || '';
+    // ✅ LUÔN gọi theo MSSV (studentCode)
+    this.classService.getStudentByCode(code).subscribe({
+      next: (stu: any) => {
+        console.log('Tìm được SV theo MSSV:', stu);
+        this.manualStudentName = stu.fullName;
+        this.manualStudentId = stu.studentId;   // dùng để add vào lớp
         this.canAddManualStudent = true;
       },
-      error: () => {
-        this.manualStudentName = 'Không tìm thấy sinh viên';
-        this.manualStudentUsername = '';
+      error: (err) => {
+        console.error('Lỗi khi gọi API tìm SV theo MSSV:', err);
+        this.manualStudentName = '';
+        this.manualStudentId = null;
         this.canAddManualStudent = false;
       }
     });
   }
 
+
+
+
   // bấm nút +
   addStudentToPendingList() {
     if (!this.canAddManualStudent) return;
-    const id = Number(this.manualStudentCode);
+    if (this.manualStudentId == null) return;
+
+    const id = this.manualStudentId;
+
     const exists = this.pendingStudentsToAdd.some(s => s.studentId === id);
     if (exists) return;
 
     this.pendingStudentsToAdd.push({
       studentId: id,
+      studentCode: this.manualStudentCode,       // để hiển thị MSSV trong bảng
       fullName: this.manualStudentName,
       username: this.manualStudentUsername
     });
 
-    // reset ô nhập
+    // reset
     this.manualStudentCode = '';
     this.manualStudentName = '';
     this.manualStudentUsername = '';
+    this.manualStudentId = null;
     this.canAddManualStudent = false;
   }
+
+
 
   // xóa 1 SV khỏi danh sách pending
   removePendingStudent(index: number) {
@@ -961,8 +1200,8 @@ export class AdminComponent {
     }
     this.closeConfirm();
   }
-logout() {
-  this.router.navigate(['/login']);
-}
+  logout() {
+    this.router.navigate(['/login']);
+  }
 
 }

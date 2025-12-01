@@ -13,7 +13,7 @@ export interface UserProfile {
 
   studentId?: number | null;
   teacherId?: number | null;
-
+    userCode: string | null;
   email: string | null;
   phone: string | null;
   address: string | null;
@@ -24,6 +24,8 @@ export interface UserProfile {
 export interface UpdateProfileRequest {
   fullName: string;
     roleName: string;
+
+      userCode: string | null;
   email: string | null;
   phone: string | null;
   address: string | null;
@@ -45,6 +47,7 @@ export class UserProfileService {
   constructor(private http: HttpClient) {}
 
   /** Lấy thông tin hồ sơ người dùng hiện tại */
+ /** Lấy thông tin hồ sơ người dùng hiện tại */
   getMyProfile(): Observable<UserProfile> {
     return this.http.get<{ account: any }>(this.apiUrl).pipe(
       map((res) => {
@@ -58,6 +61,8 @@ export class UserProfileService {
 
           studentId: a.studentId ?? null,
           teacherId: a.teacherId ?? null,
+
+          userCode: a.userCode ?? null,
 
           email: a.email ?? null,
           phone: a.phone ?? null,

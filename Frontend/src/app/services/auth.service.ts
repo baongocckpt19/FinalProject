@@ -107,13 +107,26 @@ export class AuthService {
     this.clearUser(true);
   }
 
-  // Đăng ký (nếu backend có)
-  register(data: {
-    fullName: string;
+   register(data: {
     username: string;
     password: string;
     role: string;
   }): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, data);
   }
+
+
+    // ==== FORGOT PASSWORD ====
+  forgotPassword(username: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/forgot-password`, { username });
+  }
+
+  resetPassword(data: {
+    username: string;
+    code: string;
+    newPassword: string;
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, data);
+  }
+
 }

@@ -10,6 +10,7 @@ public class ClassAttendanceStudentDto {
 
     private Integer studentId;
     private String fullName;
+    private String  studentCode;
     private String username;
 
     private String email;

@@ -13,6 +13,8 @@ public class AccountDto {
     private int roleId;
     private String roleName;
     private String fullName;
+    //thêm userCode để hiển thị mã số sinh viên/giáo viên
+    private String userCode;
 
     private Integer studentId;
     private Integer teacherId;

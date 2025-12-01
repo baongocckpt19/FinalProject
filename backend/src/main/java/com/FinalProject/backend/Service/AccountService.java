@@ -1,7 +1,14 @@
+//Đây là AccountService.java
 package com.FinalProject.backend.Service;
+import com.FinalProject.backend.Models.PasswordResetToken;
+import com.FinalProject.backend.Repository.PasswordResetTokenRepository;
+
+import java.time.LocalDateTime;
+import java.util.Random;
 
 import com.FinalProject.backend.Dto.AccountDto;
 import com.FinalProject.backend.Dto.ChangePasswordRequest;
+import com.FinalProject.backend.Dto.RegisterRequest;
 import com.FinalProject.backend.Dto.UpdateProfileRequest;
 import com.FinalProject.backend.Models.Account;
 import com.FinalProject.backend.Models.Student;
@@ -67,10 +74,12 @@ public class AccountService {
         dto.setTeacherId((Integer) row[i++]);    // 5 - teacherId
         dto.setStudentId((Integer) row[i++]);    // 6 - studentId
 
-        dto.setPhone((String) row[i++]);         // 7 - phone
-        dto.setAddress((String) row[i++]);       // 8 - address
-        dto.setDateOfBirth((String) row[i++]);   // 9 - yyyy-MM-dd
-        dto.setGender((String) row[i++]);        // 10 - gender
+        dto.setUserCode((String) row[i++]);      // 7 - userCode
+
+        dto.setPhone((String) row[i++]);         // 8 - phone
+        dto.setAddress((String) row[i++]);       // 9 - address
+        dto.setDateOfBirth((String) row[i++]);   // 10 - yyyy-MM-dd
+        dto.setGender((String) row[i++]);        // 11 - gender
 
         return dto;
     }
@@ -104,7 +113,7 @@ public class AccountService {
     }
 
     // =========================================================
-    // 5. CẬP NHẬT THÔNG TIN CÁ NHÂN
+    // 5. CẬP NHẬT THÔNG TIN CÁ NHÂN + MÃ SỐ
     // =========================================================
     @Transactional
     public void updateProfile(int accountId, UpdateProfileRequest req) {
@@ -115,7 +124,11 @@ public class AccountService {
         Object[] row = (Object[]) result;
         Integer teacherId = (Integer) row[5];
         Integer studentId = (Integer) row[6];
+        String roleName   = (String) row[2]; // "Admin" / "Giảng viên" / "Học sinh" ...
 
+        String userCode = req.getUserCode(); // có thể null
+
+        // ==== CASE 1: đã có Student -> UPDATE ====
         if (studentId != null) {
             Student student = studentRepository.findById(studentId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy Student với id = " + studentId));
@@ -132,10 +145,17 @@ public class AccountService {
             }
 
             student.setGender(req.getGender());
+
+            // ⭐ Cập nhật mã số nếu có gửi lên (FE có thể khóa không cho đổi sau này)
+            if (userCode != null && !userCode.isEmpty()) {
+                student.setStudentCode(userCode);
+            }
+
             studentRepository.save(student);
             return;
         }
 
+        // ==== CASE 2: đã có Teacher -> UPDATE ====
         if (teacherId != null) {
             Teacher teacher = teacherRepository.findById(teacherId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy Teacher với id = " + teacherId));
@@ -152,11 +172,45 @@ public class AccountService {
             }
 
             teacher.setGender(req.getGender());
+
+            if (userCode != null && !userCode.isEmpty()) {
+                teacher.setTeacherCode(userCode);
+            }
+
             teacherRepository.save(teacher);
             return;
         }
 
-        throw new RuntimeException("Tài khoản không gắn với Student hoặc Teacher, không thể cập nhật hồ sơ.");
+        // CASE 3: Chưa có Student/Teacher -> tạo mới + gán mã số
+        String rn = roleName != null ? roleName.trim() : "";
+
+        if (rn.equalsIgnoreCase("Học sinh") || rn.equalsIgnoreCase("Student")) {
+            Student student = new Student();
+            student.setAccountId(accountId);
+            student.setFullName(req.getFullName() != null ? req.getFullName() : "Chưa cập nhật");
+
+            if (userCode != null && !userCode.isEmpty()) {
+                student.setStudentCode(userCode);
+            }
+
+            studentRepository.save(student);
+            return;
+        }
+
+        if (rn.equalsIgnoreCase("Giảng viên") || rn.equalsIgnoreCase("Teacher")) {
+            Teacher teacher = new Teacher();
+            teacher.setAccountId(accountId);
+            teacher.setFullName(req.getFullName() != null ? req.getFullName() : "Chưa cập nhật");
+
+            if (userCode != null && !userCode.isEmpty()) {
+                teacher.setTeacherCode(userCode);
+            }
+
+            teacherRepository.save(teacher);
+            return;
+        }
+
+        throw new RuntimeException("Role không hỗ trợ tạo hồ sơ");
     }
 
     // =========================================================
@@ -175,7 +229,7 @@ public class AccountService {
     }
 
     // =========================================================
-    // 7. CHECK CURRENT PASSWORD (cho POST /api/account/check-password)
+    // 7. CHECK CURRENT PASSWORD
     // =========================================================
     @Transactional(readOnly = true)
     public boolean checkCurrentPassword(int accountId, String currentPassword) {
@@ -188,11 +242,135 @@ public class AccountService {
         if (stored == null) {
             return false;
         }
-
-        // Hiện tại là plain-text, so sánh trực tiếp:
         return stored.equals(currentPassword);
-
-        // Nếu sau này bạn dùng PasswordEncoder:
-        // return passwordEncoder.matches(currentPassword + passwordSecret, stored);
     }
+
+    // =========================================================
+    // 8. ĐĂNG KÝ: CHỈ TẠO ACCOUNT
+    // =========================================================
+    @Transactional
+    public void register(RegisterRequest req) {
+        if (req.getUsername() == null || req.getUsername().isEmpty()) {
+            throw new RuntimeException("Username không được để trống");
+        }
+        if (req.getPassword() == null || req.getPassword().isEmpty()) {
+            throw new RuntimeException("Mật khẩu không được để trống");
+        }
+
+        if (accountRepository.findByUsername(req.getUsername()).isPresent()) {
+            throw new RuntimeException("Tài khoản đã tồn tại");
+        }
+
+        int roleId;
+        if ("teacher".equalsIgnoreCase(req.getRole())) {
+            roleId = 2;
+        } else if ("student".equalsIgnoreCase(req.getRole())) {
+            roleId = 3;
+        } else if ("admin".equalsIgnoreCase(req.getRole())) {
+            roleId = 1;
+        } else {
+            throw new RuntimeException("Role không hợp lệ");
+        }
+
+        Account acc = new Account();
+        acc.setUsername(req.getUsername());
+        acc.setPasswordHash(req.getPassword());
+        acc.setRoleId(roleId);
+        accountRepository.save(acc);
+    }
+
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    // ===== Helper tạo mã 6 số =====
+    private String generateResetCode() {
+        Random random = new Random();
+        int num = 100000 + random.nextInt(900000); // 6 chữ số
+        return String.valueOf(num);
+    }
+    // =========================================================
+    // 9. QUÊN MẬT KHẨU - GỬI MÃ RESET QUA EMAIL
+    // =========================================================
+    @Transactional
+    public void requestPasswordReset(String username) {
+        if (username == null || username.isEmpty()) {
+            throw new RuntimeException("Username không được để trống");
+        }
+
+        Account acc = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với username: " + username));
+
+        // Lấy thông tin user (gồm email) bằng getUser(accountId)
+        AccountDto dto = getUser(acc.getAccountId());
+        if (dto == null || dto.getEmail() == null || dto.getEmail().isEmpty()) {
+            throw new RuntimeException("Tài khoản này chưa cập nhật email, không thể gửi mã.");
+        }
+
+        String email = dto.getEmail();
+
+        // Tạo mã và lưu vào bảng PasswordResetToken
+        String code = generateResetCode();
+
+        PasswordResetToken token = new PasswordResetToken();
+        token.setAccountId(acc.getAccountId());
+        token.setCode(code);
+        token.setExpiryDate(LocalDateTime.now().plusMinutes(10)); // hạn 10 phút
+        token.setUsed(false);
+
+        passwordResetTokenRepository.save(token);
+
+        // Gửi mail
+        String subject = "[EduSmart] Mã xác nhận đặt lại mật khẩu";
+        String body = "Xin chào " + (dto.getFullName() != null ? dto.getFullName() : username) + ",\n\n"
+                + "Bạn vừa yêu cầu đặt lại mật khẩu cho tài khoản EduSmart.\n"
+                + "Mã xác nhận của bạn là: " + code + "\n\n"
+                + "Mã này có hiệu lực trong 10 phút.\n\n"
+                + "Nếu bạn không yêu cầu thao tác này, vui lòng bỏ qua email.\n\n"
+                + "Trân trọng,\nEduSmart";
+
+        emailService.sendSimpleEmail(email, subject, body);
+    }
+    // =========================================================
+    // 10. QUÊN MẬT KHẨU - XÁC NHẬN MÃ + ĐỔI MẬT KHẨU
+    // =========================================================
+    @Transactional
+    public void resetPasswordWithCode(String username, String code, String newPassword) {
+        if (username == null || username.isEmpty()) {
+            throw new RuntimeException("Username không được để trống");
+        }
+        if (code == null || code.isEmpty()) {
+            throw new RuntimeException("Mã xác nhận không được để trống");
+        }
+        if (newPassword == null || newPassword.isEmpty()) {
+            throw new RuntimeException("Mật khẩu mới không được để trống");
+        }
+
+        Account acc = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với username: " + username));
+
+        // Tìm token trong DB
+        PasswordResetToken token = passwordResetTokenRepository
+                .findByAccountIdAndCodeAndIsUsedFalse(acc.getAccountId(), code)
+                .orElseThrow(() -> new RuntimeException("Mã xác nhận không hợp lệ."));
+
+        // Check hết hạn
+        if (LocalDateTime.now().isAfter(token.getExpiryDate())) {
+            token.setUsed(true);
+            passwordResetTokenRepository.save(token);
+            throw new RuntimeException("Mã xác nhận đã hết hạn. Vui lòng yêu cầu mã mới.");
+        }
+
+        // OK -> đổi mật khẩu
+        acc.setPasswordHash(newPassword);
+        accountRepository.save(acc);
+
+        // Đánh dấu token đã dùng
+        token.setUsed(true);
+        passwordResetTokenRepository.save(token);
+    }
+
 }

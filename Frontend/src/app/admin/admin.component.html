@@ -38,6 +38,16 @@
                                     d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
                             </svg> Quản lý lớp học </a>
                     </div>
+                                        <div class="admin-nav-item">
+                        <a class="admin-nav-link" (click)="openDeviceManagement()">
+                            <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M7 4h10a2 2 0 0 1 2 2v10a1 1 0 0 1-1 1h-2l-2 3h-4l-2-3H6a1 1 0 0 1-1-1V6a2 2 0 0 1 2-2zm5 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                            </svg>
+                            Quản lý thiết bị điểm danh
+                        </a>
+                    </div>
+
                     <div class="admin-nav-item">
                         <a class="admin-nav-link" (click)="logout()">
                             <svg class="admin-nav-icon" fill="currentColor" viewBox="0 0 24 24">
@@ -131,9 +141,15 @@
                                             <div class="user-details">
                                                 <h4>{{ u.fullName }}</h4>
 
-                                                <p *ngIf="u.teacherId">TeacherID: {{ u.teacherId }}</p>
-                                                <p *ngIf="!u.teacherId && u.studentId">StudentID: {{ u.studentId }}</p>
-                                                <p *ngIf="!u.teacherId && !u.studentId">AccountID: {{ u.accountId }}</p>
+                                                <p *ngIf="u.teacherId">
+                                                    Mã giảng viên: {{ u.teacherCode || u.userCode }}
+                                                </p>
+                                                <p *ngIf="!u.teacherId && u.studentId">
+                                                    Mã sinh viên: {{ u.studentCode || u.userCode }}
+                                                </p>
+                                                <p *ngIf="!u.teacherId && !u.studentId">
+                                                    Mã tài khoản: {{ u.userCode }}
+                                                </p>
                                             </div>
                                         </div>
                                     </td>
@@ -285,6 +301,93 @@
                     </div>
                 </div>
             </div>
+            <!-- Devices Management Section -->
+            <div id="devices" class="content-section active" *ngIf="showDeviceManagement">
+                <div class="data-table">
+                    <div class="table-header">
+                        <h2 class="table-title">Quản lý thiết bị điểm danh</h2>
+                        <div class="table-actions">
+                            <!-- thanh tìm kiếm -->
+                            <div class="search-box">
+                                <input type="text"
+                                       placeholder="Tìm kiếm thiết bị..."
+                                       [(ngModel)]="deviceSearchText"
+                                       (input)="searchDevices()" />
+                                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"
+                                     class="search-icon">
+                                    <path
+                                        d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.471 6.471 0 0 0 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" />
+                                </svg>
+                            </div>
+
+                            <button class="btn btn-primary" (click)="openCreateDeviceModal()">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                </svg>
+                                Thêm thiết bị
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã thiết bị</th>
+                                    <th>Tên thiết bị</th>
+                                    <th>Phòng</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let d of filteredDevices; let i = index">
+                                    <td>{{ i + 1 }}</td>
+                                    <td>{{ d.deviceCode }}</td>
+                                    <td>{{ d.deviceName || '---' }}</td>
+                                    <td>{{ d.room || '---' }}</td>
+                                    <td>
+                                        <span class="status-badge"
+                                              [ngClass]="d.isActive ? 'status-active' : 'status-inactive'"
+                                              style="cursor: pointer;"
+                                              (click)="toggleDeviceActive(d, $event)">
+                                            {{ d.isActive ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="action-btn edit"
+                                                    (click)="openEditDeviceModal(d)">
+                                                <svg width="16" height="16" fill="currentColor"
+                                                     viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                                                </svg>
+                                            </button>
+                                            <button class="action-btn delete"
+                                                    (click)="deleteDevice(d.deviceId)">
+                                                <svg width="16" height="16" fill="currentColor"
+                                                     viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr *ngIf="!filteredDevices || filteredDevices.length === 0">
+                                    <td colspan="6" style="text-align: center; padding: 12px;">
+                                        Không có thiết bị nào.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- Modal tạo lớp học -->
@@ -378,15 +481,13 @@
 
 
                     <div class="form-group">
-
-                        <label for="editTeacherCode">Mã giảng viên mới
-
-                        </label>
-                        <input type="text" id="editTeacherCode" name="editTeacherCode" placeholder="Nhập mã giảng viên"
-                            [ngModel]="editClassNewTeacherId" (ngModelChange)="handleClassTeacherLookup($event)"
+                        <label for="editTeacherCode">Mã giảng viên mới</label>
+                        <input type="text" id="editTeacherCode" name="editTeacherCode"
+                            placeholder="Nhập mã giảng viên (TeacherCode, vd: GV001)"
+                            [(ngModel)]="editClassNewTeacherCode" (ngModelChange)="handleClassTeacherLookup($event)"
                             required>
-
                     </div>
+
 
                     <div class="form-group">
                         <label for="editTeacherName">Tên giảng viên mới
@@ -480,7 +581,7 @@
                                     <tbody>
                                         <tr *ngFor="let s of pendingStudentsToAdd; let i = index">
                                             <td>{{ i + 1 }}</td>
-                                            <td>{{ s.studentId }}</td>
+                                            <td>{{ s.studentCode }}</td>
                                             <td>{{ s.fullName }}</td>
                                             <td>{{ s.username }}</td>
                                             <td>
@@ -589,13 +690,17 @@
                                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                                     <path
                                         d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                                </svg> {{ selectedUser.teacherId ? 'Mã giảng viên' :
+                                </svg>
+                                {{ selectedUser.teacherId ? 'Mã giảng viên' :
                                 (selectedUser.studentId ? 'Mã sinh viên' : 'Mã tài khoản} }') }}
                             </label>
                             <div
                                 style="padding: 12px 16px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; font-weight: 600; color: #1e293b;">
-                                <span id="userDetailId"> {{ selectedUser.teacherId ? selectedUser.teacherId :
-                                    (selectedUser.studentId ? selectedUser.studentId : selectedUser.accountId) }}
+                                <span id="userDetailId">
+                                    {{ selectedUser.teacherCode
+                                    || selectedUser.studentCode
+                                    || selectedUser.userCode
+                                    }}
                                 </span>
                             </div>
                         </div>
@@ -704,7 +809,7 @@
                             <tbody>
                                 <tr *ngFor="let student of studentsOfSelectedClass; let i = index">
                                     <td>{{ i + 1 }}</td>
-                                    <td>{{ student.studentId }}</td>
+                                    <td>{{ student.studentCode }}</td>
                                     <td>{{ student.fullName }}</td>
                                     <td>{{ student.username }}</td>
                                     <td>{{ student.email }}</td>
@@ -736,7 +841,6 @@
             </div>
         </div>
 
-        <!-- modal lịch học của lớp đang chọn -->
         <!-- Modal lịch học của lớp đang chọn -->
         <div class="modal show" *ngIf="showClassScheduleModal">
             <div class="modal-content" style="max-width: 900px;">
@@ -905,6 +1009,126 @@
                                 <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                             </svg>
                             {{ showEditScheduleModal ? 'Cập nhật' : 'Thêm lịch học' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal tạo thiết bị -->
+        <div id="createDeviceModal" class="modal show" *ngIf="showCreateDeviceModal">
+            <div class="modal-content" style="max-width: 520px;">
+                <div class="modal-header">
+                    <h3>Thêm thiết bị điểm danh</h3>
+                    <button class="modal-close" (click)="closeCreateDeviceModal()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-form">
+                    <div class="form-group">
+                        <label for="deviceCode">Mã thiết bị (DeviceCode)</label>
+                        <input id="deviceCode"
+                               type="text"
+                               [(ngModel)]="createDeviceCode"
+                               name="deviceCode"
+                               placeholder="VD: FP001"
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="deviceName">Tên thiết bị</label>
+                        <input id="deviceName"
+                               type="text"
+                               [(ngModel)]="createDeviceName"
+                               name="deviceName"
+                               placeholder="VD: Máy vân tay phòng lab 1">
+                    </div>
+                    <div class="form-group">
+                        <label for="deviceRoom">Phòng</label>
+                        <input id="deviceRoom"
+                               type="text"
+                               [(ngModel)]="createDeviceRoom"
+                               name="deviceRoom"
+                               placeholder="VD: P101, LAB3...">
+                    </div>
+                    <div class="form-group">
+                        <label class="toggle-checkbox">
+                            <input type="checkbox"
+                                   [(ngModel)]="createDeviceIsActive"
+                                   name="createDeviceIsActive">
+                            <span class="checkbox-label">Thiết bị đang hoạt động</span>
+                        </label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" (click)="closeCreateDeviceModal()">
+                            Hủy
+                        </button>
+                        <button type="button" class="btn btn-primary" (click)="submitCreateDevice()">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                            </svg>
+                            Thêm thiết bị
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+                <!-- Modal chỉnh sửa thiết bị -->
+        <div id="editDeviceModal" class="modal show" *ngIf="showEditDeviceModal">
+            <div class="modal-content" style="max-width: 520px;">
+                <div class="modal-header">
+                    <h3>Chỉnh sửa thiết bị điểm danh</h3>
+                    <button class="modal-close" (click)="closeEditDeviceModal()">
+                        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-form">
+                    <div class="form-group">
+                        <label for="editDeviceCode">Mã thiết bị (DeviceCode)</label>
+                        <input id="editDeviceCode"
+                               type="text"
+                               [(ngModel)]="editDeviceCode"
+                               name="editDeviceCode"
+                               required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDeviceName">Tên thiết bị</label>
+                        <input id="editDeviceName"
+                               type="text"
+                               [(ngModel)]="editDeviceName"
+                               name="editDeviceName">
+                    </div>
+                    <div class="form-group">
+                        <label for="editDeviceRoom">Phòng</label>
+                        <input id="editDeviceRoom"
+                               type="text"
+                               [(ngModel)]="editDeviceRoom"
+                               name="editDeviceRoom">
+                    </div>
+                    <div class="form-group">
+                        <label class="toggle-checkbox">
+                            <input type="checkbox"
+                                   [(ngModel)]="editDeviceIsActive"
+                                   name="editDeviceIsActive">
+                            <span class="checkbox-label">Thiết bị đang hoạt động</span>
+                        </label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" (click)="closeEditDeviceModal()">
+                            Hủy
+                        </button>
+                        <button type="button" class="btn btn-primary" (click)="saveDeviceChanges()">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                            </svg>
+                            Cập nhật thiết bị
                         </button>
                     </div>
                 </div>

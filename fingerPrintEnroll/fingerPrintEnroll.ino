@@ -10,7 +10,7 @@
 const char* WIFI_SSID        = "Ngoi Nha Chung";
 const char* WIFI_PASSWORD    = "123456798";
 const char* BACKEND_BASE_URL = "http://192.168.1.60:8080";
-const char* DEVICE_CODE      = "ESP_ROOM_LAB1";   // TRÙNG VỚI DeviceCode trong DB
+const char* DEVICE_CODE      = "ESP_ROOM_LAB2";   // TRÙNG VỚI DeviceCode trong DB
 
 // AS608 on UART2
 #define FP_RX_PIN 16   // AS608 TX -> ESP32 RX2
@@ -151,6 +151,7 @@ int16_t findNextFreeSlot() {
       Serial.print(F("[FP] Free slot = "));
       Serial.println(slot);
       lcdShowSlot("Free slot found", slot);
+
       return (int16_t)slot;
     }
   }
@@ -171,7 +172,9 @@ int enrollToSlot(uint16_t id) {
   // Lần 1
   Serial.println(F("Place finger (1)..."));
   lcdShow("Quet lan 1", "Dat ngon tay");
+  
   beepPrompt();
+  delay(800);
 
   while (p != FINGERPRINT_OK) {
     p = finger.getImage();
@@ -241,6 +244,7 @@ int enrollToSlot(uint16_t id) {
   if (p == FINGERPRINT_OK) {
     Serial.println(F("Model OK."));
     lcdShow("Tao model OK", "");
+    delay(800);
   } else if (p == FINGERPRINT_ENROLLMISMATCH) {
     Serial.println(F("ENROLL MISMATCH."));
     lcdShow("LOI", "Khong trung nhau");
@@ -258,8 +262,10 @@ int enrollToSlot(uint16_t id) {
   if (p == FINGERPRINT_OK) {
     Serial.print(F("Store OK at slot "));
     Serial.println(id);
+    delay(800);
     lcdShowSlot("Luu thanh cong", id);
     beepSuccess();
+    delay(800);
     return FINGERPRINT_OK;
   } else {
     Serial.print(F("Err storeModel("));
@@ -317,6 +323,7 @@ void notifyBackendEnroll(uint16_t slot, const String& sessionCode) {
 
     if (httpCode >= 200 && httpCode < 300) {
       lcdShowSlot("API OK", slot);
+      delay(800);
       beepSuccess();
     } else {
       lcdShow("API ERR code", String(httpCode));
@@ -382,6 +389,7 @@ void runEnrollForSession(const String& sessionCode) {
   Serial.println(sessionCode);
 
   lcdShow("Enroll started", sessionCode);
+
   beepPrompt();
   delay(800);
 
@@ -405,6 +413,7 @@ void runEnrollForSession(const String& sessionCode) {
   Serial.println();
   Serial.println(F("[FLOW] DONE. Waiting next command..."));
   lcdShow("DONE", "Cho lenh moi");
+  delay(800);
   delay(1000);
 }
 

@@ -14,4 +14,7 @@ public class StudentOfClassDto {
     private String username;
     private String email;
     private Integer fingerCount;
+
+    private String studentCode;
+
 }

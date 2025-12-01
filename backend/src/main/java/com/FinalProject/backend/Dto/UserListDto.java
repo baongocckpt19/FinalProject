@@ -1,3 +1,4 @@
+//Đây là UserListDto.java
 package com.FinalProject.backend.Dto;
 
 import lombok.AllArgsConstructor;
@@ -21,4 +22,5 @@ public class UserListDto {
     private String dateOfBirth;
     private String gender;
     private Integer fingerCount;
+    private String userCode;
 }

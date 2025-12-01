@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
+  DeviceFingerprintInfo,
   FingerprintService,
   StudentFingerprintInfo
 } from '../services/fingerprint.service';
@@ -17,8 +18,10 @@ type EnrollState = 'idle' | 'waitingDevice' | 'receivedFromDevice' | 'saving' | 
   styleUrl: './gv-quanlyvantay.component.scss'
 })
 export class GvQuanlyvantayComponent {
-  // nhập MSSV
-  studentIdInput: number | null = null;
+
+  // nhập MSSV (studentCode)
+  studentCodeInput: string = '';
+
 
   // thông tin sinh viên được tìm thấy (từ API)
   selectedStudent: StudentFingerprintInfo | null = null;
@@ -47,14 +50,16 @@ export class GvQuanlyvantayComponent {
     this.currentSensorSlot = null;
     this.lastEnrollMessage = '';
 
-    if (!this.studentIdInput) {
+    const code = this.studentCodeInput?.trim();
+    if (!code) {
       this.searchStudentError = 'Vui lòng nhập mã sinh viên.';
       return;
     }
 
     this.searching = true;
 
-    this.fingerprintService.getStudentFingerprintInfo(this.studentIdInput).subscribe({
+    // 🔹 GỌI THEO studentCode (MSSV)
+    this.fingerprintService.getStudentFingerprintInfoByCode(code).subscribe({
       next: (info) => {
         this.selectedStudent = info;
         this.searching = false;
@@ -65,55 +70,76 @@ export class GvQuanlyvantayComponent {
         this.selectedStudent = null;
         console.error('searchStudent error', err);
         if (err.status === 404) {
-          this.searchStudentError = `Không tìm thấy sinh viên với MSSV: ${this.studentIdInput}.`;
+          this.searchStudentError = `Không tìm thấy sinh viên với MSSV: ${code}.`;
         } else {
           this.searchStudentError = 'Có lỗi xảy ra khi tìm sinh viên. Vui lòng thử lại.';
         }
       }
     });
   }
+  // Danh sách thiết bị
+devices: DeviceFingerprintInfo[] = [];
+selectedDeviceCode: string = '';
 
-  // tạo session enroll
-  // tạo session enroll
-  createEnrollSession(): void {
-    if (!this.selectedStudent) {
-      this.lastEnrollMessage = 'Vui lòng chọn sinh viên trước.';
-      return;
-    }
+ngOnInit(): void {
+  this.loadDevices();
+}
 
-    this.creatingSession = true;
-    this.lastEnrollMessage = '';
-    this.enrollState = 'idle';
-    this.currentSessionCode = null;
-    this.currentSensorSlot = null;
-
-    const deviceCode = 'ESP_ROOM_LAB1'; // 🔹 tạm thời fix cứng
-
-    this.fingerprintService.createEnrollSession(
-      this.selectedStudent.studentId,
-      deviceCode
-    ).subscribe({
-      next: (res) => {
-        this.currentSessionCode = res.sessionCode;
-        this.enrollState = 'waitingDevice';
-        this.creatingSession = false;
-
-        // Không cần nhập sessionCode vào ESP nữa, chỉ hiển thị cho debug
-        this.lastEnrollMessage =
-          'Đã tạo phiên. Thiết bị đang chờ quét vân tay cho session: ' +
-          res.sessionCode;
-
-        // BẮT ĐẦU POLL 2S/LẦN (giữ nguyên)
-        this.startPollingSession();
-      },
-      error: (err) => {
-        console.error('createEnrollSession error', err);
-        this.creatingSession = false;
-        this.enrollState = 'error';
-        this.lastEnrollMessage = 'Không thể tạo phiên đăng ký. Vui lòng thử lại.';
+loadDevices(): void {
+  this.fingerprintService.getActiveDevices().subscribe({
+    next: (list) => {
+      this.devices = list;
+      if (list.length > 0) {
+        this.selectedDeviceCode = list[0].deviceCode; // chọn mặc định
       }
-    });
+    },
+    error: () => {
+      console.error("Không lấy được danh sách thiết bị");
+    }
+  });
+}
+
+  // tạo session enroll
+ createEnrollSession(): void {
+  if (!this.selectedStudent) {
+    this.lastEnrollMessage = 'Vui lòng chọn sinh viên trước.';
+    return;
   }
+
+  if (!this.selectedDeviceCode) {
+    this.lastEnrollMessage = 'Vui lòng chọn thiết bị.';
+    return;
+  }
+
+  this.creatingSession = true;
+  this.lastEnrollMessage = '';
+  this.enrollState = 'idle';
+  this.currentSessionCode = null;
+  this.currentSensorSlot = null;
+
+  this.fingerprintService.createEnrollSession(
+    this.selectedStudent.studentId,
+    this.selectedDeviceCode
+  ).subscribe({
+    next: (res) => {
+      this.currentSessionCode = res.sessionCode;
+      this.enrollState = 'waitingDevice';
+      this.creatingSession = false;
+
+      this.lastEnrollMessage =
+        `Đã tạo phiên cho ${this.selectedDeviceCode}. Session: ` + res.sessionCode;
+
+      this.startPollingSession();
+    },
+    error: (err) => {
+      console.error('createEnrollSession error', err);
+      this.creatingSession = false;
+      this.enrollState = 'error';
+      this.lastEnrollMessage = 'Không thể tạo phiên. Kiểm tra thiết bị!';
+    }
+  });
+}
+
   private pollTimer: any;
 
 
@@ -224,7 +250,7 @@ export class GvQuanlyvantayComponent {
     if (!this.selectedStudent) return;
     const studentId = this.selectedStudent.studentId;
 
-    this.fingerprintService.getStudentFingerprintInfo(studentId).subscribe({
+    this.fingerprintService.getStudentFingerprintInfoById(studentId).subscribe({
       next: (info) => {
         this.selectedStudent = info;
       },
@@ -233,6 +259,7 @@ export class GvQuanlyvantayComponent {
       }
     });
   }
+
 
 
 

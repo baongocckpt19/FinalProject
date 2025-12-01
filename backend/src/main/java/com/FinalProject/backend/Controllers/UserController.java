@@ -37,20 +37,22 @@ public class UserController {
         return ResponseEntity.ok(dto);
     }
     // Export danh sách người dùng ra file CSV để mở bằng Excel
+
     @GetMapping("/export/excel")
     public ResponseEntity<byte[]> exportUsersCsv() {
-        var users = userTableService.getAllUsers(); // dùng lại service cũ
+        var users = userTableService.getAllUsers();
 
         StringBuilder sb = new StringBuilder();
 
-        // 1) Header tiếng Việt, đúng thứ tự bạn muốn
-        sb.append("STT,Tên,Tên tài khoản ,Ngày sinh,Giới tính,Chức vụ,Email,Số điện thoại,Địa chỉ\n");
+        // Header thêm cột Mã số
+        sb.append("STT,Mã số,Tên,Tên tài khoản ,Ngày sinh,Giới tính,Chức vụ,Email,Số điện thoại,Địa chỉ\n");
 
         int stt = 1;
         for (var u : users) {
+            String userCode   = safe(u.getUserCode());
             String fullName   = safe(u.getFullName());
             String username   = safe(u.getUsername());
-            String dateOfBirth = safe(u.getDateOfBirth());  // đã map từ query chi tiết
+            String dateOfBirth = safe(u.getDateOfBirth());
             String gender     = safe(u.getGender());
             String role       = safe(u.getRoleName());
             String email      = safe(u.getEmail());
@@ -58,6 +60,7 @@ public class UserController {
             String address    = safe(u.getAddress());
 
             sb.append(stt++).append(",");
+            sb.append(csv(userCode)).append(",");     // 👈 MÃ SỐ
             sb.append(csv(fullName)).append(",");
             sb.append(csv(username)).append(",");
             sb.append(csv(dateOfBirth)).append(",");
@@ -68,7 +71,6 @@ public class UserController {
             sb.append(csv(address)).append("\n");
         }
 
-        // 2) Thêm BOM UTF-8 ở đầu để Excel hiểu tiếng Việt
         byte[] bom = new byte[] {(byte)0xEF, (byte)0xBB, (byte)0xBF};
         byte[] data = sb.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
 

@@ -10,4 +10,8 @@ public class UpdateProfileRequest {
     private String address;
     private String birthDate; // "yyyy-MM-dd"
     private String gender;    // "Nam" / "Nữ" / "Khác" / null
+
+
+    // ⭐ NEW: mã số người dùng nhập (SV code / GV code)
+    private String userCode;
 }

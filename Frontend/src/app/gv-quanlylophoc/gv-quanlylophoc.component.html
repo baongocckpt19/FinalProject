@@ -179,7 +179,7 @@
                             <div class="form-group" style="min-width: 140px;">
                                 <label class="form-label">MSSV</label>
                                 <input type="number" class="form-input" [(ngModel)]="newStudentIdInput"
-                                    (keyup.enter)="searchStudent()" placeholder="Nhập MSSV (StudentId)">
+                                    (keyup.enter)="searchStudent()" placeholder="Nhập MSSV">
                             </div>
 
                             <div class="form-group" style="flex: 1;">
@@ -227,7 +227,7 @@
                                 <div class="student-info">
                                     <div class="student-details">
                                         <h5>{{ st.fullName }}</h5>
-                                        <p>MSSV: {{ st.studentId }} &nbsp;|&nbsp; Username: {{ st.username }}</p>
+                                        <p>MSSV: {{ st.studentCode }} &nbsp;|&nbsp; Username: {{ st.username }}</p>
                                         <p>Email: {{ st.email }}</p>
                                     </div>
                                 </div>

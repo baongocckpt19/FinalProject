@@ -7,6 +7,7 @@ import com.FinalProject.backend.Dto.StudentOfClassDto;
 import com.FinalProject.backend.Models.Clazz;
 import com.FinalProject.backend.Repository.ClassRepository;
 import com.FinalProject.backend.Repository.GradeRepository;
+import com.FinalProject.backend.Repository.StudentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +20,14 @@ public class ClassTableService {
 
     private final ClassRepository classRepository;
     private final GradeRepository gradeRepository; // NEW
+    private final StudentRepository studentRepository;
 
     public ClassTableService(ClassRepository classRepository,
-                             GradeRepository gradeRepository) {   // NEW
+                             GradeRepository gradeRepository,
+                             StudentRepository studentRepository) {   // NEW
         this.classRepository = classRepository;
-        this.gradeRepository = gradeRepository;                   // NEW
+        this.gradeRepository = gradeRepository;// NEW
+        this.studentRepository = studentRepository;
     }
 
     public List<ClassListDto> getAllClasses() {
@@ -48,68 +52,66 @@ public class ClassTableService {
         classRepository.softDeleteClass(classId);
     }
 
+    // ClassTableService.java
     public byte[] exportStudentsOfClass(int classId) {
-        // 1) lấy info lớp
         Object cls = classRepository.findClassInfoById(classId);
         if (cls == null) {
             return new byte[0];
         }
         Object[] c = (Object[]) cls;
         int i = 0;
-        Integer cId          = asInt(c[i++]);   // 0
-        String classCode     = asStr(c[i++]);   // 1
-        String className     = asStr(c[i++]);   // 2
-        String teacherName   = asStr(c[i++]);   // 3
-        Integer studentCount = asInt(c[i++]);   // 4
-        String createdDate   = asStr(c[i++]);   // 5
-        Boolean status       = asBool(c[i++]);  // 6
+        Integer cId          = asInt(c[i++]);
+        String classCode     = asStr(c[i++]);
+        String className     = asStr(c[i++]);
+        String teacherName   = asStr(c[i++]);
+        Integer studentCount = asInt(c[i++]);
+        String createdDate   = asStr(c[i++]);
+        Boolean status       = asBool(c[i++]);
 
-        // 2) lấy danh sách SV (đã có thêm cột FingerCount ở index 8)
+        // Lấy danh sách sv (đã có FingerCount ở index 9)
         List<Object[]> students = classRepository.findStudentsByClassId(classId);
 
-        // 2.1) Đếm số học sinh đã có vân tay (FingerCount > 0)
+        // Đếm số SV đã có vân tay
         int fingerprintedCount = (int) students.stream()
                 .filter(s -> {
-                    if (s == null || s.length <= 8) return false;
-                    Integer fc = asInt(s[8]); // FingerCount
+                    if (s == null || s.length <= 9) return false;
+                    Integer fc = asInt(s[9]); // FingerCount
                     return fc != null && fc > 0;
                 })
                 .count();
 
         StringBuilder sb = new StringBuilder();
 
-        // ====== PHẦN THÔNG TIN LỚP ======
+        // THÔNG TIN LỚP
         sb.append("Mã lớp,").append(csv(classCode)).append("\n");
         sb.append("Tên lớp,").append(csv(className)).append("\n");
         sb.append("Giảng viên,").append(csv(teacherName)).append("\n");
         sb.append("Số lượng sinh viên,").append(studentCount != null ? studentCount : 0).append("\n");
-
-        // DÒNG MỚI: SỐ HỌC SINH ĐÃ CÓ VÂN TAY
-        sb.append("Số học sinh đã có vân tay,").append(fingerprintedCount).append("\n");
-
+        sb.append("Số sinh viên đã có vân tay,").append(fingerprintedCount).append("\n");
         sb.append("Ngày tạo,").append(csv(createdDate)).append("\n");
-        sb.append("Trạng thái,").append(status != null && status ? "Đã hoàn thành" : "Đang hoạt động" ).append("\n");
+        sb.append("Trạng thái,").append(status != null && status ? "Đã hoàn thành" : "Đang hoạt động").append("\n");
 
-        sb.append("\n"); // 1 dòng trống
+        sb.append("\n");
 
-        // ====== HEADER DANH SÁCH SV ======
-        sb.append("STT,Mã học sinh,Tên,Username,Ngày sinh,Giới tính,Địa chỉ,Email,Phone,Số vân tay\n");
+        // HEADER DS SV – DÙNG MÃ SỐ
+        sb.append("STT,Mã số sinh viên,Tên,Username,Ngày sinh,Giới tính,Địa chỉ,Email,Phone,Số vân tay\n");
 
         int stt = 1;
         for (Object[] s : students) {
             int j = 0;
-            Integer studentId   = asInt(s[j++]);  // 0
-            String fullName     = asStr(s[j++]);  // 1
-            String username     = asStr(s[j++]);  // 2
-            String dob          = asStr(s[j++]);  // 3
-            String gender       = asStr(s[j++]);  // 4
-            String address      = asStr(s[j++]);  // 5
-            String email        = asStr(s[j++]);  // 6
-            String phone        = asStr(s[j++]);  // 7
-            Integer fingerCount = asInt(s[j++]);  // 8
+            String studentCode  = asStr(s[j++]);   // 0
+            Integer studentId   = asInt(s[j++]);   // 1 (không export, chỉ nội bộ)
+            String fullName     = asStr(s[j++]);   // 2
+            String username     = asStr(s[j++]);   // 3
+            String dob          = asStr(s[j++]);   // 4
+            String gender       = asStr(s[j++]);   // 5
+            String address      = asStr(s[j++]);   // 6
+            String email        = asStr(s[j++]);   // 7
+            String phone        = asStr(s[j++]);   // 8
+            Integer fingerCount = asInt(s[j++]);   // 9
 
             sb.append(stt++).append(",");
-            sb.append(studentId != null ? studentId : "").append(",");
+            sb.append(csv(studentCode)).append(",");         // 👈 MÃ SỐ
             sb.append(csv(fullName)).append(",");
             sb.append(csv(username)).append(",");
             sb.append(csv(dob)).append(",");
@@ -120,7 +122,6 @@ public class ClassTableService {
             sb.append(fingerCount != null ? fingerCount : 0).append("\n");
         }
 
-        // BOM UTF-8 cho Excel
         byte[] bom = new byte[] {(byte)0xEF, (byte)0xBB, (byte)0xBF};
         byte[] data = sb.toString().getBytes(StandardCharsets.UTF_8);
         byte[] result = new byte[bom.length + data.length];
@@ -128,6 +129,7 @@ public class ClassTableService {
         System.arraycopy(data, 0, result, bom.length, data.length);
         return result;
     }
+
 
 
 
@@ -198,19 +200,22 @@ public class ClassTableService {
     }
 
     //lấy danh sách sinh viên của lớp học theo id lớp
+
     public List<StudentOfClassDto> getStudentsOfClass(int classId) {
         List<Object[]> rows = classRepository.findStudentsForClassModal(classId);
         return rows.stream().map(r -> {
             int i = 0;
             StudentOfClassDto dto = new StudentOfClassDto();
-            dto.setStudentId(asInt(r[i++]));           // 0
-            dto.setFullName(asStr(r[i++]));            // 1
-            dto.setUsername(asStr(r[i++]));            // 2
-            dto.setEmail(asStr(r[i++]));               // 3
-            dto.setFingerCount(asInt(r[i++]));         // 4
+            dto.setStudentId(asInt(r[i++]));        // 0
+            dto.setStudentCode(asStr(r[i++]));      // 1 👈
+            dto.setFullName(asStr(r[i++]));         // 2
+            dto.setUsername(asStr(r[i++]));         // 3
+            dto.setEmail(asStr(r[i++]));            // 4
+            dto.setFingerCount(asInt(r[i++]));      // 5
             return dto;
         }).toList();
     }
+
 
     // cập nhật trạng thái lớp học
     @Transactional
@@ -245,27 +250,26 @@ public class ClassTableService {
     // ======================= EXPORT ĐIỂM CỦA LỚP =======================
 
     public byte[] exportGradesOfClass(int classId) {
-        // 1) Lấy info lớp
         Object cls = classRepository.findClassInfoById(classId);
         if (cls == null) {
             return new byte[0];
         }
         Object[] c = (Object[]) cls;
         int i = 0;
-        Integer cId          = asInt(c[i++]);   // 0
-        String classCode     = asStr(c[i++]);   // 1
-        String className     = asStr(c[i++]);   // 2
-        String teacherName   = asStr(c[i++]);   // 3
-        Integer studentCount = asInt(c[i++]);   // 4
-        String createdDate   = asStr(c[i++]);   // 5
-        Boolean status       = asBool(c[i++]);  // 6
+        Integer cId          = asInt(c[i++]);
+        String classCode     = asStr(c[i++]);
+        String className     = asStr(c[i++]);
+        String teacherName   = asStr(c[i++]);
+        Integer studentCount = asInt(c[i++]);
+        String createdDate   = asStr(c[i++]);
+        Boolean status       = asBool(c[i++]);
 
-        // 2) Lấy danh sách điểm GIỐNG UI (LEFT JOIN, đầy đủ SV trong lớp)
+        // Lấy danh sách điểm (đã có StudentCode ở index 1)
         List<Object[]> grades = gradeRepository.findGradesByClassId(classId);
 
         StringBuilder sb = new StringBuilder();
 
-        // ===== THÔNG TIN LỚP =====
+        // THÔNG TIN LỚP (header trên cùng)
         sb.append("Tên lớp,").append(csv(className)).append("\n");
         sb.append("Mã lớp,").append(csv(classCode)).append("\n");
         sb.append("Giảng viên,").append(csv(teacherName)).append("\n");
@@ -273,27 +277,25 @@ public class ClassTableService {
         sb.append("Ngày tạo,").append(csv(createdDate)).append("\n");
         sb.append("Trạng thái,")
                 .append(status != null && status ? "Đã hoàn thành" : "Đang hoạt động")
-                .append("\n");
+                .append("\n\n");
 
-        sb.append("\n"); // dòng trống
-
-        // ===== HEADER BẢNG ĐIỂM =====
+        // HEADER – MSSV = MÃ SỐ SINH VIÊN
         sb.append("STT,Họ tên,MSSV,Điểm chuyên cần,Điểm giữa kỳ,Điểm cuối kỳ,Điểm trung bình,Xếp loại\n");
 
         int stt = 1;
         for (Object[] g : grades) {
             int j = 0;
             Integer studentId      = asInt(g[j++]);                      // 0
-            String fullName        = asStr(g[j++]);                      // 1
-            String username        = asStr(g[j++]);                      // 2
-            Double attendanceGrade = g[j] != null ? ((Number) g[j]).doubleValue() : null; j++; // 3
-            Double midtermGrade    = g[j] != null ? ((Number) g[j]).doubleValue() : null; j++; // 4
-            Double finalGrade      = g[j] != null ? ((Number) g[j]).doubleValue() : null; j++; // 5
+            String studentCode     = asStr(g[j++]);                      // 1  👈 LẤY MSSV TỪ QUERY
+            String fullName        = asStr(g[j++]);                      // 2
+            String username        = asStr(g[j++]);                      // 3
+            Double attendanceGrade = g[j] != null ? ((Number) g[j]).doubleValue() : null; j++; // 4
+            Double midtermGrade    = g[j] != null ? ((Number) g[j]).doubleValue() : null; j++; // 5
+            Double finalGrade      = g[j] != null ? ((Number) g[j]).doubleValue() : null; j++; // 6
 
             double at  = attendanceGrade != null ? attendanceGrade : 0.0;
             double mid = midtermGrade    != null ? midtermGrade    : 0.0;
             double fin = finalGrade      != null ? finalGrade      : 0.0;
-
             double avg = 0.25 * at + 0.25 * mid + 0.5 * fin;
 
             String xepLoai;
@@ -304,15 +306,16 @@ public class ClassTableService {
             else               xepLoai = "Yếu";
 
             sb.append(stt++).append(",");
-            sb.append(csv(fullName)).append(",");  // Họ tên
-            sb.append(studentId != null ? studentId : "").append(","); // MSSV = StudentId            sb.append(at).append(",");
+            sb.append(csv(fullName)).append(",");
+            sb.append(csv(studentCode != null ? studentCode : "")).append(",");  // 👈 MSSV
+            sb.append(at).append(",");
             sb.append(mid).append(",");
             sb.append(fin).append(",");
             sb.append(String.format(java.util.Locale.US, "%.2f", avg)).append(",");
             sb.append(csv(xepLoai)).append("\n");
         }
 
-        // BOM UTF-8 cho Excel (để mở đúng tiếng Việt)
+        // Thêm BOM UTF-8 để Excel hiểu tiếng Việt
         byte[] bom = new byte[] {(byte)0xEF, (byte)0xBB, (byte)0xBF};
         byte[] data = sb.toString().getBytes(StandardCharsets.UTF_8);
         byte[] result = new byte[bom.length + data.length];

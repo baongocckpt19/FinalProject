@@ -77,6 +77,7 @@ public class FingerprintEnrollService {
 
         StudentFingerprintInfoDto dto = new StudentFingerprintInfoDto();
         dto.setStudentId(studentId);
+        dto.setStudentCode(student.getStudentCode());
         dto.setFullName(student.getFullName());
         dto.setUsername(username != null ? username : "");
         dto.setEmail(email);

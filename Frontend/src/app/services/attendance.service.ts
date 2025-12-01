@@ -8,8 +8,8 @@ export type StudentStatus = 'present' | 'absent' | 'late' | 'none';
 export interface AttendanceStudentRow {
   classId: number;
   scheduleId: number;
-
   studentId: number;
+  studentCode: string;
   fullName: string;
   username: string;
   email: string | null;
@@ -28,6 +28,7 @@ export interface AttendanceStudentRow {
 }
 // interface lịch sử trả về từ backend
 export interface StudentHistoryItem {
+  teacherName: string;
   scheduleId: number;
   date: string;       // LocalDate -> string ISO "yyyy-MM-dd"
   startTime: string;  // "HH:mm:ss"

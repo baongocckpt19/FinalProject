@@ -43,6 +43,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
         c.ClassId,              -- 0
         cs.ScheduleId,          -- 1
         s.StudentId,            -- 2
+        s.StudentCode,          -- 3 
         s.FullName,             -- 3
         acc.Username,           -- 4
         s.Email,                -- 5   -- THÊM THÔNG TIN SINH VIÊN

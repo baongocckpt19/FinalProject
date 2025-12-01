@@ -30,6 +30,7 @@ public class GradeService {
         return rows.stream().map(r -> {
             int i = 0;
             Integer studentId = (Integer) r[i++];
+            String studentCode  = (String)  r[i++];
             String fullName   = (String) r[i++];
             String username   = (String) r[i++];
             Double att        = r[i] != null ? ((Number) r[i]).doubleValue() : null; i++;
@@ -43,6 +44,7 @@ public class GradeService {
 
             StudentGradeDto dto = new StudentGradeDto();
             dto.setStudentId(studentId);
+            dto.setStudentCode(studentCode);
             dto.setFullName(fullName);
             dto.setUsername(username);
             dto.setAttendanceGrade(att);
@@ -106,32 +108,41 @@ public class GradeService {
 
                 String[] parts = splitSmart(line);
 
-                // A: Tên, B: MSSV, C..E: điểm
+                // A: Tên, B: MSSV (StudentCode), C..E: điểm
                 if (parts.length < 3) {
                     pushReject(rejected, total, line, "Thiếu cột điểm (tối thiểu 3 cột)");
                     continue;
                 }
 
-                String name     = parts[0].trim(); // chỉ để hiển thị, không map
-                String mssvStr = parts[1].trim(); // MSSV = StudentId
+                String name    = parts[0].trim(); // chỉ để hiển thị, không map
+                String mssvStr = parts[1].trim(); // 🔥 Bây giờ là StudentCode
 
                 if (mssvStr.isEmpty()) {
                     pushReject(rejected, total, line, "MSSV (cột B) trống");
                     continue;
                 }
 
-                Integer studentId;
-                try {
-                    studentId = Integer.valueOf(mssvStr);
-                } catch (NumberFormatException ex) {
-                    pushReject(rejected, total, line, "MSSV không phải số nguyên hợp lệ: " + mssvStr);
-                    continue;
-                }
-
-// kiểm tra tồn tại trong bảng Student (JpaRepository đã có sẵn existsById)
-                if (!studentRepository.existsById(studentId)) {
-                    pushReject(rejected, total, line, "Không tìm thấy sinh viên với MSSV: " + mssvStr);
-                    continue;
+                // 🔥 Tìm student theo StudentCode trước
+                Integer studentId = null;
+                var optStudent = studentRepository.findByStudentCode(mssvStr);
+                if (optStudent.isPresent()) {
+                    studentId = optStudent.get().getStudentId();
+                } else {
+                    // fallback: nếu MSSV là số, thử hiểu như StudentId cũ
+                    try {
+                        Integer idByNumber = Integer.valueOf(mssvStr);
+                        if (studentRepository.existsById(idByNumber)) {
+                            studentId = idByNumber;
+                        } else {
+                            pushReject(rejected, total, line,
+                                    "Không tìm thấy sinh viên với MSSV/Id: " + mssvStr);
+                            continue;
+                        }
+                    } catch (NumberFormatException ex) {
+                        pushReject(rejected, total, line,
+                                "Không tìm thấy sinh viên với StudentCode: " + mssvStr);
+                        continue;
+                    }
                 }
 
                 Double att = null, mid = null, fin = null;
@@ -194,6 +205,7 @@ public class GradeService {
         result.put("rejectedRows", rejected);
         return result;
     }
+
 
     // ================== Helpers ==================
 

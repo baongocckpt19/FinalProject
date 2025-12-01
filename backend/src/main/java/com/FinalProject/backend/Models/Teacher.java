@@ -15,6 +15,10 @@ public class Teacher {
     @Column(name = "TeacherId")
     private Integer teacherId;
 
+    //thm mới cột TeacherCode thể hiện đây là mã số của giáo viên
+    @Column(name = "TeacherCode")
+    private String teacherCode;
+
     @Column(name = "AccountId", nullable = false)
     private Integer accountId;
 

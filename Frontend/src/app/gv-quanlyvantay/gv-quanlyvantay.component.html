@@ -1,6 +1,7 @@
 <body>
     <div class="dashboard-container">
         <div class="main-content">
+            
             <main class="dashboard-content">
 
                 <!-- Page Header -->
@@ -41,18 +42,17 @@
 
                                 <!-- Search row -->
                                 <div class="student-search-row">
-                                    <div class="form-group">
-                                        <label class="form-label">Mã sinh viên (MSSV / StudentId)</label>
-                                        <input type="number" class="form-input" [(ngModel)]="studentIdInput"
-                                            (keyup.enter)="searchStudent()" placeholder="Nhập mã sinh viên...">
-                                    </div>
+                                    <input type="text" class="form-input" [(ngModel)]="studentCodeInput"
+                                        (keyup.enter)="searchStudent()" placeholder="Nhập mã sinh viên (MSSV)...">
+
 
                                     <div class="form-group search-button-group">
                                         <button class="btn btn-primary" type="button" (click)="searchStudent()"
-                                            [disabled]="!studentIdInput || searching">
+                                            [disabled]="!studentCodeInput || searching">
                                             <span *ngIf="!searching">Tìm sinh viên</span>
                                             <span *ngIf="searching">Đang tìm...</span>
                                         </button>
+
                                     </div>
                                 </div>
 
@@ -69,9 +69,10 @@
                                         <div>
                                             <h5 class="student-name">{{ selectedStudent.fullName }}</h5>
                                             <p class="student-meta">
-                                                MSSV: {{ selectedStudent.studentId }} · Username: {{
+                                                MSSV: {{ selectedStudent.studentCode }} · Username: {{
                                                 selectedStudent.username }}
                                             </p>
+
                                         </div>
                                     </div>
 
@@ -165,6 +166,14 @@
 
                                 <div *ngIf="!selectedStudent" class="empty-state">
                                     <p>Vui lòng chọn sinh viên trước khi tạo phiên đăng ký vân tay.</p>
+                                </div>
+                                <div class="form-field">
+                                    <label>Chọn thiết bị:</label>
+                                    <select [(ngModel)]="selectedDeviceCode">
+                                        <option *ngFor="let d of devices" [value]="d.deviceCode">
+                                            {{d.deviceCode }} 
+                                        </option>
+                                    </select>
                                 </div>
 
                                 <ng-container *ngIf="selectedStudent">

@@ -45,21 +45,23 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
     // ====== 2) DANH SÁCH SV CHO MODAL (ĐANG XEM LỚP) ======
     @Query(value = """
     SELECT 
-        s.StudentId,                           -- 0
-        s.FullName,                            -- 1
-        a.Username,                            -- 2
-        s.Email,                               -- 3
-        COUNT(f.FingerprintID) AS FingerCount  -- 4
+        s.StudentId,                           -- 0 (ID nội bộ)
+        s.StudentCode,                         -- 1 👈 MÃ SỐ
+        s.FullName,                            -- 2
+        a.Username,                            -- 3
+        s.Email,                               -- 4
+        COUNT(f.FingerprintID) AS FingerCount  -- 5
     FROM StudentClass sc
     JOIN Student s ON sc.StudentId = s.StudentId
     JOIN Account a ON s.AccountId = a.AccountId
     LEFT JOIN Fingerprint f ON f.StudentId = s.StudentId
     WHERE sc.ClassId = ?1
-      AND sc.IsDeleted = 0                     -- 👈 CHỈ LẤY SV CÒN TRONG LỚP
-    GROUP BY s.StudentId, s.FullName, a.Username, s.Email
+      AND sc.IsDeleted = 0
+    GROUP BY s.StudentId, s.StudentCode, s.FullName, a.Username, s.Email
     ORDER BY s.StudentId
     """, nativeQuery = true)
     List<Object[]> findStudentsForClassModal(int classId);
+
 
 
     // ====== 3) SOFT DELETE CLASS ======
@@ -87,24 +89,27 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
     Object findClassInfoById(int classId);
 
     // ====== 5) LẤY DS SV THEO LỚP (EXPORT CSV) ======
+
     @Query(value = """
     SELECT 
-        s.StudentId,
-        s.FullName,
-        a.Username,
-        CONVERT(varchar(10), s.DateOfBirth, 23) AS DateOfBirth,
-        s.Gender,
-        s.Address,
-        s.Email,
-        s.Phone,
-        ISNULL(COUNT(f.FingerprintID), 0) AS FingerCount
+        s.StudentCode,                                            -- 0 👈 MÃ SỐ
+        s.StudentId,                                              -- 1 (ID nội bộ)
+        s.FullName,                                               -- 2
+        a.Username,                                               -- 3
+        CONVERT(varchar(10), s.DateOfBirth, 23) AS DateOfBirth,   -- 4
+        s.Gender,                                                 -- 5
+        s.Address,                                                -- 6
+        s.Email,                                                  -- 7
+        s.Phone,                                                  -- 8
+        ISNULL(COUNT(f.FingerprintID), 0) AS FingerCount          -- 9
     FROM StudentClass sc
     JOIN Student s ON sc.StudentId = s.StudentId
     JOIN Account a ON s.AccountId = a.AccountId
     LEFT JOIN Fingerprint f ON f.StudentId = s.StudentId
     WHERE sc.ClassId = ?1
-      AND sc.IsDeleted = 0                     -- 👈 CHỈ LẤY SV CÒN TRONG LỚP
+      AND sc.IsDeleted = 0
     GROUP BY 
+        s.StudentCode,
         s.StudentId,
         s.FullName,
         a.Username,
@@ -116,6 +121,7 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
     ORDER BY s.StudentId
     """, nativeQuery = true)
     List<Object[]> findStudentsByClassId(int classId);
+
 
     // ====== 6) CHI TIẾT LỚP (MODAL EDIT) ======
     @Query(value = """

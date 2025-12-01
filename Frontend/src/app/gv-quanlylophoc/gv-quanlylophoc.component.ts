@@ -1,3 +1,4 @@
+// src/app/gv-quanlylophoc/gv-quanlylophoc.component.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -5,7 +6,7 @@ import { Router } from '@angular/router';
 import { TeacherClassService } from '../services/teacher-class.service';
 import { ClassService, StudentOfClass } from '../services/class.service';
 import { forkJoin } from 'rxjs';
-
+import { NotificationService } from '../services/notification.service';
 
 @Component({
   selector: 'app-gv-quanlylophoc',
@@ -19,7 +20,8 @@ export class GvQuanlylophocComponent implements OnInit {
   constructor(
     private router: Router,
     private teacherClassService: TeacherClassService,
-    private classService: ClassService
+    private classService: ClassService,
+    private notify: NotificationService
   ) { }
 
   /*modal thêm lớp học*/
@@ -41,13 +43,15 @@ export class GvQuanlylophocComponent implements OnInit {
     const { className, classCode, maxStudents } = this.newClass;
 
     if (!className || !classCode || !maxStudents) {
-      alert('Vui lòng nhập đủ thông tin bắt buộc!');
+      this.notify.error('Vui lòng nhập đủ thông tin bắt buộc!');
       return;
     }
 
     // TODO: gọi API tạo lớp (nếu bạn muốn)
     this.openNotificationModal();
     this.closeAddClassModal();
+
+    this.notify.success('Thêm lớp học (demo) thành công!');
 
     this.newClass = {
       className: '',
@@ -56,7 +60,6 @@ export class GvQuanlylophocComponent implements OnInit {
       maxStudents: null
     };
   }
-
 
   /*modal thực hiện thành công*/
   showNotificationModal = false;
@@ -104,7 +107,7 @@ export class GvQuanlylophocComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loadMyClasses', err);
-        alert('Không tải được danh sách lớp học');
+        this.notify.error('Không tải được danh sách lớp học');
       }
     });
   }
@@ -121,7 +124,9 @@ export class GvQuanlylophocComponent implements OnInit {
       ngayTao: dto.createdDate, // có thể format lại nếu muốn
       trangThai: statusText,
       soSvCoVanTay: dto.fingerprintedCount,
-      teacherName: dto.teacherName
+      teacherName: dto.teacherName,
+      // Nếu cần toggleStatus dùng boolean:
+      status: dto.status
     };
   }
 
@@ -133,14 +138,14 @@ export class GvQuanlylophocComponent implements OnInit {
         // cập nhật UI
         lop.status = newStatus;
         lop.trangThai = newStatus ? 'Tạm dừng' : 'Hoạt động';
+        this.notify.success('Cập nhật trạng thái lớp thành công');
       },
       error: (err) => {
         console.error('Update class status error', err);
-        alert('Không thể thay đổi trạng thái lớp');
+        this.notify.error('Không thể thay đổi trạng thái lớp');
       }
     });
   }
-
 
   // sắp xếp tên lớp học
   sortByName() {
@@ -189,10 +194,12 @@ export class GvQuanlylophocComponent implements OnInit {
         a.download = 'my-classes.csv';
         a.click();
         window.URL.revokeObjectURL(url);
+
+        this.notify.success('Xuất danh sách lớp thành công');
       },
       error: (err) => {
         console.error('Error exportMyClasses', err);
-        alert('Xuất dữ liệu thất bại');
+        this.notify.error('Xuất dữ liệu thất bại');
       }
     });
   }
@@ -207,13 +214,11 @@ export class GvQuanlylophocComponent implements OnInit {
   searchedStudent: any = null;      // dữ liệu trả về từ /api/students/{id}
   searchStudentError: string = '';
 
-
   // Thanh tìm kiếm sinh viên
   studentSearchText: string = '';
 
   // Danh sách sau khi filter (tự động cập nhật UI)
   filteredStudents: StudentOfClass[] = [];
-
 
   /*modal chi tiết lớp học*/
   showClassDetailModal = false;
@@ -240,7 +245,7 @@ export class GvQuanlylophocComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error getStudentsOfClass', err);
-        alert('Không tải được danh sách sinh viên của lớp');
+        this.notify.error('Không tải được danh sách sinh viên của lớp');
       }
     });
   }
@@ -248,6 +253,7 @@ export class GvQuanlylophocComponent implements OnInit {
   closeClassDetailModal() {
     this.showClassDetailModal = false;
   }
+
   // Cập nhật danh sách lọc khi có thay đổi thêm/xóa
   private updateFilteredStudents() {
     const all = this.getDisplayedStudents();
@@ -261,6 +267,7 @@ export class GvQuanlylophocComponent implements OnInit {
 
     this.filteredStudents = all.filter(st =>
       st.fullName.toLowerCase().includes(search) ||
+    
       st.username.toLowerCase().includes(search) ||
       st.studentId.toString().includes(search)
     );
@@ -271,19 +278,19 @@ export class GvQuanlylophocComponent implements OnInit {
     this.updateFilteredStudents();
   }
 
-
   // Tìm SV theo MSSV (StudentId)
   searchStudent() {
     this.searchStudentError = '';
     this.searchedStudent = null;
 
-    const id = Number(this.newStudentIdInput);
-    if (!id || isNaN(id)) {
+    const code = String(this.newStudentIdInput).trim();
+    if (!code) {
       this.searchStudentError = 'Vui lòng nhập MSSV hợp lệ';
+      this.notify.error('Vui lòng nhập MSSV hợp lệ');
       return;
     }
 
-    this.classService.getStudentById(id).subscribe({
+    this.classService.getStudentByCode(code).subscribe({
       next: (data) => {
         this.searchedStudent = data;
         this.searchStudentError = '';
@@ -291,9 +298,11 @@ export class GvQuanlylophocComponent implements OnInit {
       error: (err) => {
         console.error('Error getStudentById', err);
         this.searchStudentError = 'Không tìm thấy sinh viên với MSSV này';
+        this.notify.error('Không tìm thấy sinh viên với MSSV này');
       }
     });
   }
+
   // Thêm SV vừa tìm được vào danh sách tạm (chưa lưu DB)
   addPendingStudent() {
     if (!this.searchedStudent) return;
@@ -303,19 +312,20 @@ export class GvQuanlylophocComponent implements OnInit {
     const existed = this.studentsInClass.some(s => s.studentId === sid)
       && !this.removedStudentIds.includes(sid);
     if (existed) {
-      alert('Sinh viên này đã nằm trong lớp');
+      this.notify.error('Sinh viên này đã nằm trong lớp');
       return;
     }
 
     // 2) đã nằm trong pendingAdd
     const existedInPending = this.pendingAddStudents.some(s => s.studentId === sid);
     if (existedInPending) {
-      alert('Sinh viên này đã được thêm tạm');
+      this.notify.error('Sinh viên này đã được thêm tạm');
       return;
     }
 
     const newSt: StudentOfClass = {
       studentId: this.searchedStudent.studentId,
+      studentCode: this.searchedStudent.userCode,
       fullName: this.searchedStudent.fullName,
       username: this.searchedStudent.username,
       email: this.searchedStudent.email,
@@ -329,7 +339,9 @@ export class GvQuanlylophocComponent implements OnInit {
     this.searchedStudent = null;
     this.updateFilteredStudents();
 
+    this.notify.success('Đã thêm sinh viên vào danh sách tạm');
   }
+
   // Danh sách SV hiển thị (DS hiện có - đã bị đánh dấu xóa + DS pendingAdd)
   getDisplayedStudents(): StudentOfClass[] {
     const removed = new Set(this.removedStudentIds);
@@ -360,7 +372,9 @@ export class GvQuanlylophocComponent implements OnInit {
     }
     this.updateFilteredStudents();
 
+    this.notify.success('Đã đánh dấu xóa sinh viên khỏi lớp (chưa lưu)');
   }
+
   saveClassChanges() {
     if (!this.selectedClass) return;
 
@@ -370,6 +384,7 @@ export class GvQuanlylophocComponent implements OnInit {
 
     if (addIds.length === 0 && removeIds.length === 0) {
       // không có thay đổi
+      this.notify.error('Không có thay đổi nào để lưu');
       this.openNotificationModal();
       return;
     }
@@ -393,10 +408,11 @@ export class GvQuanlylophocComponent implements OnInit {
         // - đóng modal + mở thông báo
         this.loadMyClasses();
         this.openNotificationModal();
+        this.notify.success('Lưu thay đổi lớp học thành công');
       },
       error: (err) => {
         console.error('Save class changes error', err);
-        alert('Không thể lưu thay đổi. Vui lòng thử lại.');
+        this.notify.error('Không thể lưu thay đổi. Vui lòng thử lại.');
       }
     });
   }
@@ -405,7 +421,7 @@ export class GvQuanlylophocComponent implements OnInit {
     const classId = lop.id;   // vì mapDtoToViewModel đã set id: dto.classId
 
     if (!classId) {
-      alert('Không xác định được ID lớp để xuất dữ liệu');
+      this.notify.error('Không xác định được ID lớp để xuất dữ liệu');
       return;
     }
 
@@ -422,13 +438,13 @@ export class GvQuanlylophocComponent implements OnInit {
 
         a.click();
         window.URL.revokeObjectURL(url);
+
+        this.notify.success('Xuất danh sách sinh viên lớp thành công');
       },
       error: (err) => {
         console.error('Error exportClassStudents', err);
-        alert('Xuất dữ liệu lớp thất bại');
+        this.notify.error('Xuất dữ liệu lớp thất bại');
       }
     });
   }
-
-
 }

@@ -9,9 +9,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Integer> {
+
+    Optional<Account> findByUsername(String username); // 👉 THÊM DÒNG NÀY
 
     @Query(value = """
     WITH T AS (
@@ -81,6 +84,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Object findById(int id);
 
 
+    // AccountRepository.java
     @Query(value = """
     WITH T AS (
         SELECT
@@ -92,6 +96,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             Address,
             DateOfBirth,
             Gender,
+            TeacherCode,
             ROW_NUMBER() OVER (PARTITION BY AccountId ORDER BY TeacherId) AS rn
         FROM Teacher
     ),
@@ -105,6 +110,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             Address,
             DateOfBirth,
             Gender,
+            StudentCode,
             ROW_NUMBER() OVER (PARTITION BY AccountId ORDER BY StudentId) AS rn
         FROM Student
     )
@@ -116,15 +122,16 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
         COALESCE(t.Email, s.Email) AS email,                        -- 4
         t.TeacherId AS teacherId,                                   -- 5
         s.StudentId AS studentId,                                   -- 6
-        COALESCE(t.Phone, s.Phone) AS phone,                        -- 7
-        COALESCE(t.Address, s.Address) AS address,                  -- 8
-        CONVERT(varchar(10), COALESCE(t.DateOfBirth, s.DateOfBirth), 23) AS dateOfBirth,  -- 9
-        COALESCE(t.Gender, s.Gender) AS gender,                     -- 10
+        COALESCE(s.StudentCode, t.TeacherCode) AS userCode,         -- 7
+        COALESCE(t.Phone, s.Phone) AS phone,                        -- 8
+        COALESCE(t.Address, s.Address) AS address,                  -- 9
+        CONVERT(varchar(10), COALESCE(t.DateOfBirth, s.DateOfBirth), 23) AS dateOfBirth,  -- 10
+        COALESCE(t.Gender, s.Gender) AS gender,                     -- 11
         (
             SELECT COUNT(*)
-            FROM Fingerprint f
+            FROM DeviceFingerprintSlot f
             WHERE f.StudentId = s.StudentId
-        ) AS fingerCount                                           -- 11
+        ) AS fingerCount                                           -- 12
     FROM Account a
     JOIN Role r ON a.RoleId = r.RoleId
     LEFT JOIN T t ON t.AccountId = a.AccountId AND t.rn = 1
@@ -136,11 +143,13 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
 
 
+
     @Modifying
     @Query(value = "UPDATE Account SET isDeleted = 1 WHERE AccountId = ?1", nativeQuery = true)
     void softDeleteAccount(int accountId);
 
 
+    //hàm lấy chi tiết user theo accountId cho profile ở giao diện người dùng
     @Query(value = """
     WITH T AS (
         SELECT
@@ -152,6 +161,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             Address,
             DateOfBirth,
             Gender,
+            TeacherCode,
             ROW_NUMBER() OVER (PARTITION BY AccountId ORDER BY TeacherId) AS rn
         FROM Teacher
     ),
@@ -165,6 +175,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             Address,
             DateOfBirth,
             Gender,
+            StudentCode,
             ROW_NUMBER() OVER (PARTITION BY AccountId ORDER BY StudentId) AS rn
         FROM Student
     )
@@ -174,20 +185,22 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
         r.RoleName AS roleName,                    -- 2
 
         COALESCE(t.FullName, s.FullName) AS fullName,     -- 3
-        COALESCE(t.Email, s.Email) AS email,               -- 4
+        COALESCE(t.Email, s.Email) AS email,              -- 4
 
         t.TeacherId AS teacherId,                  -- 5
         s.StudentId AS studentId,                  -- 6
 
-        COALESCE(t.Phone, s.Phone) AS phone,       -- 7
-        COALESCE(t.Address, s.Address) AS address, -- 8
-        CONVERT(varchar(10), COALESCE(t.DateOfBirth, s.DateOfBirth), 23) AS dateOfBirth, -- 9
-        COALESCE(t.Gender, s.Gender) AS gender,    -- 10
+        COALESCE(s.StudentCode, t.TeacherCode) AS userCode, -- 7
+
+        COALESCE(t.Phone, s.Phone) AS phone,       -- 8
+        COALESCE(t.Address, s.Address) AS address, -- 9
+        CONVERT(varchar(10), COALESCE(t.DateOfBirth, s.DateOfBirth), 23) AS dateOfBirth, -- 10
+        COALESCE(t.Gender, s.Gender) AS gender,    -- 11
         (
             SELECT COUNT(*)
-            FROM Fingerprint f
+            FROM DeviceFingerprintSlot f
             WHERE f.StudentId = s.StudentId
-        ) AS fingerCount                           -- 11
+        ) AS fingerCount                           -- 12
     FROM Account a
     JOIN Role r ON a.RoleId = r.RoleId
     LEFT JOIN T t ON t.AccountId = a.AccountId AND t.rn = 1
@@ -196,6 +209,8 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
       AND a.AccountId = ?1
     """, nativeQuery = true)
     Object findUserDetailByAccountId(int accountId);
+
+
 
 
     @Query(value = """

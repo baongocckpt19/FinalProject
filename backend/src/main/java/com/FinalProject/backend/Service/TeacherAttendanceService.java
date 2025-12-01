@@ -39,6 +39,7 @@ public class TeacherAttendanceService {
             dto.setClassId(((Number) r[i++]).intValue());          // 0
             dto.setScheduleId(((Number) r[i++]).intValue());       // 1
             dto.setStudentId(((Number) r[i++]).intValue());        // 2
+            dto.setStudentCode((String) r[i++]);
             dto.setFullName((String) r[i++]);                      // 3
             dto.setUsername((String) r[i++]);                      // 4
 
@@ -147,7 +148,7 @@ public class TeacherAttendanceService {
             sb.append(index++).append(',')
                     .append(escapeCsv(r.getFullName())).append(',')
                     // Mã số sinh viên = StudentId theo yêu cầu
-                    .append(r.getStudentId() != null ? r.getStudentId() : 0).append(',')
+                    .append(r.getStudentCode() != null ? r.getStudentCode() : 0).append(',')
                     .append(time).append(',')
                     .append(statusText)
                     .append('\n');

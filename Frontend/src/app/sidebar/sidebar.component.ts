@@ -30,9 +30,6 @@ export class SidebarComponent {
         } else if (event.url === '/chatbot') {
           this.titleService = "Chat Bot";
         }  
-        else if (event.url === '/diemdanh') {
-          this.titleService = "Chế độ điểm danh";
-        }
         else if (event.url === '/gv-quanlyvantay') {
           this.titleService = "Thêm vân tay";
         }
@@ -66,9 +63,7 @@ export class SidebarComponent {
   logout() {
     this.router.navigate(['/login']);
   }
-  navigateToAttendanceMode() {
-    this.router.navigate(['/diemdanh']);
-  }
+  
   navigateToFingerprint() {
     this.router.navigate(['/gv-quanlyvantay']);
   }

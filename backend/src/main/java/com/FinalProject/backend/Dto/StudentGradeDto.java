@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class StudentGradeDto {
     private Integer studentId;
     private String fullName;
+    private String studentCode;
     private String username;
 
     private Double attendanceGrade;

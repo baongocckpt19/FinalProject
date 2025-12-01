@@ -4,16 +4,16 @@ import { LoginComponent } from './login/login.component';
 import { GvTrangchuComponent } from './gv-trangchu/gv-trangchu.component';
 import { GvQuanlylophocComponent } from './gv-quanlylophoc/gv-quanlylophoc.component';
 import { GvQuanlydiemsoComponent } from './gv-quanlydiemso/gv-quanlydiemso.component';
-//import { GvQuanlydiemdanhComponent } from './gv-quanlydiemdanh/gv-quanlydiemdanh.component';
+
 import { ChatbotComponent } from './chatbot/chatbot.component';
 import { TrangcanhanComponent } from './trangcanhan/trangcanhan.component';
 import { AdminComponent } from './admin/admin.component';
 import { roleGuard } from './guards/role.guard';
 import { authGuard } from './guards/auth.guard';
-import { DiemdanhComponent } from './diemdanh/diemdanh.component';
+
 import { SvTrangchuComponent } from './sv-trangchu/sv-trangchu.component';
 import { SvDiemsoComponent } from './sv-diemso/sv-diemso.component';
-import { SvDiemdanhComponent } from './sv-diemdanh/sv-diemdanh.component';
+
 import { GvLichDayComponent } from './gv-lichday/gv-lichday.component';
 import { GvQuanlyvantayComponent } from './gv-quanlyvantay/gv-quanlyvantay.component';
 import { SvLichHocComponent } from './sv-lichhoc/sv-lichhoc.component';
@@ -41,10 +41,7 @@ export const routes: Routes = [
         path: 'gv_quanlydiemso',
         component: GvQuanlydiemsoComponent,
     },
-    // {
-    //     path: 'gv_quanlydiemdanh',
-    //     component: GvQuanlydiemdanhComponent,
-    // },
+
     {
         path: 'gv_lichday',
         component: GvLichDayComponent,
@@ -61,10 +58,7 @@ export const routes: Routes = [
         path: 'admin',
         component: AdminComponent, canMatch: [roleGuard(['Admin'])]
     },
-    {
-        path: 'diemdanh',
-        component: DiemdanhComponent,
-    },
+   
     {
         path: 'sv-trangchu',
         component: SvTrangchuComponent,
@@ -72,10 +66,6 @@ export const routes: Routes = [
     {
         path: 'sv-diemso',
         component:SvDiemsoComponent,
-    },
-     {
-        path: 'sv-diemdanh',
-        component:SvDiemdanhComponent,
     },
     {
         path: 'gv-quanlyvantay',

@@ -1,3 +1,4 @@
+// src/app/services/class.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -25,6 +26,7 @@ export interface ClassDetail {
 
 export interface StudentOfClass {
   studentId: number;
+  studentCode: string;
   fullName: string;
   username: string;
   email: string;
@@ -83,6 +85,13 @@ export class ClassService {
     return this.http.get<{ teacherId: number, fullName: string }>('http://localhost:8080/api/teachers/' + id);
   }
 
+  // ⭐ NEW: lấy thông tin giáo viên theo mã số (TeacherCode)
+  getTeacherByCode(teacherCode: string) {
+    const trimmed = (teacherCode || '').trim();
+    return this.http.get<{ teacherId: number; fullName: string; teacherCode: string }>(
+      'http://localhost:8080/api/teachers/by-code/' + encodeURIComponent(trimmed)
+    );
+  }
   // tạo lớp học mới
   createClass(payload: { classCode: string; className: string; teacherId?: number | null }) {
     return this.http.post(this.apiUrl, payload, {
@@ -94,6 +103,18 @@ export class ClassService {
   getStudentById(studentId: number) {
     return this.http.get<any>('http://localhost:8080/api/students/' + studentId);
   }
+  getStudentByCode(studentCode: string) {
+    const trimmed = (studentCode || '').trim();
+    if (!trimmed) {
+      // có thể throw error hoặc return Observable rỗng tùy em,
+      // ở đây anh cứ gọi luôn để phía component tự xử lý lỗi 404
+    }
+
+    const url = `http://localhost:8080/api/students/by-code/${encodeURIComponent(trimmed)}`;
+    return this.http.get<any>(url);
+  }
+
+
   // thêm sinh viên vào lớp học
   addStudentsToClass(classId: number, studentIds: number[]) {
     return this.http.post('http://localhost:8080/api/classes/' + classId + '/students', {
@@ -102,7 +123,7 @@ export class ClassService {
   }
 
 
-  // class.service.ts
+  // nhập danh sách sinh viên từ file CSV
   importStudentsFromCsv(classId: number, formData: FormData) {
     return this.http.post(`${this.apiUrl}/${classId}/students/import`, formData);
   }

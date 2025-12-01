@@ -244,6 +244,9 @@ CREATE TABLE FingerprintEnrollSession (
 );
 GO
 
+ALTER TABLE Student ADD StudentCode NVARCHAR(50) NULL;
+ALTER TABLE Teacher ADD TeacherCode NVARCHAR(50) NULL;
+
 --------------------------------------------------------
 -- 1.16 BẢNG ESP LOG
 --------------------------------------------------------

@@ -1,3 +1,4 @@
+//Đây là UserTableService.java
 package com.FinalProject.backend.Service;
 
 import com.FinalProject.backend.Dto.UserDetailDto;
@@ -27,15 +28,15 @@ public class UserTableService {
             dto.setEmail((String) r[i++]);          // 4
             dto.setTeacherId((Integer) r[i++]);     // 5
             dto.setStudentId((Integer) r[i++]);     // 6
-            dto.setPhone((String) r[i++]);          // 7
-            dto.setAddress((String) r[i++]);        // 8
-            dto.setDateOfBirth((String) r[i++]);    // 9
-            dto.setGender((String) r[i++]);         // 10
-            dto.setFingerCount((Integer) r[i++]);   // 11
+            dto.setUserCode((String) r[i++]);       // 7 👈 MÃ SỐ
+            dto.setPhone((String) r[i++]);          // 8
+            dto.setAddress((String) r[i++]);        // 9
+            dto.setDateOfBirth((String) r[i++]);    // 10
+            dto.setGender((String) r[i++]);         // 11
+            dto.setFingerCount((Integer) r[i++]);   // 12
             return dto;
         }).toList();
     }
-
     // LẤY CHI TIẾT MODAL (bạn đang dùng UserDetailDto thì cứ để, không sao)
     public UserDetailDto getUserDetail(int accountId) {
         Object result = accountRepository.findUserDetailByAccountId(accountId);
@@ -51,11 +52,12 @@ public class UserTableService {
         dto.setEmail((String) r[i++]);       // 4
         dto.setTeacherId((Integer) r[i++]);  // 5
         dto.setStudentId((Integer) r[i++]);  // 6
-        dto.setPhone((String) r[i++]);       // 7
-        dto.setAddress((String) r[i++]);     // 8
-        dto.setDateOfBirth((String) r[i++]); // 9
-        dto.setGender((String) r[i++]);      // 10
-        dto.setFingerCount((Integer) r[i++]); // 11
+        dto.setUserCode((String) r[i++]);    // 7 👈
+        dto.setPhone((String) r[i++]);       // 8
+        dto.setAddress((String) r[i++]);     // 9
+        dto.setDateOfBirth((String) r[i++]); // 10
+        dto.setGender((String) r[i++]);      // 11
+        dto.setFingerCount((Integer) r[i++]); // 12
         return dto;
     }
 }

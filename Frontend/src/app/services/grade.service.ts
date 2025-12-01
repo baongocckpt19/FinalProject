@@ -10,6 +10,7 @@ export interface TeacherClass {
 
 export interface StudentGradeApi {
   studentId: number;
+  studentCode: string;
   fullName: string;
   username: string;
   attendanceGrade: number | null;

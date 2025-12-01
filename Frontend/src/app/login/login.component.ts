@@ -21,7 +21,7 @@ export class LoginComponent implements OnInit {
   rememberMe = false;
   // Đăng ký
   userRole = 'student';
-  fullName = '';
+  registerUsername = '';
   registerEmail = '';
   registerPassword = '';
   confirmPassword = '';
@@ -87,10 +87,11 @@ export class LoginComponent implements OnInit {
             this.showSuccess('Đăng nhập thành công!');
             if (account?.roleName == "Admin") {
               this.router.navigate(['/admin']);
-            }  if (account?.roleName == "Học sinh") {
+            } if (account?.roleName == "Học sinh") {
               this.router.navigate(['/sv-trangchu']);
-            }  else if (account?.roleName == "Giảng viên") {
-              this.router.navigate(['/gv_trangchu']);}
+            } else if (account?.roleName == "Giảng viên") {
+              this.router.navigate(['/gv_trangchu']);
+            }
             // } else {
             //   this.router.navigate(['/trangcanhan']);
             // }
@@ -106,10 +107,11 @@ export class LoginComponent implements OnInit {
   }
 
   // 🔹 Xử lý đăng ký (có thể gọi API thật)
+  // 🔹 Xử lý đăng ký (gọi API thật)
   handleRegister(): void {
     this.clearMessages();
 
-    if (!this.fullName || !this.registerEmail || !this.registerPassword || !this.confirmPassword) {
+    if (!this.registerUsername || !this.registerPassword || !this.confirmPassword) {
       this.showError('Vui lòng điền đầy đủ thông tin!');
       return;
     }
@@ -124,10 +126,8 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    // 👇 Gọi API đăng ký thật (nếu backend có)
     this.authService.register({
-      fullName: this.fullName,
-      username: this.registerEmail,
+      username: this.registerUsername,
       password: this.registerPassword,
       role: this.userRole
     }).subscribe({
@@ -139,7 +139,10 @@ export class LoginComponent implements OnInit {
         this.showError(err.error?.message || 'Đăng ký thất bại!');
       }
     });
+
+
   }
+
 
 
   // 🔹 Hiển thị thông báo
@@ -159,5 +162,80 @@ export class LoginComponent implements OnInit {
     this.successMessage = null;
     this.errorMessage = null;
   }
+
+  // ==== Quên mật khẩu ====
+  isForgotMode = false;     // bật/tắt popup
+  forgotStep = 1;           // 1: nhập username, 2: nhập code + mật khẩu mới
+  forgotUsername = '';
+  resetCode = '';
+  newPassword = '';
+  confirmNewPassword = '';
+
+    openForgotPassword(): void {
+    this.clearMessages();
+    this.isForgotMode = true;
+    this.forgotStep = 1;
+    this.forgotUsername = '';
+    this.resetCode = '';
+    this.newPassword = '';
+    this.confirmNewPassword = '';
+  }
+
+  closeForgotPassword(): void {
+    this.isForgotMode = false;
+    // không cần reset hết, tuỳ bạn
+  }
+
+    submitForgotRequest(): void {
+    this.clearMessages();
+
+    if (!this.forgotUsername) {
+      this.showError('Vui lòng nhập tài khoản!');
+      return;
+    }
+
+    this.authService.forgotPassword(this.forgotUsername).subscribe({
+      next: (res) => {
+        this.showSuccess(res?.message || 'Đã gửi mã xác nhận. Vui lòng kiểm tra email.');
+        this.forgotStep = 2;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.showError(err.error?.message || 'Không thể gửi mã xác nhận. Vui lòng thử lại.');
+      }
+    });
+  }
+    submitResetPassword(): void {
+    this.clearMessages();
+
+    if (!this.resetCode) {
+      this.showError('Vui lòng nhập mã xác nhận!');
+      return;
+    }
+
+    if (!this.newPassword || !this.confirmNewPassword) {
+      this.showError('Vui lòng nhập đầy đủ mật khẩu mới!');
+      return;
+    }
+
+    if (this.newPassword !== this.confirmNewPassword) {
+      this.showError('Mật khẩu xác nhận không khớp!');
+      return;
+    }
+
+    this.authService.resetPassword({
+      username: this.forgotUsername,
+      code: this.resetCode,
+      newPassword: this.newPassword
+    }).subscribe({
+      next: (res) => {
+        this.showSuccess(res?.message || 'Đổi mật khẩu thành công, hãy đăng nhập lại.');
+        this.isForgotMode = false;
+      },
+      error: (err: HttpErrorResponse) => {
+        this.showError(err.error?.message || 'Không thể đổi mật khẩu. Vui lòng thử lại.');
+      }
+    });
+  }
+
 
 }

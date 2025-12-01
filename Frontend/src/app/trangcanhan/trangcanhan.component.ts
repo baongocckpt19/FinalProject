@@ -22,6 +22,9 @@ interface EditProfileModel {
   address: string;
   birthDate: string; // yyyy-MM-dd
   gender: Gender;
+
+  // ⭐ NEW
+  userCode: string;
 }
 
 interface PasswordModel {
@@ -46,6 +49,11 @@ export class TrangcanhanComponent implements OnInit, OnDestroy {
   isSaving = false;
 
   editModel: EditProfileModel | null = null;
+
+  // ✅ Cho phép sửa MÃ SỐ hay không:
+  // - true  nếu studentId == null VÀ teacherId == null
+  // - false nếu đã có studentId hoặc teacherId
+  canEditUserCode = false;
 
   // ================== PASSWORD STATE ==================
   passwordModel: PasswordModel = {
@@ -82,6 +90,10 @@ export class TrangcanhanComponent implements OnInit, OnDestroy {
     const sub = this.userProfileService.getMyProfile().subscribe({
       next: (profile) => {
         this.profile = profile;
+
+        // ✅ Rule: chỉ cho sửa "Mã số" khi chưa được gán Student/Teacher
+        this.canEditUserCode = !profile.studentId && !profile.teacherId;
+
         if (this.isEditing) {
           this.prepareEditModel();
         }
@@ -108,7 +120,8 @@ export class TrangcanhanComponent implements OnInit, OnDestroy {
       phone: this.profile.phone || '',
       address: this.profile.address || '',
       birthDate: this.profile.birthDate || '',
-      gender: this.profile.gender
+      gender: this.profile.gender,
+      userCode: this.profile.userCode || ''
     };
   }
 
@@ -139,15 +152,11 @@ export class TrangcanhanComponent implements OnInit, OnDestroy {
     return role;
   }
 
-  // Mã số: studentId nếu là SV, teacherId nếu là GV, fallback accountId
+  // Mã số hiển thị: ưu tiên userCode, fallback accountId
   get userCode(): string {
     if (!this.profile) return '-';
-
-    if (this.profile.studentId) {
-      return String(this.profile.studentId);
-    }
-    if (this.profile.teacherId) {
-      return String(this.profile.teacherId);
+    if (this.profile.userCode && this.profile.userCode.trim().length > 0) {
+      return this.profile.userCode;
     }
     return String(this.profile.accountId);
   }
@@ -183,6 +192,19 @@ export class TrangcanhanComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Xử lý userCode gửi lên backend:
+    let userCodeToSend: string | null = null;
+
+    if (this.canEditUserCode) {
+      // Chỉ khi chưa có Student/Teacher thì mới lấy từ input
+      const code = this.editModel.userCode?.trim();
+      userCodeToSend = code && code.length > 0 ? code : null;
+    } else {
+      // Nếu không cho sửa thì giữ nguyên mã số hiện tại (nếu có)
+      const code = this.profile?.userCode?.trim();
+      userCodeToSend = code && code.length > 0 ? code : null;
+    }
+
     const payload: UpdateProfileRequest = {
       fullName: this.editModel.fullName.trim(),
       roleName: this.editModel.roleName,
@@ -190,7 +212,8 @@ export class TrangcanhanComponent implements OnInit, OnDestroy {
       phone: this.editModel.phone?.trim() || null,
       address: this.editModel.address?.trim() || null,
       birthDate: this.editModel.birthDate || null,
-      gender: this.editModel.gender
+      gender: this.editModel.gender,
+      userCode: userCodeToSend
     };
 
     this.isSaving = true;
@@ -208,10 +231,13 @@ export class TrangcanhanComponent implements OnInit, OnDestroy {
             phone: payload.phone,
             address: payload.address,
             birthDate: payload.birthDate,
-            gender: payload.gender
+            gender: payload.gender,
+            userCode: userCodeToSend
           };
         }
 
+        // Sau lần đầu tạo Student/Teacher, lần load sau có studentId/teacherId
+        // -> canEditUserCode sẽ false
         this.isEditing = false;
       },
       error: (err) => {

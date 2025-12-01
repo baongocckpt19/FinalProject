@@ -59,7 +59,7 @@
                     </div>
                 </div>
 
-                <!-- DANH SÁCH LỚP DẠY TRONG NGÀY (ĐỘNG) -->
+                <!-- DANH SÁCH LỚP DẠY TRONG NGÀY  -->
                 <div class="schedule-list">
                     <div class="schedule-list-header">
                         <h3 class="schedule-list-title">
@@ -126,7 +126,7 @@
                     </div>
                 </div>
 
-                <!-- CHI TIẾT ĐIỂM DANH LỚP (ATTENDANCE) -->
+      
                 <!-- CHI TIẾT ĐIỂM DANH LỚP (ATTENDANCE) -->
                 <div id="attendanceDetailSection" class="attendance-detail-section show" *ngIf="selectedClass">
 
@@ -219,7 +219,7 @@
                                                     <div class="student-info">
                                                         <div class="student-details">
                                                             <div class="student-name">{{ s.fullName }}</div>
-                                                            <div class="student-id">MSSV: {{ s.studentId }}</div>
+                                                            <div class="student-id">MSSV: {{ s.studentCode }}</div>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -299,7 +299,7 @@
                                             {{ studentDetail.fullName }}
                                         </h3>
                                         <p class="student-profile-id">
-                                            {{ studentDetail.username }}
+                                            {{ studentDetail.studentCode }}
                                         </p>
                                         <div class="student-profile-stats">
                                             <div class="profile-stat">

@@ -22,8 +22,9 @@
 
                     <form (ngSubmit)="handleLogin()" id="loginForm">
                         <div class="form-group">
-                            <label class="form-label" >Tài khoản</label>
-                            <input  class="form-input"  name="loginUser"  placeholder="Nhập User của bạn" [(ngModel)]="username" required>
+                            <label class="form-label">Tài khoản</label>
+                            <input class="form-input" name="loginUser" placeholder="Nhập User của bạn"
+                                [(ngModel)]="username" required>
                         </div>
 
                         <div class="form-group">
@@ -31,7 +32,7 @@
                             <div class="password-group">
                                 <input type="password" id="loginPassword" class="form-input" placeholder="Nhập mật khẩu"
                                     name="loginPassword" [(ngModel)]="password" required>
-                                 <button type="button" class="password-toggle" (click)="togglePassword('loginPassword')"> 
+                                <button type="button" class="password-toggle" (click)="togglePassword('loginPassword')">
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -39,7 +40,7 @@
                                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
                                         </path>
                                     </svg>
-                                 </button> 
+                                </button>
                             </div>
                         </div>
 
@@ -49,10 +50,13 @@
                                     [(ngModel)]="rememberMe">
                                 <label for="rememberMe" class="checkbox-label">Ghi nhớ đăng nhập</label>
                             </div>
-                            <a href="#" class="forgot-link">Quên mật khẩu?</a>
+                            <a href="#" class="forgot-link" (click)="openForgotPassword(); $event.preventDefault()">
+                                Quên mật khẩu?
+                            </a>
                         </div>
 
-                        <button type="submit" class="submit-btn"  > Đăng nhập</button>
+
+                        <button type="submit" class="submit-btn"> Đăng nhập</button>
                     </form>
 
                     <div class="divider">
@@ -62,7 +66,8 @@
                         <a class="switch-link" (click)="switchToSignup(); $event.preventDefault()">Đăng ký ngay</a>
                     </div>
                 </div>
-
+                <!-- singup form -->
+                <!-- singup form -->
                 <div id="signupForm" class="form-wrapper signup-form">
                     <h1 class="form-title">Tạo tài khoản mới</h1>
                     <p class="form-subtitle">Tham gia EduSmart để bắt đầu hành trình học tập</p>
@@ -73,21 +78,19 @@
                             <div class="role-options">
                                 <div class="role-option">
                                     <input type="radio" id="studentRole" name="userRole" value="student"
-                                        class="role-radio" [(ngModel)]="userRole" checked>
+                                        class="role-radio" [(ngModel)]="userRole" />
                                     <label for="studentRole" class="role-label">
                                         <svg class="role-icon" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M12 14l9-5-9-5-9 5 9 5z" />
                                             <path
                                                 d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                                         </svg>
                                         Sinh viên
                                     </label>
                                 </div>
                                 <div class="role-option">
                                     <input type="radio" id="teacherRole" name="userRole" value="teacher"
-                                        class="role-radio" [(ngModel)]="userRole">
+                                        class="role-radio" [(ngModel)]="userRole" />
                                     <label for="teacherRole" class="role-label">
                                         <svg class="role-icon" fill="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -100,15 +103,10 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="fullName">Họ và tên</label>
-                            <input type="text" id="fullName" class="form-input" placeholder="Nhập họ và tên"
-                                name="fullName" [(ngModel)]="fullName" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="registerEmail">Email</label>
-                            <input type="email" id="registerEmail" class="form-input" placeholder="Nhập email của bạn"
-                                name="registerEmail" [(ngModel)]="registerEmail" required>
+                            <label class="form-label" for="registerUsername">Tài khoản</label>
+                            <input type="text" id="registerUsername" class="form-input"
+                                placeholder="Nhập tài khoản đăng nhập" name="registerUsername"
+                                [(ngModel)]="registerUsername" required />
                         </div>
 
                         <div class="form-group">
@@ -116,7 +114,7 @@
                             <div class="password-group">
                                 <input type="password" id="registerPassword" class="form-input"
                                     placeholder="Tạo mật khẩu mạnh" name="registerPassword"
-                                    [(ngModel)]="registerPassword" required>
+                                    [(ngModel)]="registerPassword" required />
                                 <button type="button" class="password-toggle"
                                     (click)="togglePassword('registerPassword')">
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +133,7 @@
                             <div class="password-group">
                                 <input type="password" id="confirmPassword" class="form-input"
                                     placeholder="Nhập lại mật khẩu" name="confirmPassword" [(ngModel)]="confirmPassword"
-                                    required>
+                                    required />
                                 <button type="button" class="password-toggle"
                                     (click)="togglePassword('confirmPassword')">
                                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,11 +147,20 @@
                             </div>
                         </div>
 
+                        <div class="form-options">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="agreeTerms" class="checkbox" name="agreeTerms"
+                                    [(ngModel)]="agreeTerms" />
+                                <label for="agreeTerms" class="checkbox-label">
+                                    Tôi đồng ý với điều khoản sử dụng và chính sách bảo mật
+                                </label>
+                            </div>
+                        </div>
 
                         <button type="submit" class="submit-btn">Tạo tài khoản</button>
                     </form>
 
-                     <div class="divider">
+                    <div class="divider">
                         <span>Bạn đã có tài khoản?</span>
                     </div>
 
@@ -161,6 +168,86 @@
                         <a class="switch-link" (click)="switchToSignin(); $event.preventDefault()">Đăng nhập ngay</a>
                     </div>
                 </div>
+
+            </div>
+        </div>
+        <!-- ========== FORGOT PASSWORD OVERLAY ========== -->
+        <div class="forgot-overlay" *ngIf="isForgotMode">
+            <div class="forgot-card">
+                <button type="button" class="forgot-close" (click)="closeForgotPassword()">
+                    &times;
+                </button>
+
+                <h2 class="form-title">Quên mật khẩu</h2>
+
+                <p class="form-subtitle" *ngIf="forgotStep === 1">
+                    Nhập <strong>tài khoản</strong> của bạn. Hệ thống sẽ gửi mã xác nhận về email đã đăng ký.
+                </p>
+                <p class="form-subtitle" *ngIf="forgotStep === 2">
+                    Nhập mã xác nhận được gửi qua email và mật khẩu mới.
+                </p>
+
+                <!-- Bước 1: Nhập username -->
+                <form *ngIf="forgotStep === 1" (ngSubmit)="submitForgotRequest()">
+                    <div class="form-group">
+                        <label class="form-label">Tài khoản</label>
+                        <input class="form-input" placeholder="Nhập tài khoản đăng nhập" [(ngModel)]="forgotUsername"
+                            name="forgotUsername" required>
+                    </div>
+
+                    <button class="submit-btn" type="submit">
+                        Gửi mã xác nhận
+                    </button>
+                </form>
+
+                <!-- Bước 2: Nhập code + mật khẩu mới -->
+                <form *ngIf="forgotStep === 2" (ngSubmit)="submitResetPassword()">
+                    <div class="form-group">
+                        <label class="form-label">Mã xác nhận</label>
+                        <input class="form-input" placeholder="Nhập mã được gửi qua email" [(ngModel)]="resetCode"
+                            name="resetCode" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mật khẩu mới</label>
+                        <div class="password-group">
+                            <input type="password" id="newPassword" class="form-input" placeholder="Nhập mật khẩu mới"
+                                [(ngModel)]="newPassword" name="newPassword" required>
+                            <button type="button" class="password-toggle" (click)="togglePassword('newPassword')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Xác nhận mật khẩu mới</label>
+                        <div class="password-group">
+                            <input type="password" id="confirmNewPassword" class="form-input"
+                                placeholder="Nhập lại mật khẩu mới" [(ngModel)]="confirmNewPassword"
+                                name="confirmNewPassword" required>
+                            <button type="button" class="password-toggle"
+                                (click)="togglePassword('confirmNewPassword')">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                    </path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="submit-btn" type="submit">
+                        Đổi mật khẩu
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -236,5 +323,7 @@
                 </svg>
             </div>
         </div>
+
+
     </div>
 </body>

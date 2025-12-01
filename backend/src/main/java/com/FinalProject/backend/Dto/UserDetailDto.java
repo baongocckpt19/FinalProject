@@ -1,3 +1,4 @@
+//Đây là UserDetailDto.java
 package com.FinalProject.backend.Dto;
 
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ public class UserDetailDto {
 
     private String fullName;
     private String email;
+    private String userCode;
 
     private Integer teacherId;
     private Integer studentId;

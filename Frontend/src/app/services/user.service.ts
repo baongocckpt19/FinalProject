@@ -1,3 +1,4 @@
+// src/app/services/user.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -8,6 +9,7 @@ interface UserList {
   username: string;
   roleName: string;
   email: string;
+  userCode?: string;    
   fingerCount?: number | null;
 }
 @Injectable({

@@ -26,26 +26,60 @@ public class ClassStudentService {
         this.studentRepository = studentRepository;
     }
 
-    // ================== LẤY THÔNG TIN SINH VIÊN THEO ID ==================
+    // =========================================================
+    // 1. LẤY THÔNG TIN SINH VIÊN THEO studentId
+    // =========================================================
     public Map<String, Object> getStudentInfo(int studentId) {
         Object r = studentRepository.findStudentInfoById(studentId);
+        if (r == null) return null;
+
+        return convertStudentInfoRow(r);
+    }
+
+    // =========================================================
+    // 2. LẤY THÔNG TIN SINH VIÊN THEO studentCode (MSSV)
+    //     -> dùng cho API /students/by-code/{studentCode}
+    // =========================================================
+    public Map<String, Object> getStudentInfoByCode(String studentCode) {
+        Object r = studentRepository.findStudentInfoByCode(studentCode);
         if (r == null) return null;
 
         Object[] o = (Object[]) r;
         int i = 0;
         Map<String, Object> map = new HashMap<>();
-        map.put("studentId",   o[i++]); // 0
-        map.put("fullName",    o[i++]); // 1
-        map.put("username",    o[i++]); // 2
-        map.put("dateOfBirth", o[i++]); // 3
-        map.put("gender",      o[i++]); // 4
-        map.put("address",     o[i++]); // 5
-        map.put("email",       o[i++]); // 6
-        map.put("phone",       o[i++]); // 7
+        map.put("studentId",   o[i++]);
+        map.put("studentCode", o[i++]);
+        map.put("fullName",    o[i++]);
+        map.put("username",    o[i++]);
+        map.put("dateOfBirth", o[i++]);
+        map.put("gender",      o[i++]);
+        map.put("address",     o[i++]);
+        map.put("email",       o[i++]);
+        map.put("phone",       o[i++]);
         return map;
     }
 
-    // ================== THÊM NHIỀU SINH VIÊN VÀO LỚP ==================
+
+    // Hàm dùng chung để map Object[] -> Map
+    private Map<String, Object> convertStudentInfoRow(Object row) {
+        Object[] o = (Object[]) row;
+        int i = 0;
+        Map<String, Object> map = new HashMap<>();
+        map.put("studentId",   o[i++]); // 0
+        map.put("studentCode", o[i++]); // 1  👈 MÃ SỐ SINH VIÊN
+        map.put("fullName",    o[i++]); // 2
+        map.put("username",    o[i++]); // 3
+        map.put("dateOfBirth", o[i++]); // 4
+        map.put("gender",      o[i++]); // 5
+        map.put("address",     o[i++]); // 6
+        map.put("email",       o[i++]); // 7
+        map.put("phone",       o[i++]); // 8
+        return map;
+    }
+
+    // =========================================================
+    // 3. THÊM NHIỀU SINH VIÊN VÀO LỚP
+    // =========================================================
     @Transactional
     public void addStudentsToClass(int classId, List<Integer> studentIds) {
         if (studentIds == null || studentIds.isEmpty()) return;
@@ -56,7 +90,10 @@ public class ClassStudentService {
         }
     }
 
-    // ================== IMPORT CSV ==================
+    // =========================================================
+    // 4. IMPORT CSV THEO MSSV (StudentCode)
+    //    Cột đầu tiên trong file là MÃ SỐ SINH VIÊN
+    // =========================================================
     @Transactional
     public Map<String, Object> importStudentsFromCsv(int classId, MultipartFile file) throws Exception {
         if (file == null || file.isEmpty()) {
@@ -72,6 +109,7 @@ public class ClassStudentService {
 
             String line;
             boolean first = true;
+
             while ((line = br.readLine()) != null) {
                 total++;
 
@@ -83,34 +121,39 @@ public class ClassStudentService {
 
                 if (line.trim().isEmpty()) continue;
 
-                // Cho phép ',' hoặc ';' hoặc '\t'
+                // Cho phép ',', ';' hoặc '\t'
                 String[] parts = splitSmart(line);
                 if (parts.length < 1) {
-                    pushReject(rejected, total, line, "Thiếu cột mã/username");
+                    pushReject(rejected, total, line, "Thiếu cột MSSV");
                     continue;
                 }
 
-                String idOrUsername = parts[0].trim();
-                if (idOrUsername.isEmpty()) {
-                    pushReject(rejected, total, line, "Cột mã/username trống");
+                String studentCode = parts[0].trim();
+                if (studentCode.isEmpty()) {
+                    pushReject(rejected, total, line, "Cột MSSV trống");
                     continue;
                 }
 
-                Integer studentId = tryParseInt(idOrUsername);
-                if (studentId == null) {
-                    // Nếu không phải số → tra theo username
-                    studentId = studentRepository.findStudentIdByUsername(idOrUsername);
-                    if (studentId == null) {
-                        pushReject(rejected, total, line, "Không tìm thấy username: " + idOrUsername);
-                        continue;
-                    }
+                // Nếu đây là dòng header (ví dụ: "Mã SV" hoặc "MaSV") thì bỏ qua
+                if (total == 1 && studentCode.toLowerCase().contains("mã")) {
+                    // không tính là lỗi, chỉ skip
+                    continue;
                 }
 
+                // Tìm theo studentCode (MSSV)
+                var opt = studentRepository.findByStudentCode(studentCode);
+                if (opt.isEmpty()) {
+                    pushReject(rejected, total, line,
+                            "Không tìm thấy sinh viên với MSSV: " + studentCode);
+                    continue;
+                }
+
+                Integer studentId = opt.get().getStudentId();
                 studentIds.add(studentId);
             }
         }
 
-        // Ghi vào DB (đã có IF NOT EXISTS trong query repo)
+        // Ghi vào DB
         this.addStudentsToClass(classId, studentIds);
 
         Map<String, Object> result = new HashMap<>();
@@ -128,14 +171,6 @@ public class ClassStudentService {
         return line.split("\t", -1);
     }
 
-    private static Integer tryParseInt(String s) {
-        try {
-            return Integer.valueOf(s);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
     private static void pushReject(List<Map<String, String>> rejected, int rowNum, String raw, String reason) {
         rejected.add(Map.of(
                 "row", String.valueOf(rowNum),
@@ -144,11 +179,12 @@ public class ClassStudentService {
         ));
     }
 
-    // ================== XOÁ 1 SINH VIÊN KHỎI LỚP ==================
+    // =========================================================
+    // 5. XOÁ 1 SINH VIÊN KHỎI LỚP
+    // =========================================================
     @Transactional
     public void removeStudentFromClass(int classId, int studentId) {
         classRepository.removeStudentFromClass(studentId, classId);
     }
-
 
 }

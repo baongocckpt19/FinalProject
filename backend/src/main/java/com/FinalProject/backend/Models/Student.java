@@ -13,7 +13,11 @@ public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "StudentId")
+
+    //thm mới cột StudentCode thể hiện đây là mã số của sinh viên
     private Integer studentId;
+    @Column(name = "StudentCode")
+    private String studentCode;
 
     @Column(name = "AccountId", nullable = false)
     private Integer accountId;

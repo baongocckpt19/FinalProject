@@ -7,6 +7,7 @@ import lombok.Data;
 
 public class StudentFingerprintInfoDto {
     private Integer studentId;
+    private String studentCode;
     private String fullName;
     private String username;
     private String email;
