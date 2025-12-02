@@ -1,1 +1,285 @@
-<p>chatbot works!</p>
+<body>
+  <div class="app-container">
+    <main class="main-content">
+      <div class="content-panel ai-class-review-layout">
+        <!-- VIEW DUY NHẤT CHO AI -->
+        <div class="page-view active">
+          <div class="main-panel ai-panel">
+            <!-- Header -->
+            <div class="panel-header ai-panel-header">
+              <div>
+                <h2 class="panel-title">
+                  AI Nhận xét &amp; Cảnh báo lớp học
+                </h2>
+                <p class="ai-panel-subtitle">
+                  Phân tích dữ liệu điểm danh các tuần gần đây để hỗ trợ giảng viên quản lý lớp học hiệu quả hơn.
+                </p>
+              </div>
+
+              <div class="ai-header-meta">
+                <div class="ai-class-tag">
+                  <span class="ai-class-code">Lớp: CT101 - Lập trình Cơ bản</span>
+                  <span class="ai-class-info-dot"></span>
+                  <span class="ai-class-semester">HK1 / Năm học 2024-2025</span>
+                </div>
+                <div class="ai-badge ai-badge-low">
+                  <span class="ai-badge-label">Mức rủi ro tổng thể</span>
+                  <span class="ai-badge-value">LOW</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Body -->
+            <div class="panel-body ai-panel-body">
+              <div class="ai-grid">
+                <!-- Cột trái: tóm tắt, điểm nổi bật, khuyến nghị -->
+                <div class="ai-main-column">
+                  <!-- Tóm tắt -->
+                  <section class="form-section ai-section">
+                    <div class="form-section-title ai-section-title">
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                          d="M4 4h16v2H4zm0 4h10v2H4zm0 4h16v2H4zm0 4h10v2H4z" />
+                      </svg>
+                      Tóm tắt tình hình chuyên cần
+                    </div>
+                    <div class="ai-summary-text">
+                      Trong 4 tuần gần đây, lớp duy trì tỉ lệ đi học khá tốt, dao động quanh
+                      <span class="ai-highlight-number">90%</span>. Tuy nhiên, tỉ lệ vắng có xu hướng
+                      tăng nhẹ ở 2 tuần gần nhất, đặc biệt vào các buổi sáng đầu tuần.
+                    </div>
+
+                    <div class="ai-summary-tags">
+                      <span class="ai-tag ai-tag-good">Tỉ lệ đi học ổn</span>
+                      <span class="ai-tag ai-tag-warning">Xu hướng vắng tăng nhẹ</span>
+                      <span class="ai-tag ai-tag-focus">Cần theo dõi thêm 2 tuần tới</span>
+                    </div>
+                  </section>
+
+                  <!-- Điểm nổi bật -->
+                  <section class="form-section ai-section">
+                    <div class="form-section-title ai-section-title">
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                          d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10
+                               10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8
+                               8-8 8 3.59 8 8-3.59 8-8 8z" />
+                      </svg>
+                      Điểm nổi bật từ dữ liệu
+                    </div>
+                    <ul class="ai-highlight-list">
+                      <li>
+                        <span class="dot"></span>
+                        Tỉ lệ đi học trung bình toàn lớp trong 4 tuần gần đây đạt
+                        <strong>90,2%</strong>.
+                      </li>
+                      <li>
+                        <span class="dot"></span>
+                        Tuần gần nhất, tỉ lệ vắng tăng từ <strong>6,5%</strong> lên
+                        <strong>9,1%</strong>, chủ yếu tập trung ở ca sáng thứ 2.
+                      </li>
+                      <li>
+                        <span class="dot"></span>
+                        Có <strong>3 sinh viên</strong> vắng từ <strong>3 buổi liên tiếp</strong>
+                        trở lên.
+                      </li>
+                      <li>
+                        <span class="dot"></span>
+                        Nhóm sinh viên nguy cơ cao chủ yếu thuộc các bạn ở xa trường hoặc thường xuyên đi làm thêm.
+                      </li>
+                    </ul>
+                  </section>
+
+                  <!-- Khuyến nghị -->
+                  <section class="form-section ai-section">
+                    <div class="form-section-title ai-section-title">
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                          d="M13 2.05v3.03c2.83.47 5 2.94 5 5.92 0 3.31-2.69 6-6
+                               6s-6-2.69-6-6c0-2.98 2.17-5.45 5-5.92V2.05C7.06 2.55 4
+                               5.92 4 9.99 4 14.41 7.59 18 12 18s8-3.59
+                               8-8.01C20 5.92 16.94 2.55 13 2.05zM11 8h2v5h-2zm0 7h2v2h-2z" />
+                      </svg>
+                      Gợi ý hành động cho giảng viên
+                    </div>
+                    <div class="ai-recommendations">
+                      <div class="ai-recommendation-card">
+                        <div class="ai-recommendation-title">
+                          ✔ Nhắc nhẹ trong đầu buổi học
+                        </div>
+                        <div class="ai-recommendation-text">
+                          Dành 1–2 phút đầu buổi để nhắc lại quy định chuyên cần, đồng thời
+                          ghi nhận các bạn có tiến bộ về mặt đi học đầy đủ.
+                        </div>
+                      </div>
+                      <div class="ai-recommendation-card">
+                        <div class="ai-recommendation-title">
+                          ✔ Liên hệ sớm với sinh viên vắng nhiều
+                        </div>
+                        <div class="ai-recommendation-text">
+                          Gửi email hoặc trao đổi riêng với nhóm 3 sinh viên vắng nhiều để tìm
+                          hiểu lý do và thống nhất kế hoạch cải thiện.
+                        </div>
+                      </div>
+                      <div class="ai-recommendation-card">
+                        <div class="ai-recommendation-title">
+                          ✔ Kết hợp điểm chuyên cần linh hoạt
+                        </div>
+                        <div class="ai-recommendation-text">
+                          Cân nhắc cộng điểm khuyến khích cho những tuần đi học đầy đủ, giúp
+                          sinh viên có thêm động lực duy trì chuyên cần.
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </div>
+
+                <!-- Cột phải: thống kê + sinh viên nguy cơ cao -->
+                <div class="ai-side-column">
+                  <!-- Thống kê nhanh -->
+                  <section class="form-section ai-section">
+                    <div class="form-section-title ai-section-title">
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                          d="M3 17h18v2H3zm2-7h3v5H5zm5-4h3v9h-3zm5 6h3v3h-3z" />
+                      </svg>
+                      Tổng quan chuyên cần
+                    </div>
+                    <div class="ai-stat-grid">
+                      <div class="ai-stat-card">
+                        <div class="ai-stat-label">Số tuần phân tích</div>
+                        <div class="ai-stat-value">4 tuần</div>
+                        <div class="ai-stat-hint">Tính từ tuần hiện tại trở về trước</div>
+                      </div>
+                      <div class="ai-stat-card">
+                        <div class="ai-stat-label">Tỉ lệ đi học trung bình</div>
+                        <div class="ai-stat-value ai-stat-good">90,2%</div>
+                        <div class="ai-stat-bar">
+                          <div class="ai-stat-bar-fill good" style="width: 90%;"></div>
+                        </div>
+                      </div>
+                      <div class="ai-stat-card">
+                        <div class="ai-stat-label">Tỉ lệ vắng trung bình</div>
+                        <div class="ai-stat-value ai-stat-warning">7,3%</div>
+                        <div class="ai-stat-bar">
+                          <div class="ai-stat-bar-fill warning" style="width: 30%;"></div>
+                        </div>
+                      </div>
+                      <div class="ai-stat-card">
+                        <div class="ai-stat-label">Sinh viên nguy cơ cao</div>
+                        <div class="ai-stat-value ai-stat-critical">3</div>
+                        <div class="ai-stat-hint">Vắng ≥ 3 buổi hoặc vắng liên tiếp</div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <!-- Xu hướng theo tuần -->
+                  <section class="form-section ai-section">
+                    <div class="form-section-title ai-section-title">
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                          d="M3 17h18v2H3V5h2v10zm4.5-3.5L11 9l2.5 3 3.5-4.5 2.5 3.01V5h-7.5z" />
+                      </svg>
+                      Xu hướng vắng theo tuần
+                    </div>
+                    <div class="ai-weeks-timeline">
+                      <div class="ai-week-row">
+                        <div class="ai-week-label">Tuần hiện tại</div>
+                        <div class="ai-week-bar">
+                          <div class="ai-week-bar-fill warning" style="width: 40%;"></div>
+                        </div>
+                        <div class="ai-week-value">9,1% vắng</div>
+                      </div>
+                      <div class="ai-week-row">
+                        <div class="ai-week-label">Tuần -1</div>
+                        <div class="ai-week-bar">
+                          <div class="ai-week-bar-fill good" style="width: 25%;"></div>
+                        </div>
+                        <div class="ai-week-value">6,5% vắng</div>
+                      </div>
+                      <div class="ai-week-row">
+                        <div class="ai-week-label">Tuần -2</div>
+                        <div class="ai-week-bar">
+                          <div class="ai-week-bar-fill good" style="width: 20%;"></div>
+                        </div>
+                        <div class="ai-week-value">5,2% vắng</div>
+                      </div>
+                      <div class="ai-week-row">
+                        <div class="ai-week-label">Tuần -3</div>
+                        <div class="ai-week-bar">
+                          <div class="ai-week-bar-fill good" style="width: 18%;"></div>
+                        </div>
+                        <div class="ai-week-value">4,8% vắng</div>
+                      </div>
+                    </div>
+                  </section>
+
+                  <!-- Sinh viên nguy cơ cao -->
+                  <section class="form-section ai-section">
+                    <div class="form-section-title ai-section-title">
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                          d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4
+                               1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8
+                               1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                      </svg>
+                      Danh sách sinh viên nguy cơ cao
+                    </div>
+                    <div class="ai-risk-table-wrapper">
+                      <table class="ai-risk-table">
+                        <thead>
+                          <tr>
+                            <th>MSSV</th>
+                            <th>Họ tên</th>
+                            <th>Vắng</th>
+                            <th>Vắng liên tiếp</th>
+                            <th>Mức rủi ro</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>SV00123</td>
+                            <td>Nguyễn Văn A</td>
+                            <td>4 buổi</td>
+                            <td>3 buổi</td>
+                            <td><span class="ai-risk-chip high">HIGH</span></td>
+                          </tr>
+                          <tr>
+                            <td>SV00456</td>
+                            <td>Trần Thị B</td>
+                            <td>3 buổi</td>
+                            <td>2 buổi</td>
+                            <td><span class="ai-risk-chip medium">MEDIUM</span></td>
+                          </tr>
+                          <tr>
+                            <td>SV00789</td>
+                            <td>Lê Văn C</td>
+                            <td>3 buổi</td>
+                            <td>1 buổi</td>
+                            <td><span class="ai-risk-chip medium">MEDIUM</span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <p class="ai-risk-note">
+                        Danh sách trên được xác định dựa trên số buổi vắng và số buổi vắng liên tiếp
+                        trong 4 tuần gần nhất.
+                      </p>
+                    </div>
+                  </section>
+                </div>
+              </div>
+
+              <!-- Ghi chú nguồn dữ liệu -->
+              <div class="ai-footer-note">
+                🔍 <strong>Lưu ý:</strong> Đây là giao diện demo sử dụng dữ liệu tĩnh. Khi tích hợp
+                thực tế, số liệu sẽ được lấy từ bảng Attendance, ClassSchedule, Student, v.v. và phần
+                nhận xét sẽ được sinh bởi AI (Gemini) dựa trên dữ liệu thực.
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /page-view -->
+      </div>
+    </main>
+  </div>
+</body>

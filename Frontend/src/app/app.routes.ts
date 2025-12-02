@@ -18,6 +18,8 @@ import { GvLichDayComponent } from './gv-lichday/gv-lichday.component';
 import { GvQuanlyvantayComponent } from './gv-quanlyvantay/gv-quanlyvantay.component';
 import { SvLichHocComponent } from './sv-lichhoc/sv-lichhoc.component';
 
+import { GvAireviewComponent } from './gv-aireview/gv-aireview.component';
+
 
 export const routes: Routes = [
 
@@ -58,22 +60,27 @@ export const routes: Routes = [
         path: 'admin',
         component: AdminComponent, canMatch: [roleGuard(['Admin'])]
     },
-   
+
     {
         path: 'sv-trangchu',
         component: SvTrangchuComponent,
     },
     {
         path: 'sv-diemso',
-        component:SvDiemsoComponent,
+        component: SvDiemsoComponent,
     },
     {
         path: 'gv-quanlyvantay',
         component: GvQuanlyvantayComponent,
     },
     {
-        path:'sv-lichhoc',
+        path: 'sv-lichhoc',
         component: SvLichHocComponent,
+    },
+  
+    {
+        path: 'gv-aireview',
+        component: GvAireviewComponent,
     },
     {
         path: '',

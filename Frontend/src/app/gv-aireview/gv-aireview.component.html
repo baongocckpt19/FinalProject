@@ -1,0 +1,311 @@
+<div class="dashboard-container">
+    <main class="main-content">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title" id="mainTitle">{{ mainTitle }}</h1>
+            <p class="dashboard-subtitle">{{ mainSubtitle }}</p>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <div class="stat-card" *ngFor="let stat of statsOverview">
+                <div class="stat-header">
+                    <div class="stat-icon" [ngClass]="stat.colorClass">
+                        {{ stat.icon }}
+                    </div>
+
+                    <span class="stat-trend" [ngClass]="stat.trendDirection">
+                        <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                            <ng-container *ngIf="stat.trendDirection === 'up'; else downArrow">
+                                <path d="M7 14l5-5 5 5z"></path>
+                            </ng-container>
+                            <ng-template #downArrow>
+                                <path d="M7 10l5 5 5-5z"></path>
+                            </ng-template>
+                        </svg>
+                        {{ stat.trendValue }}
+                    </span>
+                </div>
+
+                <div class="stat-value">
+                    {{ stat.value }}
+                </div>
+                <div class="stat-label">
+                    {{ stat.label }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Grades Analysis Section -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <div class="card-title-group">
+                    <span class="card-title-icon">📝</span>
+                    <h2 class="card-title">Phân tích điểm số</h2>
+                </div>
+                <span class="ai-badge">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z">
+                        </path>
+                    </svg>
+                    Grades Analytics
+                </span>
+            </div>
+
+            <div class="grades-grid">
+                <!-- Grade distribution -->
+                <div class="grade-distribution-card">
+                    <h3 class="grade-section-title">Phân bố điểm theo thang 10</h3>
+
+                    <div class="grade-bars">
+                        <div class="grade-bar-item" *ngFor="let bar of gradeBars">
+                            <div class="grade-bar-label">
+                                <span class="grade-range">{{ bar.range }}</span>
+                                <span class="grade-category" [ngClass]="bar.categoryClass">
+                                    {{ bar.category }}
+                                </span>
+                            </div>
+                            <div class="grade-bar-container">
+                                <div class="grade-bar-fill" [ngClass]="{ 'danger-fill': bar.danger }"
+                                    [style.width.%]="bar.barWidth"></div>
+                                <span class="grade-bar-value">
+                                    {{ bar.count }} SV ({{ bar.percent }}%)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grade components -->
+                <div class="grade-components-card">
+                    <h3 class="grade-section-title">Điểm thành phần</h3>
+
+                    <div class="component-list">
+                        <div class="component-item" *ngFor="let comp of gradeComponents"
+                            [ngClass]="{ highlight: comp.highlight }">
+                            <div class="component-info">
+                                <div class="component-icon">
+                                    <ng-container [ngSwitch]="comp.name">
+                                        <span *ngSwitchCase="'Chuyên cần'">📋</span>
+                                        <span *ngSwitchCase="'Giữa kỳ'">📊</span>
+                                        <span *ngSwitchCase="'Cuối kỳ'">📝</span>
+                                        <span *ngSwitchDefault>⭐</span>
+                                    </ng-container>
+                                </div>
+                                <div>
+                                    <div class="component-name">
+                                        {{ comp.name }}
+                                        <ng-container *ngIf="comp.weightLabel">
+                                            ({{ comp.weightLabel }})
+                                        </ng-container>
+                                    </div>
+                                    <div class="component-desc">{{ comp.desc }}</div>
+                                </div>
+                            </div>
+
+                            <div class="component-score">
+                                <div class="component-avg" [style.color]="comp.highlight ? '#2563eb' : null">
+                                    {{ formatNumber(comp.avg) }}
+                                </div>
+                                <div class="component-trend" [ngClass]="comp.trend >= 0 ? 'positive' : 'negative'">
+                                    {{ comp.trend > 0 ? '+' : '' }}{{ comp.trend }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights for grades -->
+            <div class="insights" style="margin-top: 24px;">
+                <div class="insight" *ngFor="let insight of gradeInsights" [ngClass]="insight.type">
+                    <span class="insight-icon">{{ insight.icon }}</span>
+                    <div class="insight-text">
+                        <strong>
+                            <ng-container [ngSwitch]="insight.type">
+                                <span *ngSwitchCase="'success'">Tích cực:</span>
+                                <span *ngSwitchCase="'warning'">Cần cải thiện:</span>
+                                <span *ngSwitchCase="'info'">Mục tiêu:</span>
+                            </ng-container>
+                        </strong>
+                        {{ ' ' + insight.text }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Weekly Trends -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title-group">
+                        <span class="card-title-icon">📊</span>
+                        <h2 class="card-title">Phân tích điểm danh theo tuần</h2>
+                    </div>
+                    <span class="ai-badge">
+                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z">
+                            </path>
+                        </svg>
+                        AI Analysis
+                    </span>
+                </div>
+
+                <div class="weeks-container">
+                    <div class="week-box" *ngFor="let w of weeklyTrends">
+                        <div class="week-label">
+                            {{ w.weekLabel }}
+                        </div>
+                        <div class="week-percentage">
+                            {{ formatNumber(w.percentage) }}%
+                        </div>
+                        <span class="week-change" [ngClass]="getTrendClass(w.change)">
+                            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                                <ng-container *ngIf="w.change >= 0; else weekDown">
+                                    <path d="M7 14l5-5 5 5z"></path>
+                                </ng-container>
+                                <ng-template #weekDown>
+                                    <path d="M7 10l5 5 5-5z"></path>
+                                </ng-template>
+                            </svg>
+                            {{ formatChange(w.change) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="chart-area">
+                    <div class="chart-placeholder">
+                        <div class="chart-placeholder-icon">📈</div>
+                        <div class="chart-placeholder-text">Biểu đồ xu hướng tăng trưởng</div>
+                    </div>
+                </div>
+
+                <div class="insights">
+                    <div class="insight" *ngFor="let insight of weeklyInsights" [ngClass]="insight.type">
+                        <span class="insight-icon">{{ insight.icon }}</span>
+                        <div class="insight-text">
+                            <strong>
+                                <ng-container [ngSwitch]="insight.type">
+                                    <span *ngSwitchCase="'success'">Tích cực:</span>
+                                    <span *ngSwitchCase="'warning'">Cần duy trì:</span>
+                                    <span *ngSwitchCase="'info'">Hiệu quả cao:</span>
+                                </ng-container>
+                            </strong>
+                            {{ ' ' + insight.text }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classification -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title-group">
+                        <span class="card-title-icon">✅</span>
+                        <h2 class="card-title">Phân loại chuyên cần</h2>
+                    </div>
+                </div>
+
+                <div class="classification-list">
+                    <div class="classification-item" *ngFor="let item of classifications" [ngClass]="item.levelClass">
+                        <div class="classification-left">
+                            <span class="classification-icon">{{ item.icon }}</span>
+                            <div class="classification-info">
+                                <div class="classification-name">
+                                    {{ item.name }}
+                                </div>
+                                <div class="classification-range">
+                                    {{ item.range }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="classification-right">
+                            <div class="classification-count">
+                                {{ item.count }}
+                            </div>
+                            <div class="classification-percent">
+                                {{ item.percent }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students at Risk -->
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <div class="card-title-group">
+                    <span class="card-title-icon">🚨</span>
+                    <h2 class="card-title">Sinh viên nguy cơ cao</h2>
+                </div>
+                <span class="ai-badge">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 16h2v2h-2zm0-6h2v4h-2z"></path>
+                    </svg>
+                    Risk Alert
+                </span>
+            </div>
+
+            <div class="risk-alert">
+                <span class="risk-alert-icon">⚠️</span>
+                <div class="risk-alert-content">
+                    <div class="risk-alert-title">
+                        {{ riskAlertTitle }}
+                    </div>
+                    <div class="risk-alert-desc">
+                        {{ riskAlertDesc }}
+                    </div>
+                </div>
+                <div class="risk-alert-count">
+                    {{ riskAlertCount }}
+                </div>
+            </div>
+
+            <div class="students-grid">
+                <div class="student-item" *ngFor="let sv of studentsAtRisk">
+                    <div class="student-left">
+                        <div class="student-avatar">
+                            {{ sv.initials }}
+                        </div>
+                        <div class="student-details">
+                            <div class="student-name">
+                                {{ sv.name }}
+                            </div>
+                            <div class="student-id">
+                                {{ sv.studentId }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="student-right">
+                        <div class="student-stat">
+                            <div class="student-stat-value" [ngClass]="sv.attendanceLevel">
+                                {{ sv.attendancePercent }}%
+                            </div>
+                            <div class="student-stat-label">
+                                Điểm danh
+                            </div>
+                        </div>
+
+                        <div class="student-stat">
+                            <div class="student-stat-value" [ngClass]="sv.avgLevel">
+                                {{ formatNumber(sv.avgScore) }}
+                            </div>
+                            <div class="student-stat-label">
+                                Điểm TB
+                            </div>
+                        </div>
+
+                        <span class="risk-level" [ngClass]="sv.riskLevel">
+                            {{ sv.riskLevel === 'high' ? 'Cao' : 'TB' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>

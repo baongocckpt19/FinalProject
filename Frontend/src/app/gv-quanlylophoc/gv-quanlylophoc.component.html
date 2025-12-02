@@ -108,20 +108,14 @@
                                     <td>
                                         <div class="action-buttons">
                                             <!-- NÚT XUẤT DỮ LIỆU LỚP -->
-                                            <button class="btn-icon btn-export" title="Xuất CSV lớp này"
+                                            <button class="btn-icon btn-export" title="Xuất CSV lớp"
                                                 (click)="exportClassStudents(lop); $event.stopPropagation()">
                                                 <!-- icon download -->
                                                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                                                     <path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.84v4h4.66V9h3.84L12 2z" />
                                                 </svg>
                                             </button>
-                                            <button class="btn-icon btn-delete"
-                                                (click)="openDeleteModal();$event.stopPropagation() ">
-                                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path
-                                                        d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
-                                                </svg>
-                                            </button>
+                                          
                                         </div>
                                     </td>
                                 </tr>

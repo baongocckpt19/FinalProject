@@ -261,6 +261,17 @@ CREATE TABLE EspLog (
 );
 GO
 
+
+CREATE TABLE PasswordResetToken (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    AccountId INT NOT NULL,
+    Code NVARCHAR(20) NOT NULL,
+    ExpiryDate DATETIME2 NOT NULL,
+    IsUsed BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_PasswordResetToken_Account
+    FOREIGN KEY (AccountId) REFERENCES Account(AccountId)
+);
+
 /*======================================================
 = 2) DỮ LIỆU MẪU
 ======================================================*/
