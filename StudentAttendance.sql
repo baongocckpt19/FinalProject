@@ -1,4 +1,4 @@
-﻿/*====================================================== 
+﻿/*======================================================  
 = 0) TẠO MỚI DATABASE
 ======================================================*/
 USE master;
@@ -42,15 +42,16 @@ GO
 
 --------------------------------------------------------
 -- 1.3 BẢNG GIẢNG VIÊN
+--  BỎ Department, THÊM TeacherCode NGAY TRONG CREATE TABLE
 --------------------------------------------------------
 IF OBJECT_ID('Teacher') IS NOT NULL DROP TABLE Teacher;
 CREATE TABLE Teacher (
     TeacherId   INT IDENTITY(1,1) PRIMARY KEY,
     AccountId   INT NOT NULL FOREIGN KEY REFERENCES Account(AccountId),
+    TeacherCode NVARCHAR(50) NULL,
     FullName    NVARCHAR(100) NOT NULL,
     Email       NVARCHAR(100),
     Phone       NVARCHAR(20),
-    Department  NVARCHAR(100),
     Address     NVARCHAR(200),
     DateOfBirth DATE NULL,
     Gender      NVARCHAR(10) NULL,
@@ -60,11 +61,13 @@ GO
 
 --------------------------------------------------------
 -- 1.4 BẢNG HỌC SINH
+--  THÊM StudentCode NGAY TRONG CREATE TABLE
 --------------------------------------------------------
 IF OBJECT_ID('Student') IS NOT NULL DROP TABLE Student;
 CREATE TABLE Student (
     StudentId   INT IDENTITY(1,1) PRIMARY KEY,
     AccountId   INT NOT NULL FOREIGN KEY REFERENCES Account(AccountId),
+    StudentCode NVARCHAR(50) NULL,
     FullName    NVARCHAR(100) NOT NULL,
     Email       NVARCHAR(100),
     Phone       NVARCHAR(20),
@@ -76,19 +79,10 @@ CREATE TABLE Student (
 GO
 
 --------------------------------------------------------
--- 1.5 BẢNG VÂN TAY ĐƠN GIẢN (Fingerprint) - GIỮ LẠI
+-- *** BỎ BẢNG VÂN TAY ĐƠN GIẢN (Fingerprint) ***
+-- *** BỎ BẢNG FingerprintTemp ***
+-- (KHÔNG TẠO LẠI 2 BẢNG NÀY)
 --------------------------------------------------------
-IF OBJECT_ID('Fingerprint') IS NOT NULL DROP TABLE Fingerprint;
-CREATE TABLE Fingerprint (
-    FingerprintID INT IDENTITY(1,1) PRIMARY KEY,
-    StudentId     INT NOT NULL FOREIGN KEY REFERENCES Student(StudentId),
-    SensorSlot    INT NOT NULL
-);
-GO
-
-ALTER TABLE Fingerprint
-ADD CONSTRAINT UQ_Fingerprint_SensorSlot UNIQUE (SensorSlot);
-GO
 
 --------------------------------------------------------
 -- 1.6 BẢNG LỚP HỌC
@@ -100,7 +94,7 @@ CREATE TABLE Class (
     ClassName   NVARCHAR(100) NOT NULL,
     TeacherId   INT FOREIGN KEY REFERENCES Teacher(TeacherId),
     CreatedDate DATETIME NOT NULL DEFAULT GETDATE(),
-    Status      BIT NOT NULL DEFAULT 1, --0: HOAT DONG/1: KHONG HOAT DONG
+    Status      BIT NOT NULL DEFAULT 1, -- 1: HOẠT ĐỘNG, 0: NGỪNG
     IsDeleted   BIT NOT NULL DEFAULT 0
 );
 GO
@@ -135,6 +129,7 @@ GO
 
 --------------------------------------------------------
 -- 1.9 BẢNG ĐIỂM DANH
+--  THÊM UNIQUE NGAY TRONG CREATE TABLE
 --------------------------------------------------------
 IF OBJECT_ID('Attendance') IS NOT NULL DROP TABLE Attendance;
 CREATE TABLE Attendance (
@@ -143,12 +138,9 @@ CREATE TABLE Attendance (
     ClassId        INT NOT NULL FOREIGN KEY REFERENCES Class(ClassId),
     ScheduleId     INT NOT NULL FOREIGN KEY REFERENCES ClassSchedule(ScheduleId),
     AttendanceTime TIME NOT NULL,
-    Status         NVARCHAR(50) NOT NULL
+    Status         NVARCHAR(50) NOT NULL,
+    CONSTRAINT UQ_Attendance_Student_Schedule UNIQUE (StudentId, ScheduleId)
 );
-GO
-
-ALTER TABLE Attendance
-ADD CONSTRAINT UQ_Attendance_Student_Schedule UNIQUE (StudentId, ScheduleId);
 GO
 
 --------------------------------------------------------
@@ -179,21 +171,8 @@ CREATE TABLE Device (
 GO
 
 --------------------------------------------------------
--- 1.12 BẢNG FINGERPRINT TEMP (nếu cần)
---------------------------------------------------------
-IF OBJECT_ID('FingerprintTemp') IS NOT NULL DROP TABLE FingerprintTemp;
-GO
-
-CREATE TABLE FingerprintTemp (
-    TempId      INT IDENTITY(1,1) PRIMARY KEY,
-    SessionCode NVARCHAR(100) NOT NULL UNIQUE,
-    SensorSlot  INT NULL,
-    CreatedAt   DATETIME NOT NULL DEFAULT GETDATE()
-);
-GO
-
---------------------------------------------------------
 -- 1.13 BẢNG FINGERPRINT TEMPLATE (LƯU TEMPLATE NHỊ PHÂN)
+--  (GIỮ LẠI, KHÔNG INSERT DATA)
 --------------------------------------------------------
 IF OBJECT_ID('FingerprintTemplate') IS NOT NULL DROP TABLE FingerprintTemplate;
 GO
@@ -211,7 +190,8 @@ ON FingerprintTemplate(StudentId);
 GO
 
 --------------------------------------------------------
--- 1.14 BẢNG DEVICE - FINGERPRINT SLOT (MAP DEVICE + STUDENT + SLOT)
+-- 1.14 BẢNG DEVICE - FINGERPRINT SLOT
+--  (GIỮ LẠI, KHÔNG INSERT DATA)
 --------------------------------------------------------
 IF OBJECT_ID('DeviceFingerprintSlot') IS NOT NULL DROP TABLE DeviceFingerprintSlot;
 GO
@@ -228,6 +208,7 @@ GO
 
 --------------------------------------------------------
 -- 1.15 BẢNG FINGERPRINT ENROLL SESSION
+--  (GIỮ LẠI, KHÔNG INSERT DATA)
 --------------------------------------------------------
 IF OBJECT_ID('FingerprintEnrollSession') IS NOT NULL DROP TABLE FingerprintEnrollSession;
 GO
@@ -244,23 +225,15 @@ CREATE TABLE FingerprintEnrollSession (
 );
 GO
 
-ALTER TABLE Student ADD StudentCode NVARCHAR(50) NULL;
-ALTER TABLE Teacher ADD TeacherCode NVARCHAR(50) NULL;
+--------------------------------------------------------
+-- *** KHÔNG TẠO BẢNG EspLog ***
+--------------------------------------------------------
 
 --------------------------------------------------------
--- 1.16 BẢNG ESP LOG
+-- 1.16 BẢNG PASSWORD RESET TOKEN
 --------------------------------------------------------
-IF OBJECT_ID('EspLog') IS NOT NULL DROP TABLE EspLog;
+IF OBJECT_ID('PasswordResetToken') IS NOT NULL DROP TABLE PasswordResetToken;
 GO
-
-CREATE TABLE EspLog (
-    LogId      INT IDENTITY(1,1) PRIMARY KEY,
-    DeviceCode NVARCHAR(50) NOT NULL,
-    Message    NVARCHAR(255) NOT NULL,
-    CreatedAt  DATETIME NOT NULL DEFAULT GETDATE()
-);
-GO
-
 
 CREATE TABLE PasswordResetToken (
     Id INT IDENTITY(1,1) PRIMARY KEY,
@@ -269,8 +242,9 @@ CREATE TABLE PasswordResetToken (
     ExpiryDate DATETIME2 NOT NULL,
     IsUsed BIT NOT NULL DEFAULT 0,
     CONSTRAINT FK_PasswordResetToken_Account
-    FOREIGN KEY (AccountId) REFERENCES Account(AccountId)
+        FOREIGN KEY (AccountId) REFERENCES Account(AccountId)
 );
+GO
 
 /*======================================================
 = 2) DỮ LIỆU MẪU
@@ -285,6 +259,7 @@ GO
 
 -----------------------
 -- 2.2 ACCOUNT
+--  (ID sẽ chạy: 1 = admin, 2-7 = GV, 8-31 = SV)
 -----------------------
 INSERT INTO Account (Username, PasswordHash, RoleId, IsDeleted)
 VALUES ('admin01', 'admin123', 1, 0);   -- Admin
@@ -328,46 +303,48 @@ GO
 
 -----------------------
 -- 2.3 TEACHER
+--  THÊM TeacherCode (GV001 ... GV006)
 -----------------------
-INSERT INTO Teacher (AccountId, FullName, Email, Phone, Department, Address, DateOfBirth, Gender)
+INSERT INTO Teacher (AccountId, TeacherCode, FullName, Email, Phone, Address, DateOfBirth, Gender)
 VALUES
-(2, N'Nguyễn Văn A', 'a.nguyen@univ.edu.vn',  '0901000001', N'Công nghệ thông tin', N'Quận 1, TP.HCM', '1980-05-15', N'Nam'),
-(3, N'Lê Thị B',     'b.le@univ.edu.vn',      '0901000002', N'Khoa Toán - Tin',     N'Đống Đa, Hà Nội', '1975-11-20', N'Nữ'),
-(4, N'Phạm Quốc C',  'c.pham@univ.edu.vn',    '0901000003', N'Kỹ thuật phần mềm',   N'Thanh Xuân, Hà Nội', '1982-03-10', N'Nam'),
-(5, N'Trần Thị D',   'd.tran@univ.edu.vn',    '0901000004', N'Ngoại ngữ',           N'Hải Châu, Đà Nẵng', '1988-09-25', N'Nữ'),
-(6, N'Hoàng Minh E', 'e.hoang@univ.edu.vn',   '0901000005', N'Vật lý',              N'Ninh Kiều, Cần Thơ', '1979-01-05', N'Nam'),
-(7, N'Vũ Thị F',     'f.vu@univ.edu.vn',      '0901000006', N'Khoa học dữ liệu',    N'Thủ Đức, TP.HCM', '1985-07-30', N'Nữ');
+(2, N'GV001', N'Nguyễn Văn A', 'a.nguyen@univ.edu.vn',  '0901000001', N'Quận 1, TP.HCM',       '1980-05-15', N'Nam'),
+(3, N'GV002', N'Lê Thị B',     'b.le@univ.edu.vn',      '0901000002', N'Đống Đa, Hà Nội',      '1975-11-20', N'Nữ'),
+(4, N'GV003', N'Phạm Quốc C',  'c.pham@univ.edu.vn',    '0901000003', N'Thanh Xuân, Hà Nội',   '1982-03-10', N'Nam'),
+(5, N'GV004', N'Trần Thị D',   'd.tran@univ.edu.vn',    '0901000004', N'Hải Châu, Đà Nẵng',    '1988-09-25', N'Nữ'),
+(6, N'GV005', N'Hoàng Minh E', 'e.hoang@univ.edu.vn',   '0901000005', N'Ninh Kiều, Cần Thơ',   '1979-01-05', N'Nam'),
+(7, N'GV006', N'Vũ Thị F',     'f.vu@univ.edu.vn',      '0901000006', N'Thủ Đức, TP.HCM',      '1985-07-30', N'Nữ');
 GO
 
 -----------------------
 -- 2.4 STUDENT
+--  THÊM StudentCode (SV001 ... SV024)
 -----------------------
-INSERT INTO Student (AccountId, FullName, Email, Phone, Address, DateOfBirth, Gender)
+INSERT INTO Student (AccountId, StudentCode, FullName, Email, Phone, Address, DateOfBirth, Gender)
 VALUES
-(8,  N'Nguyễn Minh An',      'an.nguyen@student.edu.vn',     '0912000001', N'Ba Đình, Hà Nội',       '2003-03-12', N'Nam'),
-(9,  N'Trần Thị Bình',       'binh.tran@student.edu.vn',     '0912000002', N'Cầu Giấy, Hà Nội',      '2004-07-21', N'Nữ'),
-(10, N'Lê Hoàng Cường',      'cuong.le@student.edu.vn',      '0912000003', N'Hồng Bàng, Hải Phòng', '2003-10-05', N'Nam'),
-(11, N'Phạm Anh Dũng',       'dung.pham@student.edu.vn',     '0912000004', N'Hai Bà Trưng, Hà Nội', '2002-12-19', N'Nam'),
-(12, N'Đỗ Thu Hà',           'ha.do@student.edu.vn',         '0912000005', N'Tân Bình, TP.HCM',     '2004-02-08', N'Nữ'),
-(13, N'Hoàng Minh Huy',      'huy.hoang@student.edu.vn',     '0912000006', N'Thủ Đức, TP.HCM',      '2003-08-30', N'Nam'),
-(14, N'Vũ Thị Lan',          'lan.vu@student.edu.vn',        '0912000007', N'Lê Chân, Hải Phòng',   '2004-11-11', N'Nữ'),
-(15, N'Bùi Quang Long',      'long.bui@student.edu.vn',      '0912000008', N'Sơn Trà, Đà Nẵng',     '2003-06-22', N'Nam'),
-(16, N'Ngô Thị Mai',         'mai.ngo@student.edu.vn',       '0912000009', N'Liên Chiểu, Đà Nẵng',  '2003-09-02', N'Nữ'),
-(17, N'Phan Anh Khoa',       'khoa.phan@student.edu.vn',     '0912000010', N'Ninh Kiều, Cần Thơ',   '2002-05-17', N'Nam'),
-(18, N'Đặng Thị Ngọc',       'ngoc.dang@student.edu.vn',     '0912000011', N'Bình Thạnh, TP.HCM',   '2004-03-27', N'Nữ'),
-(19, N'Lý Hoàng Nam',        'nam.ly@student.edu.vn',        '0912000012', N'Thanh Khê, Đà Nẵng',   '2003-01-09', N'Nam'),
-(20, N'Nguyễn Thị Oanh',     'oanh.nguyen@student.edu.vn',   '0912000013', N'Quận 3, TP.HCM',       '2004-06-14', N'Nữ'),
-(21, N'Trương Minh Phúc',    'phuc.truong@student.edu.vn',   '0912000014', N'Quận 10, TP.HCM',      '2003-04-18', N'Nam'),
-(22, N'Đoàn Thị Quỳnh',      'quynh.doan@student.edu.vn',    '0912000015', N'Long Biên, Hà Nội',    '2004-12-01', N'Nữ'),
-(23, N'Nguyễn Đức Sơn',      'son.nguyen@student.edu.vn',    '0912000016', N'Hoàn Kiếm, Hà Nội',    '2002-09-29', N'Nam'),
-(24, N'Phạm Thị Trang',      'trang.pham@student.edu.vn',    '0912000017', N'Hồng Bàng, Hải Phòng', '2003-02-03', N'Nữ'),
-(25, N'Hoàng Anh Tuấn',      'tuan.hoang@student.edu.vn',    '0912000018', N'Thanh Xuân, Hà Nội',   '2002-07-07', N'Nam'),
-(26, N'Lê Thị Uyên',         'uyen.le@student.edu.vn',       '0912000019', N'Cẩm Lệ, Đà Nẵng',      '2004-09-15', N'Nữ'),
-(27, N'Võ Minh Việt',        'viet.vo@student.edu.vn',       '0912000020', N'Thủ Đức, TP.HCM',      '2003-11-23', N'Nam'),
-(28, N'Đinh Thị Yến',        'yen.dinh@student.edu.vn',      '0912000021', N'Ninh Kiều, Cần Thơ',   '2004-01-19', N'Nữ'),
-(29, N'Ngô Thanh Hải',       'hai.ngo@student.edu.vn',       '0912000022', N'Bình Thạnh, TP.HCM',   '2003-05-01', N'Nam'),
-(30, N'Phan Thị Giang',      'giang.phan@student.edu.vn',    '0912000023', N'Ba Đình, Hà Nội',      '2004-08-28', N'Nữ'),
-(31, N'Bùi Anh Khánh',       'khanh.bui@student.edu.vn',     '0912000024', N'Sơn Trà, Đà Nẵng',     '2003-10-30', N'Nam');
+(8,  N'SV001', N'Nguyễn Minh An',      'an.nguyen@student.edu.vn',     '0912000001', N'Ba Đình, Hà Nội',       '2003-03-12', N'Nam'),
+(9,  N'SV002', N'Trần Thị Bình',       'binh.tran@student.edu.vn',     '0912000002', N'Cầu Giấy, Hà Nội',      '2004-07-21', N'Nữ'),
+(10, N'SV003', N'Lê Hoàng Cường',      'cuong.le@student.edu.vn',      '0912000003', N'Hồng Bàng, Hải Phòng', '2003-10-05', N'Nam'),
+(11, N'SV004', N'Phạm Anh Dũng',       'dung.pham@student.edu.vn',     '0912000004', N'Hai Bà Trưng, Hà Nội', '2002-12-19', N'Nam'),
+(12, N'SV005', N'Đỗ Thu Hà',           'ha.do@student.edu.vn',         '0912000005', N'Tân Bình, TP.HCM',     '2004-02-08', N'Nữ'),
+(13, N'SV006', N'Hoàng Minh Huy',      'huy.hoang@student.edu.vn',     '0912000006', N'Thủ Đức, TP.HCM',      '2003-08-30', N'Nam'),
+(14, N'SV007', N'Vũ Thị Lan',          'lan.vu@student.edu.vn',        '0912000007', N'Lê Chân, Hải Phòng',   '2004-11-11', N'Nữ'),
+(15, N'SV008', N'Bùi Quang Long',      'long.bui@student.edu.vn',      '0912000008', N'Sơn Trà, Đà Nẵng',     '2003-06-22', N'Nam'),
+(16, N'SV009', N'Ngô Thị Mai',         'mai.ngo@student.edu.vn',       '0912000009', N'Liên Chiểu, Đà Nẵng',  '2003-09-02', N'Nữ'),
+(17, N'SV010', N'Phan Anh Khoa',       'khoa.phan@student.edu.vn',     '0912000010', N'Ninh Kiều, Cần Thơ',   '2002-05-17', N'Nam'),
+(18, N'SV011', N'Đặng Thị Ngọc',       'ngoc.dang@student.edu.vn',     '0912000011', N'Bình Thạnh, TP.HCM',   '2004-03-27', N'Nữ'),
+(19, N'SV012', N'Lý Hoàng Nam',        'nam.ly@student.edu.vn',        '0912000012', N'Thanh Khê, Đà Nẵng',   '2003-01-09', N'Nam'),
+(20, N'SV013', N'Nguyễn Thị Oanh',     'oanh.nguyen@student.edu.vn',   '0912000013', N'Quận 3, TP.HCM',       '2004-06-14', N'Nữ'),
+(21, N'SV014', N'Trương Minh Phúc',    'phuc.truong@student.edu.vn',   '0912000014', N'Quận 10, TP.HCM',      '2003-04-18', N'Nam'),
+(22, N'SV015', N'Đoàn Thị Quỳnh',      'quynh.doan@student.edu.vn',    '0912000015', N'Long Biên, Hà Nội',    '2004-12-01', N'Nữ'),
+(23, N'SV016', N'Nguyễn Đức Sơn',      'son.nguyen@student.edu.vn',    '0912000016', N'Hoàn Kiếm, Hà Nội',    '2002-09-29', N'Nam'),
+(24, N'SV017', N'Phạm Thị Trang',      'trang.pham@student.edu.vn',    '0912000017', N'Hồng Bàng, Hải Phòng', '2003-02-03', N'Nữ'),
+(25, N'SV018', N'Hoàng Anh Tuấn',      'tuan.hoang@student.edu.vn',    '0912000018', N'Thanh Xuân, Hà Nội',   '2002-07-07', N'Nam'),
+(26, N'SV019', N'Lê Thị Uyên',         'uyen.le@student.edu.vn',       '0912000019', N'Cẩm Lệ, Đà Nẵng',      '2004-09-15', N'Nữ'),
+(27, N'SV020', N'Võ Minh Việt',        'viet.vo@student.edu.vn',       '0912000020', N'Thủ Đức, TP.HCM',      '2003-11-23', N'Nam'),
+(28, N'SV021', N'Đinh Thị Yến',        'yen.dinh@student.edu.vn',      '0912000021', N'Ninh Kiều, Cần Thơ',   '2004-01-19', N'Nữ'),
+(29, N'SV022', N'Ngô Thanh Hải',       'hai.ngo@student.edu.vn',       '0912000022', N'Bình Thạnh, TP.HCM',   '2003-05-01', N'Nam'),
+(30, N'SV023', N'Phan Thị Giang',      'giang.phan@student.edu.vn',    '0912000023', N'Ba Đình, Hà Nội',      '2004-08-28', N'Nữ'),
+(31, N'SV024', N'Bùi Anh Khánh',       'khanh.bui@student.edu.vn',     '0912000024', N'Sơn Trà, Đà Nẵng',     '2003-10-30', N'Nam');
 GO
 
 -----------------------
@@ -442,26 +419,8 @@ VALUES
 GO
 
 -----------------------
--- 2.8 FINGERPRINT SAMPLE (GIỮ LẠI)
+-- *** 2.8: KHÔNG CÒN FINGERPRINT SAMPLE (ĐÃ BỎ BẢNG Fingerprint) ***
 -----------------------
-INSERT INTO Fingerprint (StudentId, SensorSlot)
-VALUES
-(1,  1),
-(2,  2),
-(3,  3),
-(4,  4),
-(5,  5),
-(6,  6),
-(7,  7),
-(8,  8),
-(10, 10),
-(12, 12),
-(15, 15),
-(18, 18),
-(20, 20),
-(22, 22),
-(24, 24);
-GO
 
 -----------------------
 -- 2.9 ATTENDANCE SAMPLE
@@ -577,7 +536,7 @@ VALUES
 GO
 
 -----------------------
--- 2.11 DEVICE SAMPLE (để ESP chạy được)
+-- 2.11 DEVICE SAMPLE (GIỮ NGUYÊN DỮ LIỆU CŨ)
 -----------------------
 INSERT INTO Device (DeviceCode, DeviceName, Room, IsActive)
 VALUES 
