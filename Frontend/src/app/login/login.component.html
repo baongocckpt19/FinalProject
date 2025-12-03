@@ -45,11 +45,6 @@
                         </div>
 
                         <div class="form-options">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="rememberMe" class="checkbox" name="rememberMe"
-                                    [(ngModel)]="rememberMe">
-                                <label for="rememberMe" class="checkbox-label">Ghi nhớ đăng nhập</label>
-                            </div>
                             <a href="#" class="forgot-link" (click)="openForgotPassword(); $event.preventDefault()">
                                 Quên mật khẩu?
                             </a>
@@ -66,7 +61,7 @@
                         <a class="switch-link" (click)="switchToSignup(); $event.preventDefault()">Đăng ký ngay</a>
                     </div>
                 </div>
-                <!-- singup form -->
+               
                 <!-- singup form -->
                 <div id="signupForm" class="form-wrapper signup-form">
                     <h1 class="form-title">Tạo tài khoản mới</h1>
@@ -147,15 +142,6 @@
                             </div>
                         </div>
 
-                        <div class="form-options">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="agreeTerms" class="checkbox" name="agreeTerms"
-                                    [(ngModel)]="agreeTerms" />
-                                <label for="agreeTerms" class="checkbox-label">
-                                    Tôi đồng ý với điều khoản sử dụng và chính sách bảo mật
-                                </label>
-                            </div>
-                        </div>
 
                         <button type="submit" class="submit-btn">Tạo tài khoản</button>
                     </form>
@@ -172,7 +158,7 @@
             </div>
         </div>
         <!-- ========== FORGOT PASSWORD OVERLAY ========== -->
-        <div class="forgot-overlay" *ngIf="isForgotMode">
+        <div class="forgot-overlay " *ngIf="isForgotMode">
             <div class="forgot-card">
                 <button type="button" class="forgot-close" (click)="closeForgotPassword()">
                     &times;
@@ -202,7 +188,7 @@
 
                 <!-- Bước 2: Nhập code + mật khẩu mới -->
                 <form *ngIf="forgotStep === 2" (ngSubmit)="submitResetPassword()">
-                    <div class="form-group">
+                    <div class="form-group ">
                         <label class="form-label">Mã xác nhận</label>
                         <input class="form-input" placeholder="Nhập mã được gửi qua email" [(ngModel)]="resetCode"
                             name="resetCode" required>
