@@ -28,13 +28,14 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
         CONVERT(varchar(19), c.CreatedDate, 120) AS CreatedDate, -- 5
         c.Status,                                           -- 6
         (
-            SELECT COUNT(DISTINCT s.StudentId)
-            FROM StudentClass sc
-            JOIN Student s ON sc.StudentId = s.StudentId
-            JOIN Fingerprint f ON f.StudentId = s.StudentId
-            WHERE sc.ClassId = c.ClassId
-              AND sc.IsDeleted = 0                          -- 👈 CHỈ ĐẾM SV CÒN TRONG LỚP
-        ) AS FingerprintedCount                             -- 7
+                    SELECT COUNT(DISTINCT s.StudentId)
+                    FROM StudentClass sc
+                    JOIN Student s ON sc.StudentId = s.StudentId
+                    JOIN DeviceFingerprintSlot dfs ON dfs.StudentId = s.StudentId
+                    WHERE sc.ClassId = c.ClassId
+                      AND sc.IsDeleted = 0
+                ) AS FingerprintedCount
+                                            -- 7
     FROM Class c
     LEFT JOIN Teacher t ON t.TeacherId = c.TeacherId
     WHERE c.IsDeleted = 0
@@ -50,17 +51,18 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
         s.FullName,                            -- 2
         a.Username,                            -- 3
         s.Email,                               -- 4
-        COUNT(f.FingerprintID) AS FingerCount  -- 5
+        COUNT(dfs.SensorSlot) AS FingerCount   -- 5 👈 SỐ SLOT VÂN TAY
     FROM StudentClass sc
     JOIN Student s ON sc.StudentId = s.StudentId
     JOIN Account a ON s.AccountId = a.AccountId
-    LEFT JOIN Fingerprint f ON f.StudentId = s.StudentId
+    LEFT JOIN DeviceFingerprintSlot dfs ON dfs.StudentId = s.StudentId
     WHERE sc.ClassId = ?1
       AND sc.IsDeleted = 0
     GROUP BY s.StudentId, s.StudentCode, s.FullName, a.Username, s.Email
     ORDER BY s.StudentId
     """, nativeQuery = true)
     List<Object[]> findStudentsForClassModal(int classId);
+
 
 
 
@@ -101,11 +103,11 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
         s.Address,                                                -- 6
         s.Email,                                                  -- 7
         s.Phone,                                                  -- 8
-        ISNULL(COUNT(f.FingerprintID), 0) AS FingerCount          -- 9
+        ISNULL(COUNT(dfs.SensorSlot), 0) AS FingerCount           -- 9 👈 SỐ SLOT
     FROM StudentClass sc
     JOIN Student s ON sc.StudentId = s.StudentId
     JOIN Account a ON s.AccountId = a.AccountId
-    LEFT JOIN Fingerprint f ON f.StudentId = s.StudentId
+    LEFT JOIN DeviceFingerprintSlot dfs ON dfs.StudentId = s.StudentId
     WHERE sc.ClassId = ?1
       AND sc.IsDeleted = 0
     GROUP BY 
@@ -121,6 +123,7 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
     ORDER BY s.StudentId
     """, nativeQuery = true)
     List<Object[]> findStudentsByClassId(int classId);
+
 
 
     // ====== 6) CHI TIẾT LỚP (MODAL EDIT) ======
@@ -261,10 +264,10 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
             SELECT COUNT(DISTINCT s.StudentId)
             FROM StudentClass sc
             JOIN Student s ON sc.StudentId = s.StudentId
-            JOIN Fingerprint f ON f.StudentId = s.StudentId
+            JOIN DeviceFingerprintSlot dfs ON dfs.StudentId = s.StudentId
             WHERE sc.ClassId = c.ClassId
               AND sc.IsDeleted = 0
-        ) AS FingerprintedCount                             -- 7
+        ) AS FingerprintedCount                             -- 7 👈 ĐÃ ĐỔI
     FROM Class c
     LEFT JOIN Teacher t ON t.TeacherId = c.TeacherId
     WHERE c.IsDeleted = 0
@@ -272,10 +275,6 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
     ORDER BY c.ClassId
     """, nativeQuery = true)
     List<Object[]> findClassTableForTeacher(int teacherId);
-
-
-
-
 
 
 }
