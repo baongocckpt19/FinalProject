@@ -33,9 +33,15 @@
                   <span class="ai-class-semester">HK1 / Năm học 2024-2025</span>
                 </div>
 
-                <div class="ai-badge ai-badge-low">
+                <div class="ai-badge" [ngClass]="{
+                    'ai-badge-low': (analysis?.overallStatistics?.attendanceRate ?? 0) >= 85,
+                    'ai-badge-medium': (analysis?.overallStatistics?.attendanceRate ?? 0) >= 70 && (analysis?.overallStatistics?.attendanceRate ?? 0) < 85,
+                    'ai-badge-high': (analysis?.overallStatistics?.attendanceRate ?? 0) < 70
+                  }">
                   <span class="ai-badge-label">Mức rủi ro tổng thể</span>
-                  <span class="ai-badge-value">LOW</span>
+                  <span class="ai-badge-value">
+                    {{ (analysis?.overallStatistics?.attendanceRate ?? 0) >= 85 ? 'LOW' : ((analysis?.overallStatistics?.attendanceRate ?? 0) >= 70 ? 'MEDIUM' : 'HIGH') }}
+                  </span>
                 </div>
               </div>
             </div>
@@ -53,16 +59,15 @@
                       </svg>
                       Tóm tắt tình hình chuyên cần
                     </div>
-                    <div class="ai-summary-text">
-                      Trong 4 tuần gần đây, lớp duy trì tỉ lệ đi học khá tốt, dao động quanh
-                      <span class="ai-highlight-number">90%</span>. Tuy nhiên, tỉ lệ vắng có xu hướng
-                      tăng nhẹ ở 2 tuần gần nhất, đặc biệt vào các buổi sáng đầu tuần.
+                    <div class="ai-summary-text" *ngIf="analysis as a">
+                      Trong {{ a.weeklyTrend?.length || 0 }} tuần gần đây, lớp duy trì tỉ lệ đi học trung bình
+                      <span class="ai-highlight-number">{{ a.overallStatistics?.attendanceRate | number:'1.0-1' }}%</span>.
                     </div>
 
                     <div class="ai-summary-tags">
-                      <span class="ai-tag ai-tag-good">Tỉ lệ đi học ổn</span>
-                      <span class="ai-tag ai-tag-warning">Xu hướng vắng tăng nhẹ</span>
-                      <span class="ai-tag ai-tag-focus">Cần theo dõi thêm 2 tuần tới</span>
+                      <span class="ai-tag ai-tag-good" *ngIf="(analysis?.overallStatistics?.attendanceRate ?? 0) >= 85">Tỉ lệ đi học ổn</span>
+                      <span class="ai-tag ai-tag-warning" *ngIf="(analysis?.overallStatistics?.attendanceRate ?? 0) >= 70 && (analysis?.overallStatistics?.attendanceRate ?? 0) < 85">Cần chú ý</span>
+                      <span class="ai-tag ai-tag-critical" *ngIf="(analysis?.overallStatistics?.attendanceRate ?? 0) < 70">Rủi ro cao</span>
                     </div>
                   </section>
 
@@ -76,25 +81,15 @@
                       </svg>
                       Điểm nổi bật từ dữ liệu
                     </div>
-                    <ul class="ai-highlight-list">
+                    <ul class="ai-highlight-list" *ngIf="analysis as a">
                       <li>
                         <span class="dot"></span>
-                        Tỉ lệ đi học trung bình toàn lớp trong 4 tuần gần đây đạt
-                        <strong>90,2%</strong>.
+                        Tỉ lệ đi học trung bình toàn lớp trong {{ a.weeklyTrend?.length || 0 }} tuần gần đây đạt
+                        <strong>{{ a.overallStatistics?.attendanceRate | number:'1.0-1' }}%</strong>.
                       </li>
-                      <li>
+                      <li *ngIf="a.overallStatistics">
                         <span class="dot"></span>
-                        Tuần gần nhất, tỉ lệ vắng tăng từ <strong>6,5%</strong> lên
-                        <strong>9,1%</strong>, chủ yếu tập trung ở ca sáng thứ 2.
-                      </li>
-                      <li>
-                        <span class="dot"></span>
-                        Có <strong>3 sinh viên</strong> vắng từ <strong>3 buổi liên tiếp</strong>
-                        trở lên.
-                      </li>
-                      <li>
-                        <span class="dot"></span>
-                        Nhóm sinh viên nguy cơ cao chủ yếu thuộc các bạn ở xa trường hoặc thường xuyên đi làm thêm.
+                        Tổng số bản ghi: <strong>{{ a.overallStatistics.totalRecords }}</strong>, Vắng: <strong>{{ a.overallStatistics.absentCount }}</strong>, Đi muộn: <strong>{{ a.overallStatistics.lateCount }}</strong>.
                       </li>
                     </ul>
                   </section>
@@ -110,33 +105,10 @@
                       </svg>
                       Gợi ý hành động cho giảng viên
                     </div>
-                    <div class="ai-recommendations">
-                      <div class="ai-recommendation-card">
-                        <div class="ai-recommendation-title">
-                          ✔ Nhắc nhẹ trong đầu buổi học
-                        </div>
-                        <div class="ai-recommendation-text">
-                          Dành 1–2 phút đầu buổi để nhắc lại quy định chuyên cần, đồng thời
-                          ghi nhận các bạn có tiến bộ về mặt đi học đầy đủ.
-                        </div>
-                      </div>
-                      <div class="ai-recommendation-card">
-                        <div class="ai-recommendation-title">
-                          ✔ Liên hệ sớm với sinh viên vắng nhiều
-                        </div>
-                        <div class="ai-recommendation-text">
-                          Gửi email hoặc trao đổi riêng với nhóm 3 sinh viên vắng nhiều để tìm
-                          hiểu lý do và thống nhất kế hoạch cải thiện.
-                        </div>
-                      </div>
-                      <div class="ai-recommendation-card">
-                        <div class="ai-recommendation-title">
-                          ✔ Kết hợp điểm chuyên cần linh hoạt
-                        </div>
-                        <div class="ai-recommendation-text">
-                          Cân nhắc cộng điểm khuyến khích cho những tuần đi học đầy đủ, giúp
-                          sinh viên có thêm động lực duy trì chuyên cần.
-                        </div>
+                    <div class="ai-recommendations" *ngIf="analysis?.recommendations as recs">
+                      <div class="ai-recommendation-card" *ngFor="let r of recs">
+                        <div class="ai-recommendation-title">✔ Khuyến nghị</div>
+                        <div class="ai-recommendation-text">{{ r }}</div>
                       </div>
                     </div>
                   </section>
@@ -153,28 +125,28 @@
                       Tổng quan chuyên cần
                     </div>
                     <div class="ai-stat-grid">
-                      <div class="ai-stat-card">
+                      <div class="ai-stat-card" *ngIf="analysis as a">
                         <div class="ai-stat-label">Số tuần phân tích</div>
-                        <div class="ai-stat-value">4 tuần</div>
+                        <div class="ai-stat-value">{{ a.weeklyTrend?.length || 0 }} tuần</div>
                         <div class="ai-stat-hint">Tính từ tuần hiện tại trở về trước</div>
                       </div>
                       <div class="ai-stat-card">
                         <div class="ai-stat-label">Tỉ lệ đi học trung bình</div>
-                        <div class="ai-stat-value ai-stat-good">90,2%</div>
+                        <div class="ai-stat-value ai-stat-good">{{ analysis?.overallStatistics?.attendanceRate | number:'1.0-1' }}%</div>
                         <div class="ai-stat-bar">
-                          <div class="ai-stat-bar-fill good" style="width: 90%;"></div>
+                          <div class="ai-stat-bar-fill good" [style.width.%]="analysis?.overallStatistics?.attendanceRate || 0"></div>
                         </div>
                       </div>
                       <div class="ai-stat-card">
                         <div class="ai-stat-label">Tỉ lệ vắng trung bình</div>
-                        <div class="ai-stat-value ai-stat-warning">7,3%</div>
+                        <div class="ai-stat-value ai-stat-warning">{{ ((analysis?.overallStatistics?.absentCount || 0) / (analysis?.overallStatistics?.totalRecords || 1)) * 100 | number:'1.0-1' }}%</div>
                         <div class="ai-stat-bar">
-                          <div class="ai-stat-bar-fill warning" style="width: 30%;"></div>
+                          <div class="ai-stat-bar-fill warning" [style.width.%]="((analysis?.overallStatistics?.absentCount || 0) / (analysis?.overallStatistics?.totalRecords || 1)) * 100"></div>
                         </div>
                       </div>
                       <div class="ai-stat-card">
                         <div class="ai-stat-label">Sinh viên nguy cơ cao</div>
-                        <div class="ai-stat-value ai-stat-critical">3</div>
+                        <div class="ai-stat-value ai-stat-critical">{{ analysis?.highRiskStudents?.length || 0 }}</div>
                         <div class="ai-stat-hint">Vắng ≥ 3 buổi hoặc vắng liên tiếp</div>
                       </div>
                     </div>
@@ -188,34 +160,13 @@
                       </svg>
                       Xu hướng vắng theo tuần
                     </div>
-                    <div class="ai-weeks-timeline">
-                      <div class="ai-week-row">
-                        <div class="ai-week-label">Tuần hiện tại</div>
+                    <div class="ai-weeks-timeline" *ngIf="analysis?.weeklyTrend as weeks">
+                      <div class="ai-week-row" *ngFor="let w of weeks; let i = index">
+                        <div class="ai-week-label">Tuần {{ i === 0 ? 'hiện tại' : '-' + i }}</div>
                         <div class="ai-week-bar">
-                          <div class="ai-week-bar-fill warning" style="width: 40%;"></div>
+                          <div class="ai-week-bar-fill warning" [style.width.%]="((w.absent || 0) / ((w.present || 0) + (w.absent || 0) + (w.late || 0) || 1)) * 100"></div>
                         </div>
-                        <div class="ai-week-value">9,1% vắng</div>
-                      </div>
-                      <div class="ai-week-row">
-                        <div class="ai-week-label">Tuần -1</div>
-                        <div class="ai-week-bar">
-                          <div class="ai-week-bar-fill good" style="width: 25%;"></div>
-                        </div>
-                        <div class="ai-week-value">6,5% vắng</div>
-                      </div>
-                      <div class="ai-week-row">
-                        <div class="ai-week-label">Tuần -2</div>
-                        <div class="ai-week-bar">
-                          <div class="ai-week-bar-fill good" style="width: 20%;"></div>
-                        </div>
-                        <div class="ai-week-value">5,2% vắng</div>
-                      </div>
-                      <div class="ai-week-row">
-                        <div class="ai-week-label">Tuần -3</div>
-                        <div class="ai-week-bar">
-                          <div class="ai-week-bar-fill good" style="width: 18%;"></div>
-                        </div>
-                        <div class="ai-week-value">4,8% vắng</div>
+                        <div class="ai-week-value">{{ ((w.absent || 0) / ((w.present || 0) + (w.absent || 0) + (w.late || 0) || 1)) * 100 | number:'1.0-1' }}% vắng</div>
                       </div>
                     </div>
                   </section>
@@ -231,7 +182,7 @@
                       Danh sách sinh viên nguy cơ cao
                     </div>
                     <div class="ai-risk-table-wrapper">
-                      <table class="ai-risk-table">
+                      <table class="ai-risk-table" *ngIf="analysis as a">
                         <thead>
                           <tr>
                             <th>MSSV</th>
@@ -242,26 +193,20 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>SV00123</td>
-                            <td>Nguyễn Văn A</td>
-                            <td>4 buổi</td>
-                            <td>3 buổi</td>
-                            <td><span class="ai-risk-chip high">HIGH</span></td>
-                          </tr>
-                          <tr>
-                            <td>SV00456</td>
-                            <td>Trần Thị B</td>
-                            <td>3 buổi</td>
-                            <td>2 buổi</td>
-                            <td><span class="ai-risk-chip medium">MEDIUM</span></td>
-                          </tr>
-                          <tr>
-                            <td>SV00789</td>
-                            <td>Lê Văn C</td>
-                            <td>3 buổi</td>
-                            <td>1 buổi</td>
-                            <td><span class="ai-risk-chip medium">MEDIUM</span></td>
+                          <tr *ngFor="let s of a.highRiskStudents">
+                            <td>{{ s.studentCode }}</td>
+                            <td>{{ s.fullName }}</td>
+                            <td>{{ s.absentCount }} buổi</td>
+                            <td><!-- không có trường vắng liên tiếp trong payload; để trống hoặc tính thêm --></td>
+                            <td>
+                              <span class="ai-risk-chip" [ngClass]="{
+                                'high': (s.riskScore || 0) >= 70,
+                                'medium': (s.riskScore || 0) >= 40 && (s.riskScore || 0) < 70,
+                                'low': (s.riskScore || 0) < 40
+                              }">
+                                {{ (s.riskScore || 0) >= 70 ? 'HIGH' : ((s.riskScore || 0) >= 40 ? 'MEDIUM' : 'LOW') }}
+                              </span>
+                            </td>
                           </tr>
                         </tbody>
                       </table>
@@ -275,11 +220,9 @@
               </div>
 
               <!-- Ghi chú nguồn dữ liệu -->
-              <div class="ai-footer-note">
-                🔍 <strong>Lưu ý:</strong> Đây là giao diện demo sử dụng dữ liệu tĩnh. Khi tích hợp
-                thực tế, số liệu sẽ được lấy từ bảng Attendance, ClassSchedule, Student, v.v. và phần
-                nhận xét sẽ được sinh bởi AI (Gemini) dựa trên dữ liệu thực.
-              </div>
+              <div class="ai-footer-note" *ngIf="loading">Đang tải phân tích AI…</div>
+              <div class="ai-footer-note" *ngIf="error">{{ error }}</div>
+              <div class="ai-footer-note" *ngIf="!loading && !error && !analysis">Chưa có dữ liệu phân tích.</div>
             </div>
           </div>
         </div>

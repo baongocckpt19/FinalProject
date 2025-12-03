@@ -79,4 +79,8 @@ export class AttendanceService {
       `${this.apiUrl}/class/${classId}/student/${studentId}/history`
     );
   }
+
+  analyticsAttendance(classId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/analyze/${classId}`);
+  }
 }
