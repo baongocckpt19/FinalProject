@@ -64,8 +64,6 @@ public interface ClassRepository extends JpaRepository<Clazz, Integer> {
     List<Object[]> findStudentsForClassModal(int classId);
 
 
-
-
     // ====== 3) SOFT DELETE CLASS ======
     @Modifying
     @Query(value = "UPDATE Class SET IsDeleted = 1 WHERE ClassId = ?1", nativeQuery = true)

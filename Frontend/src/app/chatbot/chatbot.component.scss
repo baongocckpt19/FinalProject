@@ -1,13 +1,93 @@
-/* ====== AI CLASS REVIEW – BỔ SUNG ====== */
+/* =========================
+   GLOBAL & LAYOUT
+   ========================= */
 
-.ai-class-review-layout {
-  /* dùng lại layout content-panel, chỉ tinh chỉnh nếu cần */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-/* Panel AI chỉnh nhẹ header */
-.ai-panel-header {
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f8fafc;
+  color: #1e293b;
+  line-height: 1.6;
+}
+
+/* 
+  Khu vực nội dung chính của app.
+  CÁCH LỀ TRÁI 280px để chừa khoảng cho sidebar bên trái.
+*/
+.app-container {
+  margin-left: 280px;
+  padding: 24px 32px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  width: 100%;
+}
+
+.content-panel {
+  flex: 1;
+  width: 100%;
+}
+
+/* Nếu sau này bạn reuse page-view cho nhiều view: giữ class này cũng được */
+.page-view {
+  width: 100%;
+}
+
+/* =========================
+   MAIN PANEL (CARD LỚN)
+   ========================= */
+
+.main-panel {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
   align-items: flex-start;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.panel-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.panel-body {
+  padding: 20px 24px 22px;
+}
+
+/* =========================
+   HEADER AI
+   ========================= */
+
+.ai-panel-header {
   flex-wrap: wrap;
 }
 
@@ -17,13 +97,47 @@
   margin-top: 6px;
 }
 
-/* Meta trên header */
+/* Khối bên phải header: chọn lớp + tag lớp + badge rủi ro */
 .ai-header-meta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
+
+/* ----- BỘ CHỌN LỚP (CÓ THỂ XOÁ NẾU KHÔNG DÙNG) ----- */
+.ai-class-select-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.ai-class-select-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.ai-class-select {
+  min-width: 220px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  font-size: 13px;
+  font-weight: 500;
+  background: #ffffff;
+  color: #0f172a;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+}
+/* ----- HẾT PHẦN CHỌN LỚP (XOÁ TỪ ĐÂY TRỞ LÊN NẾU KHÔNG CẦN) ----- */
 
 .ai-class-tag {
   font-size: 13px;
@@ -48,7 +162,7 @@
   background: #cbd5f5;
 }
 
-/* Badge rủi ro */
+/* Badge rủi ro tổng thể */
 .ai-badge {
   display: inline-flex;
   align-items: center;
@@ -84,14 +198,17 @@
   color: #b91c1c;
 }
 
-/* Body layout */
+/* =========================
+   GRID NỘI DUNG
+   ========================= */
+
 .ai-panel-body {
-  padding-top: 22px;
+  padding-top: 18px;
 }
 
 .ai-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.1fr);
   gap: 24px;
   align-items: flex-start;
 }
@@ -100,24 +217,47 @@
 .ai-side-column {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
-/* Section chung cho AI */
+/* =========================
+   SECTION CHUNG (FORM-SECTION)
+   ========================= */
+
+.form-section {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 18px 18px 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.form-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  svg {
+    color: #3b82f6;
+  }
+}
+
 .ai-section {
   background: #f8fafc;
 }
 
-.ai-section-title svg {
-  color: #3b82f6;
-}
+/* =========================
+   SUMMARY
+   ========================= */
 
-/* Summary */
 .ai-summary-text {
   font-size: 14px;
   color: #0f172a;
   line-height: 1.6;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .ai-highlight-number {
@@ -157,7 +297,10 @@
   border-color: #bfdbfe;
 }
 
-/* Highlights list */
+/* =========================
+   HIGHLIGHTS LIST
+   ========================= */
+
 .ai-highlight-list {
   list-style: none;
   margin: 0;
@@ -184,7 +327,10 @@
   background: #3b82f6;
 }
 
-/* Recommendations */
+/* =========================
+   RECOMMENDATIONS
+   ========================= */
+
 .ai-recommendations {
   display: flex;
   flex-direction: column;
@@ -194,7 +340,7 @@
 .ai-recommendation-card {
   background: #ffffff;
   border-radius: 10px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border: 1px solid #e2e8f0;
 }
 
@@ -210,11 +356,14 @@
   color: #475569;
 }
 
-/* Stats grid */
+/* =========================
+   STATS TỔNG QUAN
+   ========================= */
+
 .ai-stat-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 10px;
 }
 
 .ai-stat-card {
@@ -225,7 +374,7 @@
 }
 
 .ai-stat-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #64748b;
   text-transform: uppercase;
@@ -282,7 +431,10 @@
   background: #f97373;
 }
 
-/* Weekly timeline */
+/* =========================
+   WEEKLY TIMELINE
+   ========================= */
+
 .ai-weeks-timeline {
   display: flex;
   flex-direction: column;
@@ -326,7 +478,10 @@
   color: #0f172a;
 }
 
-/* Risk table */
+/* =========================
+   RISK TABLE
+   ========================= */
+
 .ai-risk-table-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -382,7 +537,10 @@
   margin-top: 6px;
 }
 
-/* Footer note */
+/* =========================
+   FOOTER NOTE
+   ========================= */
+
 .ai-footer-note {
   margin-top: 16px;
   font-size: 12px;
@@ -392,7 +550,10 @@
   padding: 10px 12px;
 }
 
-/* Responsive */
+/* =========================
+   RESPONSIVE
+   ========================= */
+
 @media (max-width: 1200px) {
   .ai-grid {
     grid-template-columns: 1fr;
@@ -401,9 +562,23 @@
   .ai-header-meta {
     align-items: flex-start;
   }
+
+  .main-panel {
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
+  .app-container {
+    margin-left: 0; /* Nếu mobile không dùng sidebar thì có thể trả về full-width */
+    padding: 16px;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .ai-header-meta {
     width: 100%;
     align-items: flex-start;
