@@ -134,5 +134,14 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Integer>
     """, nativeQuery = true)
     List<Object[]> summarizeAttendanceByStudent(@Param("studentId") Integer studentId);
 
-
+    @Query(value = """
+        SELECT s.studentCode, s.fullName,  cs.scheduleDate, cs.startTime, cs.endTime, a.status
+        FROM Attendance a
+        JOIN Student s ON a.studentId = s.studentId
+        JOIN Class c ON a.classId = c.classId
+        JOIN ClassSchedule cs ON a.scheduleId = cs.scheduleId
+        WHERE cs.scheduleDate >= DATEADD(DAY, -28, GETDATE()) AND c.classId = :classId
+        ORDER BY s.studentCode, cs.scheduleDate
+    """, nativeQuery = true)
+    List<Object[]> findRecentAttendance(@Param("classId") Integer classId);
 }
