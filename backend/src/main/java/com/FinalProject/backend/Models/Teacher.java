@@ -15,7 +15,6 @@ public class Teacher {
     @Column(name = "TeacherId")
     private Integer teacherId;
 
-    //thm mới cột TeacherCode thể hiện đây là mã số của giáo viên
     @Column(name = "TeacherCode")
     private String teacherCode;
 
@@ -30,9 +29,6 @@ public class Teacher {
 
     @Column(name = "Phone", length = 20)
     private String phone;
-
-    @Column(name = "Department", length = 100)
-    private String department;
 
     @Column(name = "Address", length = 200)
     private String address;
