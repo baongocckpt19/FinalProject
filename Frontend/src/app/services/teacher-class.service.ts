@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 })
 export class TeacherClassService {
   private apiUrl = 'http://localhost:8080/api/teacher-classes';
-  private classApiUrl = 'http://localhost:8080/api/classes'; // <-- thêm dòng này
+  private classApiUrl = 'http://localhost:8080/api/classes'; 
 
   constructor(private http: HttpClient) { }
 
@@ -43,7 +43,7 @@ export class TeacherClassService {
     {
       headers,
       params: { status },
-      responseType: 'text'   // 👈 bảo Angular: đừng parse JSON, nhận plain text
+      responseType: 'text'   
     }
   );
 }

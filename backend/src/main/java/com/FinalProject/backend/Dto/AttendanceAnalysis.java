@@ -1,54 +1,66 @@
+//đây là AttendanceAnalysis.java
 package com.FinalProject.backend.Dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import java.util.List;
 
+@Data // 🟢 Thêm Data cho class cha
 public class AttendanceAnalysis {
 
     @JsonProperty("overallStatistics")
-    public Stats stats;
+    private Stats stats; // Nên để private
 
     @JsonProperty("highRiskStudents")
-    public List<RiskStudent> riskStudents;
+    private List<RiskStudent> riskStudents;
 
-    public List<WeeklyTrend> weeklyTrend;
-    public List<PerStudent> perStudent;
-    public List<String> recommendations;
+    @JsonProperty("weeklyTrend") // Map chính xác tên field JSON
+    private List<WeeklyTrend> weeklyTrend;
 
+    @JsonProperty("perStudent")
+    private List<PerStudent> perStudent;
+
+    @JsonProperty("recommendations")
+    private List<String> recommendations;
+
+    @Data // 🟢 Thêm Data cho các class con
     public static class Stats {
-        public int totalRecords;
-        public int presentCount;
-        public int absentCount;
-        public int lateCount;
-        public int onLeaveCount;
-        public double attendanceRate;
+        private int totalRecords;
+        private int presentCount;
+        private int absentCount;
+        private int lateCount;
+        private int onLeaveCount;
+        private double attendanceRate;
     }
 
+    @Data
     public static class RiskStudent {
-        public String studentCode;
-        public String fullName;
-        public int absentCount;
-        public int lateCount;
-        public double riskScore;
-        public String riskReason;
+        private String studentCode;
+        private String fullName;
+        private int absentCount;
+        private int lateCount;
+        private double riskScore;
+        private String riskReason;
     }
 
+    @Data
     public static class WeeklyTrend {
-        public String weekStart;
-        public String weekEnd;
-        public int present;
-        public int absent;
-        public int late;
+        private String weekStart;
+        private String weekEnd;
+        private int present;
+        private int absent;
+        private int late;
     }
 
+    @Data
     public static class PerStudent {
-        public String studentCode;
-        public String fullName;
-        public int presentCount;  // đổi từ present
-        public int absentCount;   // đổi từ absent
-        public int lateCount;     // đổi từ late
-        public int onLeaveCount;  // đổi từ onLeave
-        public int totalSessions; // thêm mới
-        public double attendanceRate;
+        private String studentCode;
+        private String fullName;
+        private int presentCount;
+        private int absentCount;
+        private int lateCount;
+        private int onLeaveCount;
+        private int totalSessions;
+        private double attendanceRate;
     }
 }

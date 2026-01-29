@@ -17,11 +17,11 @@
   ========================*/
 
 // WiFi
-const char *WIFI_SSID = "Ngoi Nha Chung";
-const char *WIFI_PASSWORD = "123456798";
+const char *WIFI_SSID = "baongocneee";
+const char *WIFI_PASSWORD = "040612@@";
 
 // API backend
-const char *API_URL = "http://192.168.1.60:8080/api/fingerprint/verify";  // ĐỔI IP SERVER
+const char *API_URL = "http://172.20.10.2:8080/api/fingerprint/verify";  // ĐỔI IP SERVER
 const char *DEVICE_CODE = "ESP_ROOM_LAB1";                                // phải trùng DeviceCode trong DB
 
 // Chân UART2 cho AS608 trên ESP32
@@ -81,7 +81,7 @@ void showLcdMessage(const String &line1, const String &line2 = "") {
 
 void showWelcome(const String &fullName, const String &statusText) {
   // Màn 1: Xin chào + tên
-  showLcdMessage("Xin chao:", fullName);
+  showLcdMessage("Xin chao:");
   delay(1500);
 
   // Màn 2: trạng thái

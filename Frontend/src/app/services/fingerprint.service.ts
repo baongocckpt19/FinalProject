@@ -141,5 +141,12 @@ export class FingerprintService {
     );
   }
 
+  // Thêm vào trong class FingerprintService
+distributeFingerprintToAllDevices(studentId: number): Observable<any> {
+  return this.http.post<any>(
+    `${this.apiBase}/fingerprint/sync/distribute`,
+    { studentId }
+  );
+}
 
 }

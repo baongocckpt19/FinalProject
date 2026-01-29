@@ -97,9 +97,7 @@
                                         <span class="status-badge" [ngClass]="{ 
                                                                                     'active': lop.trangThai === 'Hoạt động', 
                                                                                     'inactive': lop.trangThai === 'Tạm dừng' 
-                                                                                    }"
-                                            (click)="toggleClassStatus(lop); $event.stopPropagation()"
-                                            style="cursor: pointer;">
+                                                                                    }" style="cursor: pointer;">
                                             {{ lop.trangThai }}
                                         </span>
                                     </td>
@@ -115,7 +113,7 @@
                                                     <path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.84v4h4.66V9h3.84L12 2z" />
                                                 </svg>
                                             </button>
-                                          
+
                                         </div>
                                     </td>
                                 </tr>
@@ -274,7 +272,7 @@
             </div>
         </div>
 
-        
+
 
     </div>
 </body>

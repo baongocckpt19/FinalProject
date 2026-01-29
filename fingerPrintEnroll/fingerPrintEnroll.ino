@@ -6,50 +6,267 @@
 #include <Adafruit_Fingerprint.h>
 
 // ===================== CONFIG =====================
-// WiFi + Backend
-const char* WIFI_SSID        = "Ngoi Nha Chung";
-const char* WIFI_PASSWORD    = "123456798";
-const char* BACKEND_BASE_URL = "http://192.168.1.60:8080";
-const char* DEVICE_CODE      = "ESP_ROOM_LAB2";   // TRÙNG VỚI DeviceCode trong DB
+const char* WIFI_SSID = "baongocneee";
+const char* WIFI_PASSWORD = "040612@@";
+const char* BACKEND_BASE_URL = "http://172.20.10.2:8080";
+const char* DEVICE_CODE = "ESP_ROOM_LAB1";
 
-// AS608 on UART2
-#define FP_RX_PIN 16   // AS608 TX -> ESP32 RX2
-#define FP_TX_PIN 17   // AS608 RX -> ESP32 TX2
-
-// Buzzer (đổi lại nếu dùng chân khác)
-#define BUZZER_PIN 25
-
-// LCD I2C: nếu module bạn là 0x3F thì sửa 0x27 -> 0x3F
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-
+// AS608 Config
+#define FP_RX_PIN 16  // AS608 TX -> ESP32 RX2
+#define FP_TX_PIN 17  // AS608 RX -> ESP32 TX2
 HardwareSerial FingerSerial(2);
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&FingerSerial);
 
-// ===================== BUZZER =====================
-void buzzerOn(int ms = 80) {
+// LCD Config
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// Buzzer
+#define BUZZER_PIN 25
+
+// Global Buffer
+uint8_t templateBuffer[512];
+
+// ===================== FIX DEFINE =====================
+// Định nghĩa lệnh Download nếu thư viện thiếu
+#ifndef FINGERPRINT_DOWNLOAD
+#define FINGERPRINT_DOWNLOAD 0x09
+#endif
+#ifndef FINGERPRINT_UPLOAD
+#define FINGERPRINT_UPLOAD 0x08
+#endif
+
+// ===================== BASE64 HELPER =====================
+const char b64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+String base64_encode(uint8_t* data, size_t length) {
+  String ret = "";
+  int i = 0, j = 0;
+  uint8_t char_array_3[3], char_array_4[4];
+
+  while (length--) {
+    char_array_3[i++] = *(data++);
+    if (i == 3) {
+      char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+      char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+      char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+      char_array_4[3] = char_array_3[2] & 0x3f;
+      for (i = 0; (i < 4); i++) ret += b64_chars[char_array_4[i]];
+      i = 0;
+    }
+  }
+  if (i) {
+    for (j = i; j < 3; j++) char_array_3[j] = '\0';
+    char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+    char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+    char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+    char_array_4[3] = char_array_3[2] & 0x3f;
+    for (j = 0; (j < i + 1); j++) ret += b64_chars[char_array_4[j]];
+    while ((i++ < 3)) ret += '=';
+  }
+  return ret;
+}
+
+int b64_pos(char c) {
+  if (c >= 'A' && c <= 'Z') return c - 'A';
+  if (c >= 'a' && c <= 'z') return c - 'a' + 26;
+  if (c >= '0' && c <= '9') return c - '0' + 52;
+  if (c == '+') return 62;
+  if (c == '/') return 63;
+  return -1;
+}
+
+size_t base64_decode(String input, uint8_t* output) {
+  int in_len = input.length();
+  int i = 0, j = 0, in_ = 0;
+  uint8_t char_array_4[4], char_array_3[3];
+  size_t out_len = 0;
+
+  while (in_len-- && (input[in_] != '=') && (b64_pos(input[in_]) != -1)) {
+    char_array_4[i++] = input[in_];
+    in_++;
+    if (i == 4) {
+      for (i = 0; i < 4; i++) char_array_4[i] = b64_pos(char_array_4[i]);
+      char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+      char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+      char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+      for (i = 0; (i < 3); i++) output[out_len++] = char_array_3[i];
+      i = 0;
+    }
+  }
+  if (i) {
+    for (j = i; j < 4; j++) char_array_4[j] = 0;
+    for (j = 0; j < 4; j++) char_array_4[j] = b64_pos(char_array_4[j]);
+    char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+    char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+    char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+    for (j = 0; (j < i - 1); j++) output[out_len++] = char_array_3[j];
+  }
+  return out_len;
+}
+
+// ===================== LOW LEVEL FINGERPRINT HELPERS =====================
+
+// HÀM QUAN TRỌNG: Tải template từ Sensor về ESP (Extract)
+bool extractTemplate(uint8_t* buffer) {
+  // 1. Gửi lệnh UpChar (0x08) cho Buffer 1
+  // SỬA LỖI: Tạo mảng dữ liệu trước
+  uint8_t cmdData[] = { FINGERPRINT_UPLOAD, 0x01 };  // 0x01 là BufferID
+
+  // SỬA LỖI: Truyền 3 tham số (Type, Length, Data*)
+  Adafruit_Fingerprint_Packet packet(FINGERPRINT_COMMANDPACKET, sizeof(cmdData), cmdData);
+  finger.writeStructuredPacket(packet);
+
+  // 2. Đọc phản hồi (Header + Data)
+  // Cần tạo một packet rỗng để nhận phản hồi lệnh ACK
+  uint8_t dummy[10];
+  Adafruit_Fingerprint_Packet recvPacket(FINGERPRINT_ACKPACKET, 0, dummy);
+
+  delay(50);
+  if (finger.getStructuredPacket(&recvPacket) != FINGERPRINT_OK) return false;
+  if (recvPacket.type != FINGERPRINT_ACKPACKET) return false;
+
+  // Bây giờ đọc stream dữ liệu thô (4 gói x 128 bytes)
+  int index = 0;
+  for (int i = 0; i < 4; i++) {
+    unsigned long start = millis();
+    while (FingerSerial.available() < 12) {
+      if (millis() - start > 1000) return false;
+    }
+
+    // Bỏ qua Header(2) + Addr(4) + Type(1) + Len(2) = 9 bytes
+    for (int k = 0; k < 9; k++) FingerSerial.read();
+
+    // Đọc 128 byte data
+    for (int j = 0; j < 128; j++) {
+      while (!FingerSerial.available())
+        ;
+      buffer[index++] = FingerSerial.read();
+    }
+
+    // Đọc Checksum (2 byte)
+    while (!FingerSerial.available())
+      ;
+    FingerSerial.read();
+    while (!FingerSerial.available())
+      ;
+    FingerSerial.read();
+  }
+  return true;
+}
+
+// HÀM QUAN TRỌNG: Nạp template từ ESP vào Sensor (Insert)
+bool insertTemplate(uint8_t* data) {
+  // Thử tối đa 2 lần (lần 1 fail như bạn đang bị, lần 2 tự động retry)
+  for (int attempt = 1; attempt <= 2; attempt++) {
+    Serial.print("[INS] Attempt ");
+    Serial.println(attempt);
+
+    // 0. XÓA RÁC TRONG SERIAL CỦA SENSOR
+    while (FingerSerial.available()) {
+      FingerSerial.read();
+    }
+    delay(30);  // cho chắc
+
+    // 1. GỬI LỆNH DOWNLOAD (DownChar) VÀO BUFFER 1
+    uint8_t cmdData[] = { FINGERPRINT_DOWNLOAD, 0x01 };  // 0x01 = CharBuffer1
+
+    Adafruit_Fingerprint_Packet cmdPacket(
+      FINGERPRINT_COMMANDPACKET,
+      sizeof(cmdData),
+      cmdData);
+    finger.writeStructuredPacket(cmdPacket);
+
+    Serial.println("[INS] DOWNLOAD cmd sent, waiting ACK...");
+
+    // 2. ĐỢI ACK
+    Adafruit_Fingerprint_Packet reply(FINGERPRINT_ACKPACKET, 0, nullptr);
+    uint8_t rc = finger.getStructuredPacket(&reply);
+
+    if (rc != FINGERPRINT_OK) {
+      Serial.print("[INS] getStructuredPacket rc = ");
+      Serial.println(rc);  // 0xFE = BADPACKET, 0xFF = TIMEOUT,...
+
+      // Nếu lần 1 fail -> continue để thử lại lần 2
+      if (attempt == 1) {
+        Serial.println("[INS] BADPACKET, retry once...");
+        continue;
+      } else {
+        Serial.println("[INS] Failed even after retry.");
+        return false;
+      }
+    }
+
+    if (reply.type != FINGERPRINT_ACKPACKET) {
+      Serial.print("[INS] Unexpected packet type: 0x");
+      Serial.println(reply.type, HEX);
+      if (attempt == 1) {
+        Serial.println("[INS] Retry due to wrong packet type...");
+        continue;
+      } else {
+        return false;
+      }
+    }
+
+    if (reply.length < 1) {
+      Serial.println("[INS] ACK packet length too short");
+      if (attempt == 1) {
+        Serial.println("[INS] Retry due to short ACK...");
+        continue;
+      } else {
+        return false;
+      }
+    }
+
+    uint8_t confirmCode = reply.data[0];
+    Serial.print("[INS] ConfirmCode=0x");
+    Serial.println(confirmCode, HEX);
+
+    if (confirmCode != 0x00) {
+      Serial.println("[INS] Sensor reported error on DOWNLOAD");
+      // Ở đây thường không phải lỗi rác mà là lỗi thực sự → không retry
+      return false;
+    }
+
+    // === ĐẾN ĐÂY: ACK OK, THOÁT KHỎI FOR VÀ GỬI DATA ===
+    Serial.println("[INS] CMD accepted, sending data...");
+
+    // 3. GỬI 4 GÓI DỮ LIỆU (4 x 128 = 512 BYTES)
+    for (int i = 0; i < 4; i++) {
+      uint8_t pid = (i == 3) ? FINGERPRINT_ENDDATAPACKET : FINGERPRINT_DATAPACKET;
+
+      uint8_t packetData[128];
+      memcpy(packetData, data + i * 128, 128);
+
+      Adafruit_Fingerprint_Packet dataPacket(pid, 128, packetData);
+      finger.writeStructuredPacket(dataPacket);
+
+      Serial.print("[INS] Sent chunk ");
+      Serial.println(i + 1);
+      delay(40);  // cho sensor nuốt data
+    }
+
+    return true;  // thành công
+  }
+
+  // Lý thuyết không tới đây, nhưng cho chắc:
+  return false;
+}
+// ===================== UI & UTILS =====================
+void buzzerOn(int ms) {
   digitalWrite(BUZZER_PIN, HIGH);
   delay(ms);
   digitalWrite(BUZZER_PIN, LOW);
 }
-
-void beepPrompt() {      // báo hành động (đặt tay, bắt đầu enroll...)
-  buzzerOn(80);
+void beepSuccess() {
+  buzzerOn(100);
+  delay(50);
+  buzzerOn(100);
+}
+void beepError() {
+  buzzerOn(500);
 }
 
-void beepSuccess() {     // báo thành công
-  buzzerOn(80);
-  delay(60);
-  buzzerOn(80);
-}
-
-void beepError() {       // báo lỗi
-  buzzerOn(250);
-}
-
-// ===================== LCD HELPERS =====================
-
-// Dùng String để tránh lỗi StringSumHelper
-void lcdShow(const String &line1, const String &line2 = "") {
+void lcdShow(const String& line1, const String& line2 = "") {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print(line1);
@@ -57,404 +274,223 @@ void lcdShow(const String &line1, const String &line2 = "") {
   lcd.print(line2);
 }
 
-// Helper: show message + Slot=x
-void lcdShowSlot(const String &msg, int slot) {
-  String line2 = "Slot=" + String(slot);
-  lcdShow(msg, line2);
-}
-
-// ===================== WIFI =====================
 void connectWiFi() {
-  lcdShow("WiFi: Connecting", WIFI_SSID);
-  Serial.println(F("[WiFi] Dang ket noi..."));
+  if (WiFi.status() == WL_CONNECTED) return;
+  lcdShow("WiFi Connecting", WIFI_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
   int retry = 0;
-  while (WiFi.status() != WL_CONNECTED && retry < 30) {
+  while (WiFi.status() != WL_CONNECTED && retry < 20) {
     delay(500);
-    Serial.print(".");
     retry++;
   }
-
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println();
-    Serial.print(F("[WiFi] OK, IP: "));
-    Serial.println(WiFi.localIP());
     lcdShow("WiFi OK", WiFi.localIP().toString());
     beepSuccess();
   } else {
-    Serial.println();
-    Serial.println(F("[WiFi] FAIL!"));
-    lcdShow("WiFi FAILED", "Chi dung offline");
+    lcdShow("WiFi FAIL", "Offline Mode");
     beepError();
   }
-
-  delay(800);
 }
 
-// ===================== FINGERPRINT =====================
+// ===================== FINGERPRINT CORE =====================
 bool initFingerprint() {
   FingerSerial.begin(57600, SERIAL_8N1, FP_RX_PIN, FP_TX_PIN);
   finger.begin(57600);
-
-  Serial.println(F("[FP] Dang kiem tra cam bien..."));
-  lcdShow("Check sensor...", "");
-
-  if (!finger.verifyPassword()) {
-    Serial.println(F("[FP] LOI: Khong tim thay AS608!"));
-    lcdShow("FP ERROR", "Check wiring!");
-    beepError();
-    return false;
+  if (finger.verifyPassword()) {
+    lcdShow("Sensor OK", "Ready");
+    return true;
   }
-
-  finger.getParameters();
-  Serial.println(F("[FP] Connected AS608 OK."));
-  Serial.print(F("Capacity: "));
-  Serial.println(finger.capacity);
-
-  lcdShow("FP OK", "Cap: " + String(finger.capacity));
-  beepSuccess();
-  delay(800);
-  return true;
+  lcdShow("Sensor ERROR", "Check wiring");
+  return false;
 }
 
-// Tìm slot TRỐNG đầu tiên (quét từ 1 → capacity)
 int16_t findNextFreeSlot() {
-  if (finger.getTemplateCount() != FINGERPRINT_OK) {
-    Serial.println(F("[FP] getTemplateCount ERROR."));
-    lcdShow("FP ERROR", "getTemplateCnt");
-    beepError();
-    return -1;
+  for (uint16_t slot = 1; slot <= finger.capacity; slot++) {
+    if (finger.loadModel(slot) != FINGERPRINT_OK) return slot;
   }
-
-  uint16_t total = finger.templateCount;
-  uint16_t capacity = finger.capacity > 0 ? finger.capacity : 200;
-
-  if (total >= capacity) {
-    Serial.println(F("[FP] FULL - no free slot."));
-    lcdShow("FP FULL", "No free slot");
-    beepError();
-    return -1;
-  }
-
-  Serial.print(F("[FP] total="));
-  Serial.print(total);
-  Serial.println(F(", finding free slot..."));
-
-  for (uint16_t slot = 1; slot <= capacity; slot++) {
-    int p = finger.loadModel(slot);
-    if (p == FINGERPRINT_OK) {
-      // slot đang dùng
-      continue;
-    } else {
-      Serial.print(F("[FP] Free slot = "));
-      Serial.println(slot);
-      lcdShowSlot("Free slot found", slot);
-
-      return (int16_t)slot;
-    }
-  }
-
-  Serial.println(F("[FP] No free slot found."));
-  lcdShow("No free slot", "");
-  beepError();
   return -1;
 }
 
-// Enroll vân tay vào 1 slot cho trước
-int enrollToSlot(uint16_t id) {
+// ===================== LOGIC 1: ENROLL & UPLOAD =====================
+int enrollAndUpload(const String& sessionCode) {
+  lcdShow("Enroll Session", sessionCode);
+  int id = findNextFreeSlot();
+  if (id < 0) {
+    lcdShow("Full Memory", "");
+    beepError();
+    return -1;
+  }
+
+  // 1. Thu thập
   int p = -1;
-  Serial.println();
-  Serial.print(F("[ENROLL] Slot #"));
-  Serial.println(id);
-
-  // Lần 1
-  Serial.println(F("Place finger (1)..."));
-  lcdShow("Quet lan 1", "Dat ngon tay");
-  
-  beepPrompt();
-  delay(800);
-
+  lcdShow("Dat ngon tay", "Lan 1 (Slot " + String(id) + ")");
   while (p != FINGERPRINT_OK) {
     p = finger.getImage();
-    if (p == FINGERPRINT_NOFINGER) {
-      delay(50);
-      continue;
-    } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
-      Serial.println(F("Err: getImage #1"));
-      lcdShow("Err getImage", "#1");
+    if (p != FINGERPRINT_OK && p != FINGERPRINT_NOFINGER) {
       beepError();
-      return p;
-    } else if (p == FINGERPRINT_IMAGEFAIL) {
-      Serial.println(F("Err: IMAGEFAIL #1"));
-      lcdShow("Err IMAGE", "#1");
-      beepError();
-      return p;
+      return -1;
     }
   }
+  if (finger.image2Tz(1) != FINGERPRINT_OK) return -1;
 
-  p = finger.image2Tz(1);
-  if (p != FINGERPRINT_OK) {
-    Serial.println(F("Err: image2Tz(1)"));
-    lcdShow("Err image2Tz", "(1)");
-    beepError();
-    return p;
-  }
-
-  Serial.println(F("Remove finger..."));
-  lcdShow("Nho tay ra", "");
+  lcdShow("Bo tay ra", "");
   beepSuccess();
-  delay(1500);
+  delay(1000);
+  while (finger.getImage() != FINGERPRINT_NOFINGER);
 
-  // Lần 2
-  Serial.println(F("Place SAME finger (2)..."));
-  lcdShow("Quet lan 2", "Dat lai tay");
-  beepPrompt();
-
+  lcdShow("Dat lai tay", "Lan 2");
   p = -1;
   while (p != FINGERPRINT_OK) {
     p = finger.getImage();
-    if (p == FINGERPRINT_NOFINGER) {
-      delay(50);
-      continue;
-    } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
-      Serial.println(F("Err: getImage #2"));
-      lcdShow("Err getImage", "#2");
-      beepError();
-      return p;
-    } else if (p == FINGERPRINT_IMAGEFAIL) {
-      Serial.println(F("Err: IMAGEFAIL #2"));
-      lcdShow("Err IMAGE", "#2");
-      beepError();
-      return p;
-    }
+  }
+  if (finger.image2Tz(2) != FINGERPRINT_OK) return -1;
+
+  if (finger.createModel() != FINGERPRINT_OK) {
+    lcdShow("Khong khop", "Thu lai");
+    beepError();
+    return -1;
   }
 
-  p = finger.image2Tz(2);
-  if (p != FINGERPRINT_OK) {
-    Serial.println(F("Err: image2Tz(2)"));
-    lcdShow("Err image2Tz", "(2)");
+  // 2. Lưu vào Flash
+  if (finger.storeModel(id) != FINGERPRINT_OK) {
+    lcdShow("Loi luu Flash", "");
     beepError();
-    return p;
+    return -1;
   }
 
-  // Ghép model
-  p = finger.createModel();
-  if (p == FINGERPRINT_OK) {
-    Serial.println(F("Model OK."));
-    lcdShow("Tao model OK", "");
-    delay(800);
-  } else if (p == FINGERPRINT_ENROLLMISMATCH) {
-    Serial.println(F("ENROLL MISMATCH."));
-    lcdShow("LOI", "Khong trung nhau");
+  // 3. EXTRACT RAW DATA
+  finger.loadModel(id);
+  if (!extractTemplate(templateBuffer)) {
+    lcdShow("Extract Fail", "");
     beepError();
-    return p;
-  } else {
-    Serial.println(F("createModel ERROR."));
-    lcdShow("Err createModel", "");
-    beepError();
-    return p;
+    return -1;
   }
 
-  // Lưu vào slot
-  p = finger.storeModel(id);
-  if (p == FINGERPRINT_OK) {
-    Serial.print(F("Store OK at slot "));
-    Serial.println(id);
-    delay(800);
-    lcdShowSlot("Luu thanh cong", id);
-    beepSuccess();
-    delay(800);
-    return FINGERPRINT_OK;
-  } else {
-    Serial.print(F("Err storeModel("));
-    Serial.print(id);
-    Serial.println(F(")"));
-    lcdShowSlot("Err storeModel", id);
-    beepError();
-    return p;
-  }
-}
+  // 4. Gửi lên Server
+  String base64Template = base64_encode(templateBuffer, 512);
 
-// Gửi slot + sessionCode + deviceCode lên backend
-void notifyBackendEnroll(uint16_t slot, const String& sessionCode) {
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println(F("[API] WiFi NOT connected."));
-    lcdShow("API skipped", "No WiFi");
-    beepError();
-    return;
-  }
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(String(BACKEND_BASE_URL) + "/api/fingerprint/enroll/upload-from-device");
+    http.addHeader("Content-Type", "application/json");
 
-  if (sessionCode.length() == 0) {
-    Serial.println(F("[API] sessionCode empty."));
-    lcdShow("API ERROR", "Session empty");
-    beepError();
-    return;
-  }
+    String json = "{";
+    json += "\"sessionCode\":\"" + sessionCode + "\",";
+    json += "\"deviceCode\":\"" + String(DEVICE_CODE) + "\",";
+    json += "\"sensorSlot\":" + String(id) + ",";
+    json += "\"templateBase64\":\"" + base64Template + "\"";
+    json += "}";
 
-  HTTPClient http;
-  String url = String(BACKEND_BASE_URL) + "/api/fingerprint/enroll/upload-from-device";
+    int httpCode = http.POST(json);
+    http.end();
 
-  Serial.println();
-  Serial.print(F("[API] POST "));
-  Serial.println(url);
-  lcdShowSlot("Gui len server", slot);
-
-  http.begin(url);
-  http.addHeader("Content-Type", "application/json");
-
-  String payload = "{";
-  payload += "\"sessionCode\":\"" + sessionCode + "\",";
-  payload += "\"deviceCode\":\"" + String(DEVICE_CODE) + "\",";
-  payload += "\"sensorSlot\":" + String(slot);
-  payload += "}";
-
-  Serial.print(F("[API] Body: "));
-  Serial.println(payload);
-
-  int httpCode = http.POST(payload);
-  if (httpCode > 0) {
-    Serial.print(F("[API] HTTP code: "));
-    Serial.println(httpCode);
-    String resp = http.getString();
-    Serial.print(F("[API] Response: "));
-    Serial.println(resp);
-
-    if (httpCode >= 200 && httpCode < 300) {
-      lcdShowSlot("API OK", slot);
-      delay(800);
+    if (httpCode == 200) {
+      lcdShow("Upload OK", "Slot " + String(id));
       beepSuccess();
     } else {
-      lcdShow("API ERR code", String(httpCode));
+      lcdShow("Upload Fail", String(httpCode));
       beepError();
     }
-  } else {
-    Serial.print(F("[API] HTTP ERROR: "));
-    Serial.println(http.errorToString(httpCode));
-    lcdShow("API HTTP ERR", "");
-    beepError();
   }
-  http.end();
+  return 0;
 }
 
-// ===================== POLL COMMAND FROM SERVER =====================
-// Gọi: GET /api/fingerprint/enroll/next-command?deviceCode=ESP_ROOM_LAB1
-//  - 200 OK + body = sessionCode -> có lệnh
-//  - 204 No Content             -> không có lệnh
-String pollCommandFromServer() {
-  if (WiFi.status() != WL_CONNECTED) {
-    connectWiFi(); // thử nối lại
-    if (WiFi.status() != WL_CONNECTED) {
-      return "";
-    }
-  }
+// ===================== LOGIC 2: SYNC (DOWNLOAD & SAVE) =====================
+void syncFromSession(const String& sessionCode) {
+  lcdShow("Dong bo...", "Tai data");
+  if (WiFi.status() != WL_CONNECTED) return;
 
   HTTPClient http;
-  String url = String(BACKEND_BASE_URL) +
-               "/api/fingerprint/enroll/next-command?deviceCode=" +
-               DEVICE_CODE;
-
-  Serial.print(F("[CMD] GET "));
-  Serial.println(url);
-
+  String url = String(BACKEND_BASE_URL) + "/api/fingerprint/sync/data?sessionCode=" + sessionCode;
   http.begin(url);
   int httpCode = http.GET();
 
-  String sessionCode = "";
-
   if (httpCode == 200) {
-    sessionCode = http.getString();
-    sessionCode.trim();
-    Serial.print(F("[CMD] Got sessionCode: "));
-    Serial.println(sessionCode);
-  } else if (httpCode == 204) {
-    Serial.println(F("[CMD] No command (204)."));
+    String payload = http.getString();
+    size_t len = base64_decode(payload, templateBuffer);
+    Serial.print("Decoded length: ");
+    Serial.println(len);
+
+    if (len == 512) {
+      int slot = findNextFreeSlot();
+      if (slot < 0) {
+        lcdShow("Full Memory", "Sync Fail");
+        http.end();
+        return;
+      }
+
+      if (insertTemplate(templateBuffer)) {
+        if (finger.storeModel(slot) == FINGERPRINT_OK) {
+          lcdShow("Sync OK", "Saved Slot " + String(slot));
+          beepSuccess();
+
+          // ==== BÁO NGƯỢC VỀ SERVER SLOT VỪA LƯU ====
+          HTTPClient http2;
+          http2.begin(String(BACKEND_BASE_URL) + "/api/fingerprint/sync/result");
+          http2.addHeader("Content-Type", "application/json");
+
+          String body = "{";
+          body += "\"sessionCode\":\"" + sessionCode + "\",";
+          body += "\"sensorSlot\":" + String(slot);
+          body += "}";
+
+          int code2 = http2.POST(body);
+          Serial.print("[SYNC] POST /sync/result code = ");
+          Serial.println(code2);
+          http2.end();
+          // ===========================================
+        } else {
+          lcdShow("Store Fail", "");
+        }
+      } else {
+        lcdShow("Insert Fail", "Sensor Err");
+      }
+    } else {
+      lcdShow("Bad Data Len", String(len));
+    }
   } else {
-    Serial.print(F("[CMD] HTTP error: "));
-    Serial.println(httpCode);
+    lcdShow("Sync Fail", "HTTP " + String(httpCode));
   }
-
   http.end();
-  return sessionCode;
 }
 
-// Chạy full flow cho 1 sessionCode (được lấy từ server)
-void runEnrollForSession(const String& sessionCode) {
-  if (sessionCode.length() == 0) return;
 
-  Serial.println();
-  Serial.println(F("==== ENROLL SESSION ===="));
-  Serial.print(F("SessionCode = "));
-  Serial.println(sessionCode);
-
-  lcdShow("Enroll started", sessionCode);
-
-  beepPrompt();
-  delay(800);
-
-  // Tìm slot trống
-  int16_t slot = findNextFreeSlot();
-  if (slot < 0) {
-    Serial.println(F("[FLOW] No free slot, cancel."));
-    return;
-  }
-
-  // Enroll
-  int result = enrollToSlot((uint16_t)slot);
-  if (result != FINGERPRINT_OK) {
-    Serial.println(F("[FLOW] Enroll FAIL, not sending API."));
-    return;
-  }
-
-  // Gửi server
-  notifyBackendEnroll((uint16_t)slot, sessionCode);
-
-  Serial.println();
-  Serial.println(F("[FLOW] DONE. Waiting next command..."));
-  lcdShow("DONE", "Cho lenh moi");
-  delay(800);
-  delay(1000);
-}
-
-// ===================== SETUP / LOOP =====================
+// ===================== MAIN LOOP =====================
 void setup() {
-  // LCD
+  Serial.begin(115200);
   Wire.begin();
   lcd.init();
   lcd.backlight();
-  lcdShow("ESP Fingerprint", "Starting...");
-
-  // Serial
-  Serial.begin(115200);
-  delay(1000);
-  Serial.println();
-  Serial.println(F("==== ESP32 + AS608 - AUTO ENROLL + LCD ===="));
-
   pinMode(BUZZER_PIN, OUTPUT);
-  digitalWrite(BUZZER_PIN, LOW);
 
-  if (!initFingerprint()) {
-    // Không khởi tạo được cảm biến thì thôi, đứng im
-    while (true) {
-      delay(1000);
-    }
-  }
-
+  lcdShow("System Init", "...");
+  initFingerprint();
   connectWiFi();
-  lcdShow("Cho lenh enroll", "Tu server...");
+  lcdShow("Ready", "Waiting cmd...");
 }
 
 void loop() {
-  // Mỗi vòng:
-  //  - Hỏi server xem có lệnh mới không
-  //  - Nếu có -> thực hiện 1 phiên enroll -> rồi quay về chờ lệnh
-  String sessionCode = pollCommandFromServer();
-  if (sessionCode.length() > 0) {
-    runEnrollForSession(sessionCode);
-    lcdShow("Cho lenh enroll", "Tu server...");
-  } else {
-    // Không có lệnh -> chờ 1 chút rồi hỏi lại
-    delay(1000);
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(String(BACKEND_BASE_URL) + "/api/fingerprint/enroll/next-command?deviceCode=" + String(DEVICE_CODE));
+    int httpCode = http.GET();
+
+    if (httpCode == 200) {
+      String payload = http.getString();
+      int separator = payload.indexOf('|');
+      if (separator > 0) {
+        String type = payload.substring(0, separator);
+        String sessionCode = payload.substring(separator + 1);
+
+        if (type == "ENROLL") {
+          enrollAndUpload(sessionCode);
+        } else if (type == "SYNC") {
+          syncFromSession(sessionCode);
+        }
+      }
+    }
+    http.end();
   }
+  delay(2000);
 }

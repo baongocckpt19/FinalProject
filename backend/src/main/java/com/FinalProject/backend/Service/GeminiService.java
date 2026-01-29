@@ -1,3 +1,4 @@
+//đây là GeminiService.java
 package com.FinalProject.backend.Service;
 
 import com.FinalProject.backend.Dto.AttendanceDto;
@@ -71,7 +72,7 @@ public class GeminiService {
         );
 
         Request request = new Request.Builder()
-                .url("https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=" + geminiApiKey)
+                .url("https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash-lite:generateContent?key=" + geminiApiKey)
                 .post(body)
                 .build();
 

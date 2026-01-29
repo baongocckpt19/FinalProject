@@ -1,7 +1,7 @@
 <body>
     <div class="dashboard-container">
         <div class="main-content">
-            
+
             <main class="dashboard-content">
 
                 <!-- Page Header -->
@@ -135,6 +135,35 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Đồng bộ vân tay -->
+                                    <!-- <div class="sync-section-card"
+                                        *ngIf="selectedStudent && selectedStudent.hasFingerprint"
+                                        style="margin-top: 24px; padding-top: 16px; border-top: 1px dashed #e0e0e0;">
+
+                                        <div class="sync-header" style="margin-bottom: 12px;">
+                                            <h5 class="section-title"
+                                                style="margin: 0; font-size: 16px; color: #d97706;">
+                                                <i class="fa fa-cloud-upload"></i> Đồng bộ dữ liệu
+                                            </h5>
+                                            <p class="text-muted"
+                                                style="font-size: 13px; margin-top: 4px; line-height: 1.4;">
+                                                Gửi dữ liệu vân tay của sinh viên này xuống tất cả các thiết bị đang
+                                                hoạt động.
+                                            </p>
+                                        </div>
+
+                                        <button class="btn btn-warning" style="width: 100%; justify-content: center;"
+                                            (click)="syncFingerprintToAll()" [disabled]="syncing">
+                                            <span *ngIf="!syncing">Đồng bộ sang tất cả thiết bị</span>
+                                            <span *ngIf="syncing">Đang xử lý...</span>
+                                        </button>
+
+                                        <div class="sync-message" *ngIf="syncMessage"
+                                            style="margin-top: 8px; font-size: 13px; text-align: center;"
+                                            [ngClass]="{'text-success': !syncMessage.includes('Lỗi'), 'text-danger': syncMessage.includes('Lỗi')}">
+                                            {{ syncMessage }}
+                                        </div>
+                                    </div> -->
 
                                     <div class="device-empty"
                                         *ngIf="selectedStudent.devices && selectedStudent.devices.length === 0">
@@ -163,7 +192,7 @@
                                     <label>Chọn thiết bị:</label>
                                     <select [(ngModel)]="selectedDeviceCode">
                                         <option *ngFor="let d of devices" [value]="d.deviceCode">
-                                            {{d.deviceCode }} 
+                                            {{d.deviceCode }}
                                         </option>
                                     </select>
                                 </div>
@@ -250,10 +279,9 @@
                                             <li>
                                                 <span class="step-index">2</span>
                                                 <div class="step-content">
-                                                    <div class="step-title">Nhập sessionCode vào ESP32</div>
+                                                    <div class="step-title">Thêm vân tay vào thiết bị</div>
                                                     <div class="step-desc">
-                                                        Mở Serial Monitor (hoặc giao diện web cho ESP), nhập sessionCode
-                                                        và
+                                                        Trên thiết bị ESP32,
                                                         bắt đầu quét vân tay
                                                         theo hướng dẫn trên LCD.
                                                     </div>

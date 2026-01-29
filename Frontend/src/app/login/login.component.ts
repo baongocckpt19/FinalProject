@@ -25,7 +25,7 @@ export class LoginComponent implements OnInit {
   registerEmail = '';
   registerPassword = '';
   confirmPassword = '';
-  agreeTerms = false;
+ 
 
   // Trạng thái Form
   isSignupMode = false;
@@ -121,10 +121,7 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    if (!this.agreeTerms) {
-      this.showError('Bạn phải đồng ý với điều khoản sử dụng!');
-      return;
-    }
+  
 
     this.authService.register({
       username: this.registerUsername,
@@ -171,7 +168,7 @@ export class LoginComponent implements OnInit {
   newPassword = '';
   confirmNewPassword = '';
 
-    openForgotPassword(): void {
+  openForgotPassword(): void {
     this.clearMessages();
     this.isForgotMode = true;
     this.forgotStep = 1;
@@ -186,7 +183,7 @@ export class LoginComponent implements OnInit {
     // không cần reset hết, tuỳ bạn
   }
 
-    submitForgotRequest(): void {
+  submitForgotRequest(): void {
     this.clearMessages();
 
     if (!this.forgotUsername) {
@@ -204,7 +201,7 @@ export class LoginComponent implements OnInit {
       }
     });
   }
-    submitResetPassword(): void {
+  submitResetPassword(): void {
     this.clearMessages();
 
     if (!this.resetCode) {

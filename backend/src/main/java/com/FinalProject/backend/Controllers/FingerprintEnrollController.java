@@ -6,6 +6,7 @@ import com.FinalProject.backend.Service.FingerprintEnrollService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,6 +95,32 @@ public class FingerprintEnrollController {
         }
         return ResponseEntity.ok(sessionCode);         // 200 + "STU4-ABC123"
     }
+
+
+    @PostMapping("/sync/distribute")
+    public ResponseEntity<?> distributeFingerprint(@RequestBody DistributeRequest req) {
+        fingerprintEnrollService.createSyncTasks(req.getStudentId());
+        return ResponseEntity.ok(Collections.singletonMap("message", "Sync tasks created"));
+    }
+
+    @GetMapping("/sync/data")
+    public ResponseEntity<String> getSyncData(@RequestParam String sessionCode) {
+        // Tìm session (tạm hoặc gốc)
+        // Ở đây giả sử bạn lưu data vào EnrollSession hoặc lấy từ Template gốc
+        // Trả về chuỗi Base64
+        // String base64 = Base64.getEncoder().encodeToString(templateBytes);
+        // return ResponseEntity.ok(base64);
+
+        // Logic giả định:
+        return ResponseEntity.ok(fingerprintEnrollService.getTemplateDataBase64(sessionCode));
+    }
+
+    @PostMapping("/sync/result")
+    public ResponseEntity<?> syncResult(@RequestBody SyncResultRequest req) {
+        fingerprintEnrollService.handleSyncResult(req);
+        return ResponseEntity.ok(Collections.singletonMap("message", "Sync result updated"));
+    }
+
 }
 
 

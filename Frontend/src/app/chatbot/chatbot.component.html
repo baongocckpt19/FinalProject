@@ -4,7 +4,6 @@
       <div class="content-panel ai-class-review-layout">
         <div class="page-view active">
           <div class="main-panel ai-panel">
-            <!-- Header -->
             <div class="panel-header ai-panel-header">
               <div>
                 <h2 class="panel-title">
@@ -16,42 +15,51 @@
               </div>
 
               <div class="ai-header-meta">
-                <!-- BỘ CHỌN LỚP - NẾU KHÔNG CẦN CÓ THỂ XOÁ CẢ BLOCK NÀY -->
+
                 <div class="ai-class-select-wrapper">
                   <span class="ai-class-select-label">Chọn lớp</span>
-                  <select class="ai-class-select">
-                    <option>CT101 - Lập trình Cơ bản</option>
-                    <option>CT201 - Cấu trúc dữ liệu</option>
-                    <option>CT301 - Cơ sở dữ liệu</option>
+                  <select class="ai-class-select" (change)="onClassChange($event)">
+                    <option *ngFor="let c of teacherClasses" [value]="c.classId"
+                      [selected]="c.classId === selectedClassId">
+                      {{ c.classCode }} - {{ c.className }}
+                    </option>
+
+                    <option *ngIf="teacherClasses.length === 0" disabled>Bạn chưa có lớp học nào</option>
                   </select>
                 </div>
-                <!-- HẾT BỘ CHỌN LỚP -->
-
-                <div class="ai-class-tag">
-                  <span class="ai-class-code">Lớp: CT101 - Lập trình Cơ bản</span>
+                <div class="ai-class-tag" *ngIf="currentClass">
+                  <span class="ai-class-code">Lớp: {{ currentClass.classCode }} - {{ currentClass.className }}</span>
                   <span class="ai-class-info-dot"></span>
-                  <span class="ai-class-semester">HK1 / Năm học 2024-2025</span>
+                  <span class="ai-class-semester">Danh sách giảng dạy</span>
                 </div>
 
-                <div class="ai-badge" [ngClass]="{
+                <div class="ai-badge" *ngIf="analysis" [ngClass]="{
                     'ai-badge-low': (analysis?.overallStatistics?.attendanceRate ?? 0) >= 85,
                     'ai-badge-medium': (analysis?.overallStatistics?.attendanceRate ?? 0) >= 70 && (analysis?.overallStatistics?.attendanceRate ?? 0) < 85,
                     'ai-badge-high': (analysis?.overallStatistics?.attendanceRate ?? 0) < 70
                   }">
                   <span class="ai-badge-label">Mức rủi ro tổng thể</span>
                   <span class="ai-badge-value">
-                    {{ (analysis?.overallStatistics?.attendanceRate ?? 0) >= 85 ? 'LOW' : ((analysis?.overallStatistics?.attendanceRate ?? 0) >= 70 ? 'MEDIUM' : 'HIGH') }}
+                    {{ (analysis?.overallStatistics?.attendanceRate ?? 0) >= 85 ? 'LOW' :
+                    ((analysis?.overallStatistics?.attendanceRate ?? 0) >= 70 ? 'MEDIUM' : 'HIGH') }}
                   </span>
                 </div>
               </div>
             </div>
 
-            <!-- Body -->
             <div class="panel-body ai-panel-body">
-              <div class="ai-grid">
-                <!-- Cột trái: tóm tắt, điểm nổi bật, khuyến nghị -->
+
+              <div *ngIf="loading" class="ai-loading-state">
+                <p>Đang phân tích dữ liệu...</p>
+              </div>
+
+              <div *ngIf="error" class="ai-error-state">
+                <p>{{ error }}</p>
+              </div>
+
+              <div class="ai-grid" *ngIf="!loading && !error && analysis">
+
                 <div class="ai-main-column">
-                  <!-- Tóm tắt -->
                   <section class="form-section ai-section">
                     <div class="form-section-title ai-section-title">
                       <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -61,17 +69,21 @@
                     </div>
                     <div class="ai-summary-text" *ngIf="analysis as a">
                       Trong {{ a.weeklyTrend?.length || 0 }} tuần gần đây, lớp duy trì tỉ lệ đi học trung bình
-                      <span class="ai-highlight-number">{{ a.overallStatistics?.attendanceRate | number:'1.0-1' }}%</span>.
+                      <span class="ai-highlight-number">{{ a.overallStatistics?.attendanceRate | number:'1.0-1'
+                        }}%</span>.
                     </div>
 
                     <div class="ai-summary-tags">
-                      <span class="ai-tag ai-tag-good" *ngIf="(analysis?.overallStatistics?.attendanceRate ?? 0) >= 85">Tỉ lệ đi học ổn</span>
-                      <span class="ai-tag ai-tag-warning" *ngIf="(analysis?.overallStatistics?.attendanceRate ?? 0) >= 70 && (analysis?.overallStatistics?.attendanceRate ?? 0) < 85">Cần chú ý</span>
-                      <span class="ai-tag ai-tag-critical" *ngIf="(analysis?.overallStatistics?.attendanceRate ?? 0) < 70">Rủi ro cao</span>
+                      <span class="ai-tag ai-tag-good"
+                        *ngIf="(analysis?.overallStatistics?.attendanceRate ?? 0) >= 85">Tỉ lệ đi học ổn</span>
+                      <span class="ai-tag ai-tag-warning"
+                        *ngIf="(analysis?.overallStatistics?.attendanceRate ?? 0) >= 70 && (analysis?.overallStatistics?.attendanceRate ?? 0) < 85">Cần
+                        chú ý</span>
+                      <span class="ai-tag ai-tag-critical"
+                        *ngIf="(analysis?.overallStatistics?.attendanceRate ?? 0) < 70">Rủi ro cao</span>
                     </div>
                   </section>
 
-                  <!-- Điểm nổi bật -->
                   <section class="form-section ai-section">
                     <div class="form-section-title ai-section-title">
                       <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -89,12 +101,13 @@
                       </li>
                       <li *ngIf="a.overallStatistics">
                         <span class="dot"></span>
-                        Tổng số bản ghi: <strong>{{ a.overallStatistics.totalRecords }}</strong>, Vắng: <strong>{{ a.overallStatistics.absentCount }}</strong>, Đi muộn: <strong>{{ a.overallStatistics.lateCount }}</strong>.
+                        Tổng số bản ghi: <strong>{{ a.overallStatistics.totalRecords }}</strong>, Vắng: <strong>{{
+                          a.overallStatistics.absentCount }}</strong>, Đi muộn: <strong>{{ a.overallStatistics.lateCount
+                          }}</strong>.
                       </li>
                     </ul>
                   </section>
 
-                  <!-- Khuyến nghị -->
                   <section class="form-section ai-section">
                     <div class="form-section-title ai-section-title">
                       <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -114,9 +127,7 @@
                   </section>
                 </div>
 
-                <!-- Cột phải: thống kê + sinh viên nguy cơ cao -->
                 <div class="ai-side-column">
-                  <!-- Thống kê nhanh -->
                   <section class="form-section ai-section">
                     <div class="form-section-title ai-section-title">
                       <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -128,31 +139,35 @@
                       <div class="ai-stat-card" *ngIf="analysis as a">
                         <div class="ai-stat-label">Số tuần phân tích</div>
                         <div class="ai-stat-value">{{ a.weeklyTrend?.length || 0 }} tuần</div>
-                        <div class="ai-stat-hint">Tính từ tuần hiện tại trở về trước</div>
+                        <div class="ai-stat-hint">Dữ liệu hiện có</div>
                       </div>
                       <div class="ai-stat-card">
                         <div class="ai-stat-label">Tỉ lệ đi học trung bình</div>
-                        <div class="ai-stat-value ai-stat-good">{{ analysis?.overallStatistics?.attendanceRate | number:'1.0-1' }}%</div>
+                        <div class="ai-stat-value ai-stat-good">{{ analysis?.overallStatistics?.attendanceRate |
+                          number:'1.0-1' }}%</div>
                         <div class="ai-stat-bar">
-                          <div class="ai-stat-bar-fill good" [style.width.%]="analysis?.overallStatistics?.attendanceRate || 0"></div>
+                          <div class="ai-stat-bar-fill good"
+                            [style.width.%]="analysis?.overallStatistics?.attendanceRate || 0"></div>
                         </div>
                       </div>
                       <div class="ai-stat-card">
                         <div class="ai-stat-label">Tỉ lệ vắng trung bình</div>
-                        <div class="ai-stat-value ai-stat-warning">{{ ((analysis?.overallStatistics?.absentCount || 0) / (analysis?.overallStatistics?.totalRecords || 1)) * 100 | number:'1.0-1' }}%</div>
+                        <div class="ai-stat-value ai-stat-warning">{{ ((analysis?.overallStatistics?.absentCount || 0) /
+                          (analysis?.overallStatistics?.totalRecords || 1)) * 100 | number:'1.0-1' }}%</div>
                         <div class="ai-stat-bar">
-                          <div class="ai-stat-bar-fill warning" [style.width.%]="((analysis?.overallStatistics?.absentCount || 0) / (analysis?.overallStatistics?.totalRecords || 1)) * 100"></div>
+                          <div class="ai-stat-bar-fill warning"
+                            [style.width.%]="((analysis?.overallStatistics?.absentCount || 0) / (analysis?.overallStatistics?.totalRecords || 1)) * 100">
+                          </div>
                         </div>
                       </div>
                       <div class="ai-stat-card">
                         <div class="ai-stat-label">Sinh viên nguy cơ cao</div>
                         <div class="ai-stat-value ai-stat-critical">{{ analysis?.highRiskStudents?.length || 0 }}</div>
-                        <div class="ai-stat-hint">Vắng ≥ 3 buổi hoặc vắng liên tiếp</div>
+                        <div class="ai-stat-hint">Vắng nhiều</div>
                       </div>
                     </div>
                   </section>
 
-                  <!-- Xu hướng theo tuần -->
                   <section class="form-section ai-section">
                     <div class="form-section-title ai-section-title">
                       <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -162,16 +177,18 @@
                     </div>
                     <div class="ai-weeks-timeline" *ngIf="analysis?.weeklyTrend as weeks">
                       <div class="ai-week-row" *ngFor="let w of weeks; let i = index">
-                        <div class="ai-week-label">Tuần {{ i === 0 ? 'hiện tại' : '-' + i }}</div>
+                        <div class="ai-week-label">Tuần {{ i + 1 }}</div>
                         <div class="ai-week-bar">
-                          <div class="ai-week-bar-fill warning" [style.width.%]="((w.absent || 0) / ((w.present || 0) + (w.absent || 0) + (w.late || 0) || 1)) * 100"></div>
+                          <div class="ai-week-bar-fill warning"
+                            [style.width.%]="((w.absent || 0) / ((w.present || 0) + (w.absent || 0) + (w.late || 0) || 1)) * 100">
+                          </div>
                         </div>
-                        <div class="ai-week-value">{{ ((w.absent || 0) / ((w.present || 0) + (w.absent || 0) + (w.late || 0) || 1)) * 100 | number:'1.0-1' }}% vắng</div>
+                        <div class="ai-week-value">{{ ((w.absent || 0) / ((w.present || 0) + (w.absent || 0) + (w.late
+                          || 0) || 1)) * 100 | number:'1.0-1' }}% vắng</div>
                       </div>
                     </div>
                   </section>
 
-                  <!-- Sinh viên nguy cơ cao -->
                   <section class="form-section ai-section">
                     <div class="form-section-title ai-section-title">
                       <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -187,8 +204,7 @@
                           <tr>
                             <th>MSSV</th>
                             <th>Họ tên</th>
-                            <th>Vắng</th>
-                            <th>Vắng liên tiếp</th>
+                            <th>Vắng/muộn</th>
                             <th>Mức rủi ro</th>
                           </tr>
                         </thead>
@@ -196,8 +212,7 @@
                           <tr *ngFor="let s of a.highRiskStudents">
                             <td>{{ s.studentCode }}</td>
                             <td>{{ s.fullName }}</td>
-                            <td>{{ s.absentCount }} buổi</td>
-                            <td><!-- không có trường vắng liên tiếp trong payload; để trống hoặc tính thêm --></td>
+                            <td>{{ s.absentCount }}/{{s.lateCount}}</td>
                             <td>
                               <span class="ai-risk-chip" [ngClass]="{
                                 'high': (s.riskScore || 0) >= 70,
@@ -210,23 +225,17 @@
                           </tr>
                         </tbody>
                       </table>
-                      <p class="ai-risk-note">
-                        Danh sách trên được xác định dựa trên số buổi vắng và số buổi vắng liên tiếp
-                        trong 4 tuần gần nhất.
-                      </p>
                     </div>
                   </section>
                 </div>
               </div>
 
-              <!-- Ghi chú nguồn dữ liệu -->
-              <div class="ai-footer-note" *ngIf="loading">Đang tải phân tích AI…</div>
-              <div class="ai-footer-note" *ngIf="error">{{ error }}</div>
-              <div class="ai-footer-note" *ngIf="!loading && !error && !analysis">Chưa có dữ liệu phân tích.</div>
+              <div class="ai-footer-note" *ngIf="!loading && !error && !analysis">
+                Chưa chọn lớp hoặc chưa có dữ liệu phân tích.
+              </div>
             </div>
           </div>
         </div>
-        <!-- /page-view -->
       </div>
     </main>
   </div>

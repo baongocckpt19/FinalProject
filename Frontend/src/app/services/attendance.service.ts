@@ -36,6 +36,11 @@ export interface StudentHistoryItem {
   status: StudentStatus;
   attendanceTime: string | null;
 }
+export interface TeacherClass {
+  classId: number;
+  classCode: string;
+  className: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -82,5 +87,9 @@ export class AttendanceService {
   
   analyticsAttendance(classId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/analyze/${classId}`);
+  }
+   /** Lấy danh sách lớp của giảng viên đang đăng nhập */
+  getTeacherClasses(): Observable<TeacherClass[]> {
+    return this.http.get<TeacherClass[]>(`http://localhost:8080/api/teacher-classes`);
   }
 }

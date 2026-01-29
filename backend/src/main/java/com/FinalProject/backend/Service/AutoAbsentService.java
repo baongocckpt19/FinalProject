@@ -20,17 +20,7 @@ public class AutoAbsentService {
     private final ClassScheduleRepository classScheduleRepository;
     private final AttendanceRepository attendanceRepository;
 
-    /**
-     * Mỗi 60 giây:
-     * - Lấy các buổi học đã kết thúc (theo ngày + endTime)
-     * - Với từng buổi:
-     *   + Lấy danh sách sinh viên (JOIN StudentClass trong query findClassAttendanceBySchedule)
-     *   + Nếu sinh viên chưa có Attendance -> tạo bản ghi "Vắng"
-     *
-     * Idempotent: Chạy nhiều lần cũng không tạo trùng, vì:
-     * - Query trả attendanceId != null nếu đã có
-     * - Bảng Attendance có UNIQUE(StudentId, ScheduleId)
-     */
+
     public AutoAbsentService(ClassScheduleRepository classScheduleRepository,
                              AttendanceRepository attendanceRepository) {
         this.classScheduleRepository = classScheduleRepository;

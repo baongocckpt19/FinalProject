@@ -251,22 +251,155 @@ public class FingerprintEnrollService {
     //  - ESP gọi API này: /api/fingerprint/enroll/next-command?deviceCode=...
     //  - Service tìm session PENDING của device đó, đổi sang WAITING_DEVICE, trả về sessionCode
     //  - Nếu không có, trả null
+    // Thêm vào FingerprintEnrollService
+
+    // 1. Hàm tạo lệnh đồng bộ cho tất cả thiết bị chưa có vân tay này
+    @Transactional
+    public void createSyncTasks(Integer studentId) {
+        // 1) Lấy template gốc của sinh viên
+        FingerprintTemplate template = templateRepo.findByStudentId(studentId)
+                .orElseThrow(() -> new RuntimeException("Sinh viên chưa có vân tay"));
+
+        // 2) Lấy tất cả Device hiện đang ACTIVE
+        List<Device> devices = deviceRepo.findByIsActiveTrue();
+
+        // 3) Lấy danh sách các Device mà sinh viên này ĐÃ có vân tay
+        //    (tức là không cần sync nữa, bao gồm cả "máy 1" – nơi đã enroll)
+        List<DeviceFingerprintSlot> existingSlots = slotRepo.findByIdStudentId(studentId);
+
+        // Tập hợp các deviceId đã có vân tay của SV này
+        Set<Integer> deviceIdsAlreadyHas = existingSlots.stream()
+                .map(s -> s.getId().getDeviceId())
+                .collect(Collectors.toSet());
+
+        // 4) Tạo task SYNC CHỈ CHO NHỮNG DEVICE CHƯA CÓ VÂN TAY CỦA SV
+        for (Device device : devices) {
+            Integer deviceId = device.getDeviceId();
+
+            // Nếu device này đã có vân tay của studentId -> bỏ qua, KHÔNG sync
+            if (deviceIdsAlreadyHas.contains(deviceId)) {
+                continue;
+            }
+
+            // (tuỳ chọn) Nếu bạn muốn bỏ qua luôn các device không có room / không dùng điểm danh
+            // if (device.getRoom() == null) continue;
+
+            FingerprintEnrollSession syncSession = new FingerprintEnrollSession();
+            syncSession.setSessionCode("SYNC-" + UUID.randomUUID().toString().substring(0, 6));
+            syncSession.setStudentId(studentId);
+            syncSession.setDeviceId(deviceId);
+            syncSession.setTemplateData(template.getTemplateData());
+            syncSession.setStatus("PENDING_SYNC");
+
+            sessionRepo.save(syncSession);
+        }
+    }
+
+
+    // 2. Sửa hàm getNextCommand để ưu tiên lệnh SYNC
+// (Sửa lại logic cũ một chút)
     @Transactional
     public String getNextEnrollSessionForDevice(String deviceCode) {
-        if (deviceCode == null || deviceCode.isBlank()) {
-            throw new RuntimeException("deviceCode is required");
+        Device device = deviceRepo.findByDeviceCode(deviceCode).orElseThrow();
+
+        // Ưu tiên 1: Tìm lệnh SYNC trước (để đẩy vân tay xuống)
+        Optional<FingerprintEnrollSession> syncTask = sessionRepo
+                .findFirstByDeviceIdAndStatusOrderByCreatedAtAsc(device.getDeviceId(), "PENDING_SYNC");
+
+        if (syncTask.isPresent()) {
+            FingerprintEnrollSession s = syncTask.get();
+            s.setStatus("SYNCING");
+            sessionRepo.save(s);
+            // Format trả về đặc biệt để ESP biết là lệnh download: "SYNC|sessionCode"
+            return "SYNC|" + s.getSessionCode();
         }
 
-        Device device = deviceRepo.findByDeviceCode(deviceCode)
-                .orElseThrow(() -> new RuntimeException("Device not found: " + deviceCode));
-
+        // Ưu tiên 2: Tìm lệnh Enroll (như cũ)
         return sessionRepo
                 .findFirstByDeviceIdAndStatusOrderByCreatedAtAsc(device.getDeviceId(), "PENDING")
-                .map(session -> {
-                    session.setStatus("WAITING_DEVICE");
-                    sessionRepo.save(session);
-                    return session.getSessionCode();
+                .map(s -> {
+                    s.setStatus("WAITING_DEVICE");
+                    sessionRepo.save(s);
+                    return "ENROLL|" + s.getSessionCode(); // Thêm prefix cho rõ
                 })
                 .orElse(null);
     }
+
+    // 3. Thêm hàm API cho ESP tải dữ liệu Template
+// GET /api/fingerprint/sync/data?sessionCode=...
+    public byte[] getSyncData(String sessionCode) {
+        FingerprintEnrollSession s = sessionRepo.findBySessionCode(sessionCode).orElseThrow();
+        return s.getTemplateData();
+    }
+
+    @Transactional(readOnly = true)
+    public String getTemplateDataBase64(String sessionCode) {
+        // 1. Tìm session
+        FingerprintEnrollSession session = sessionRepo.findBySessionCode(sessionCode)
+                .orElseThrow(() -> new RuntimeException("Session not found: " + sessionCode));
+
+        // 2. Lấy mảng byte
+        byte[] data = session.getTemplateData();
+        if (data == null || data.length == 0) {
+            throw new RuntimeException("Session này không có dữ liệu Template (null)");
+        }
+
+        // 3. Encode sang Base64 và trả về
+        return Base64.getEncoder().encodeToString(data);
+    }
+
+
+    @Transactional
+    public void handleSyncResult(SyncResultRequest req) {
+        if (req.getSessionCode() == null || req.getSessionCode().isBlank()) {
+            throw new RuntimeException("sessionCode is required");
+        }
+        if (req.getSensorSlot() == null) {
+            throw new RuntimeException("sensorSlot is required");
+        }
+
+        // 1) Tìm session
+        FingerprintEnrollSession session = sessionRepo.findBySessionCode(req.getSessionCode())
+                .orElseThrow(() -> new RuntimeException("Session not found: " + req.getSessionCode()));
+
+        if (!"SYNCING".equals(session.getStatus()) && !"PENDING_SYNC".equals(session.getStatus())) {
+            // tuỳ bạn, có thể bỏ check này
+            throw new RuntimeException("Session is not in SYNCING/PENDING_SYNC status");
+        }
+
+        if (session.getDeviceId() == null) {
+            throw new RuntimeException("Session has no deviceId");
+        }
+
+        Integer deviceId = session.getDeviceId();
+        Integer studentId = session.getStudentId();
+        Integer sensorSlot = req.getSensorSlot();
+
+        // 2) đảm bảo (DeviceId, SensorSlot) là unique
+        slotRepo.findByIdDeviceIdAndSensorSlot(deviceId, sensorSlot)
+                .ifPresent(existing -> {
+                    Integer oldStudentId = existing.getId().getStudentId();
+                    if (!Objects.equals(oldStudentId, studentId)) {
+                        // thu hồi slot khỏi sinh viên khác
+                        slotRepo.delete(existing);
+                    }
+                });
+
+        // 3) Tạo / update DeviceFingerprintSlot theo PK (DeviceId, StudentId)
+        DeviceFingerprintSlotId id = new DeviceFingerprintSlotId();
+        id.setDeviceId(deviceId);
+        id.setStudentId(studentId);
+
+        DeviceFingerprintSlot slot = slotRepo.findById(id)
+                .orElseGet(DeviceFingerprintSlot::new);
+        slot.setId(id);
+        slot.setSensorSlot(sensorSlot);
+        slotRepo.save(slot);
+
+        // 4) Cập nhật session (để bạn dễ debug / theo dõi)
+        session.setSensorSlot(sensorSlot);
+        session.setStatus("SYNC_DONE");  // hoặc "COMPLETED_SYNC" tuỳ bạn
+        sessionRepo.save(session);
+    }
+
 }

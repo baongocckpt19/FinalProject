@@ -320,4 +320,33 @@ export class GvQuanlyvantayComponent {
       }
     });
   }
+
+  // 11. hàm đồng bộ vân tay sang các thiết bị khác
+  // [1] Thêm biến vào trong class GvQuanlyvantayComponent
+syncing = false;
+syncMessage = '';
+
+// [2] Thêm hàm xử lý vào trong class
+syncFingerprintToAll(): void {
+  if (!this.selectedStudent || !this.selectedStudent.hasFingerprint) return;
+
+  if (!confirm(`Đồng bộ vân tay của ${this.selectedStudent.fullName} sang các thiết bị khác?`)) return;
+
+  this.syncing = true;
+  this.syncMessage = 'Đang gửi lệnh...';
+
+  // Gọi service (cần update service ở bước 3)
+  this.fingerprintService.distributeFingerprintToAllDevices(this.selectedStudent.studentId)
+    .subscribe({
+      next: (res) => {
+        this.syncing = false;
+        this.syncMessage = 'Thành công! Lệnh đồng bộ đã được tạo.';
+      },
+      error: (err) => {
+        this.syncing = false;
+        this.syncMessage = 'Lỗi: Không thể gọi server.';
+        console.error(err);
+      }
+    });
+}
 }
